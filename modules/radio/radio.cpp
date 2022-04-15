@@ -35,11 +35,15 @@ RadioDriver::RadioDriver()
 
 bool RadioDriver::init()
 {
+    _state = INIT;
+    emit radioChangedState(INIT);
+
     if (_serialPort)
     {
         _serialPort->close();
         delete _serialPort;
         _state = OFF;
+        _serialPort = nullptr;
 
         emit radioChangedState(OFF);
     }
@@ -48,12 +52,14 @@ bool RadioDriver::init()
     {
         _txTimer->stop();
         delete _txTimer;
+        _txTimer = nullptr;
     }
 
     if (_downlinkTimer)
     {
         _downlinkTimer->stop();
         delete _downlinkTimer;
+        _downlinkTimer = nullptr;
     }
 
     try
@@ -63,6 +69,11 @@ bool RadioDriver::init()
         _serialPort->open(QIODevice::OpenModeFlag::ReadWrite);
         if (!_serialPort->isOpen())
         {
+            delete _serialPort;
+            _serialPort = nullptr;
+            _state = OFF;
+            emit radioChangedState(OFF);
+
             return false;
         }
 
@@ -133,6 +144,7 @@ void RadioDriver::transmitData()
     switch (_state)
     {
         case OFF:
+        case INIT:
         clearTxBuffer();
         break;
         case NOT_CONFIGURED:
@@ -151,12 +163,7 @@ void RadioDriver::onJsBtnPressed(int btnPressed)
 {
     if (btnPressed == Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS))
     {
-        printf("BTN PS pressed\n");
         init();
-    }
-    else
-    {
-        printf("BTN pressed (%d)\n", btnPressed);
     }
 }
 
@@ -193,7 +200,7 @@ void RadioDriver::dataIngest()
 
 void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
 {
-    if (_state == OFF)
+    if (_state == INIT)
     {
         emit radioFirmwareVersion(QString("%1.%2-%3").arg(msgParsed.major_v)
                                               .arg(msgParsed.minor_v)

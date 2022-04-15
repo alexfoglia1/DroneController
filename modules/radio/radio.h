@@ -13,6 +13,7 @@ public:
     enum RadioState
     {
         OFF,
+        INIT,
         NOT_CONFIGURED,
         CONFIG_MISMATCH,
         RUNNING

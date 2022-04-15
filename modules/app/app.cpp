@@ -49,14 +49,6 @@ int main(int argc, char** argv)
 
     /** Create radio control **/
     RadioDriver radio;
-    if (radio.init())
-    {
-        std::cout << "Radio initialized\n";
-    }
-    else
-    {
-        std::cout << "Cannot initialize radio\n";
-    }
 
     /** Connect radio to GUI **/
     QObject::connect(&radio, SIGNAL(radioFirmwareVersion(QString)), &window, SLOT(onRadioFirmwareVersion(QString)));
