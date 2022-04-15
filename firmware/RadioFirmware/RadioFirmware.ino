@@ -5,39 +5,47 @@
 
 RF24 radio(9,10);
 
-const uint64_t pipe = 0xE6E6E6E6E6E6; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t pipe = 0xE6E6E6E6E6E6; // Needs to be the same for communicating between 2 NRF24L01 
 
-const byte numChars = 512;
-char receivedChars[numChars];
+const byte numChars = 64;
+char rxBuffer[numChars];
 
 boolean newData = false;
 
 void setup()
 {
+    for (int i = 0; i < numChars; i++)
+    {
+      rxBuffer[i] = 0;
+    }
     Serial.begin(9600);
     Serial.println("<Arduino is ready>");
 }
 
 void loop()
 {
-    recvFromSerial();
-    
-    if (newData == true)
-    {
-      uint32_t* msgId = (uint32_t*)(receivedChars);
+  recvFromSerial();
+  if (newData)
+  {
+      newData = false;
+      uint32_t* msgId = (uint32_t*)(rxBuffer);
+      
       if (CTRL_TO_RADIO_CFG_ID == *msgId)
       {
-        handleCfgMsg();
+        txToSerial("CFG_MSG", 7);
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
       {
-        handleCmdMsg();
+        txToSerial("CMD_MSG", 7);
       }
       else
       {
-        handleUnknownMsgId(*msgId);
+        txToSerial("UNK_MSG", 7);
       }
-    }
+  }
+
+  
+    
 }
 
 void recvFromSerial()
@@ -54,7 +62,7 @@ void recvFromSerial()
         {
             if (rc != endMarker)
             {
-                receivedChars[ndx] = rc;
+                rxBuffer[ndx] = rc;
                 ndx++;
                 if (ndx >= numChars)
                 {
@@ -76,18 +84,27 @@ void recvFromSerial()
     }
 }
 
+void txToSerial(char* data, int len)
+{
+  Serial.write(startMarker);
+  for (int i = 0; i < len; i++)
+  {
+    Serial.write(data[i]);
+  }
+  Serial.write(endMarker);
+}
+
 void handleCfgMsg()
 {
-  Serial.println("Received config msg!");
+
 }
 
 void handleCmdMsg()
 {
-  Serial.println("Received command msg!");
+
 }
 
 void handleUnknownMsgId(uint32_t msgId)
 {
-  Serial.print("Received unknown msg id: ");
-  Serial.println(msgId);
+
 }

@@ -38,6 +38,7 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
 
     switch(key)
     {
+        /** ON/OFF Menu Items to be updated **/
         case JOYSTICK:
         case RADIO:
             item->currentValueIndex = newValue.toBool() ? 1 : 0;

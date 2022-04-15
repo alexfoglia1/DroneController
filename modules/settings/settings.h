@@ -47,7 +47,7 @@ public:
         RADIO
     };
 
-    static Settings instance();
+    static Settings* instance();
 
     bool readSettings(const char* filename);
     QVariant getAttribute(Attribute a);

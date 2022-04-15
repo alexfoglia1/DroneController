@@ -1,4 +1,5 @@
 #include "modules/radio/proto.h"
+#include "modules/radio/radio.h"
 #include "modules/app/app.h"
 #include "modules/gui/DroneControllerWindow.h"
 #include "modules/joystick/joystick.h"
@@ -20,13 +21,13 @@ int main(int argc, char** argv)
     qRegisterMetaType<CtrlToRadioCommand>();
 
     /** Read settings **/
-    Settings settings = Settings::instance();
+    Settings* settings = Settings::instance();
     QFile settingsFile("Settings.xml");
     if (!settingsFile.exists())
     {
         std::cout << "Settings file does not exists" << std::endl;
     }
-    else if (!settings.readSettings("Settings.xml"))
+    else if (!settings->readSettings("Settings.xml"))
     {
         std::cout << "Cannot parse settings " << std::endl;
     }
@@ -46,8 +47,19 @@ int main(int argc, char** argv)
     /** Launch joystick control **/
     js.start();
 
-    /** Connect app exit to joystick exit **/
-    QObject::connect(&app, &QApplication::aboutToQuit, &js, [&js](){js.updateState(Joystick::js_thread_state_t::EXIT);});
+    /** Create radio control **/
+    RadioDriver radio;
+    if (radio.init())
+    {
+        std::cout << "Radio initialized\n";
+    }
+    else
+    {
+        std::cout << "Cannot initialize radio\n";
+    }
+
+    /** Connect radio to GUI **/
+    QObject::connect(&radio, SIGNAL(radioAlive(bool)), &window, SLOT(onRadioAlive(bool)));
 
     /** Launch app **/
     return app.exec();

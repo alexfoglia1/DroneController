@@ -51,9 +51,9 @@ void ControllerFrame::place(int x, int y, int w, int h)
     show();
 }
 
-void ControllerFrame::updateMenuItem(ControllerMenu::MenuItemKey key, bool connected)
+void ControllerFrame::updateMenuItem(ControllerMenu::MenuItemKey key, QVariant newValue)
 {
-    _menuSubFrame->updateItem(key, connected);
+    _menuSubFrame->updateItem(key, newValue);
 }
 
 

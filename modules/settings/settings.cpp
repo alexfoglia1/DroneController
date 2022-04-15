@@ -43,9 +43,9 @@ const QMap<Settings::SettingsType, QString> Settings::_settingsTypeToXml =
     {RADIO, "radio"}
 };
 
-Settings Settings::instance()
+Settings* Settings::instance()
 {
-    static Settings settings;
+    static Settings* settings = new Settings();
 
     return settings;
 }
@@ -56,29 +56,29 @@ Settings::Settings()
     {
         {JOYSTICK_DEAD_CENTER_ZONE, 2000},
         {JOYSTICK_BTN_CROSS, 0},
-        {JOYSTICK_BTN_CIRCLE, 1},
-        {JOYSTICK_BTN_TRIANGLE, 2},
-        {JOYSTICK_BTN_SQUARE, 3},
-        {JOYSTICK_BTN_L1, 4},
-        {JOYSTICK_BTN_R1, 5},
-        {JOYSTICK_BTN_L2, 6},
-        {JOYSTICK_BTN_R2, 7},
-        {JOYSTICK_BTN_L3, 8},
-        {JOYSTICK_BTN_R3, 9},
-        {JOYSTICK_BTN_SHARE, 10},
-        {JOSTICK_BTN_OPT, 11},
-        {JOYSTICK_BTN_PS, 12},
-        {JOYSTICK_L2_AXIS, 2},
-        {JOYSTICK_R2_AXIS, 5},
+        {JOYSTICK_BTN_CIRCLE, 0},
+        {JOYSTICK_BTN_TRIANGLE, 0},
+        {JOYSTICK_BTN_SQUARE, 0},
+        {JOYSTICK_BTN_L1, 0},
+        {JOYSTICK_BTN_R1, 0},
+        {JOYSTICK_BTN_L2, 0},
+        {JOYSTICK_BTN_R2, 0},
+        {JOYSTICK_BTN_L3, 0},
+        {JOYSTICK_BTN_R3, 0},
+        {JOYSTICK_BTN_SHARE, 0},
+        {JOSTICK_BTN_OPT, 0},
+        {JOYSTICK_BTN_PS, 0},
+        {JOYSTICK_L2_AXIS, 0},
+        {JOYSTICK_R2_AXIS, 0},
         {JOYSTICK_L3_X_AXIS, 0},
-        {JOYSTICK_L3_Y_AXIS, 1},
-        {JOYSTICK_R3_X_AXIS, 3},
-        {JOYSTICK_R3_Y_AXIS, 4},
-        {RADIO_DEVICE, "/dev/ttyUSB0"},
-        {RADIO_BAUD, 9600},
-        {RADIO_TX_FREQ, 50},
-        {RADIO_TX_PIPE, quint64(0xE6E6E6E6E6E6)},
-        {RADIO_RX_PIPE, quint64(0x6E6E6E6E6E6E)}
+        {JOYSTICK_L3_Y_AXIS, 0},
+        {JOYSTICK_R3_X_AXIS, 0},
+        {JOYSTICK_R3_Y_AXIS, 0},
+        {RADIO_DEVICE, ""},
+        {RADIO_BAUD, 0},
+        {RADIO_TX_FREQ, 0},
+        {RADIO_TX_PIPE, quint64(0)},
+        {RADIO_RX_PIPE, quint64(0)}
     };
 }
 
