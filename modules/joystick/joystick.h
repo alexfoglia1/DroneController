@@ -24,6 +24,8 @@ public:
     int R2_AXIS;
     int L2_AXIS;
     int X_BUTTON;
+    int CIRCLE_BUTTON;
+    int TRIANGLE_BUTTON;
     int SQUARE_BUTTON;
     int R1_BUTTON;
     int L1_BUTTON;

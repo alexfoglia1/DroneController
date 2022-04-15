@@ -12,6 +12,8 @@ Joystick::Joystick()
     L2_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_L2_AXIS).toInt();
     X_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_CROSS).toInt();
     SQUARE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_SQUARE).toInt();
+    CIRCLE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_CIRCLE).toInt();
+    TRIANGLE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_TRIANGLE).toInt();
     R1_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_R1).toInt();
     L1_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_L1).toInt();
     PS_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS).toInt();
@@ -105,7 +107,7 @@ void Joystick::updateMsgOut(SDL_Event event)
         }
         case  SDL_JOYBUTTONUP:
         {
-            if (X_BUTTON == event.jbutton.button)
+            if (CIRCLE_BUTTON == event.jbutton.button)
             {
                 _msgOut.l2_axis = 0;
                 _msgOut.r2_axis = 0;
