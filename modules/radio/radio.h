@@ -27,7 +27,8 @@ public slots:
     void transmitData();
 
 signals:
-    void radioAlive(bool alive);
+    void radioChangedState(int newState);
+    void radioFirmwareVersion(QString version);
 
 private:
     QSerialPort* _serialPort;
@@ -41,6 +42,7 @@ private:
     bool _gotEnd;
     int _baudRate;
     int _txTimeoutMillis;
+    int _rxTimeoutMillis;
 
     QByteArray _rxBuffer;
     QByteArray _txBuffer;

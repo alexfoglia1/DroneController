@@ -1,4 +1,5 @@
-#include "ControllerMenu.h"
+#include "modules/gui/widgets/ControllerMenu.h"
+#include "modules/radio/radio.h"
 
 #include <QPainter>
 
@@ -38,11 +39,26 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
 
     switch(key)
     {
-        /** ON/OFF Menu Items to be updated **/
-        case JOYSTICK:
-        case RADIO:
-            item->currentValueIndex = newValue.toBool() ? 1 : 0;
-            break;
+        /** ON/OFF Menu Item to be updated **/
+        case MenuItemKey::JOYSTICK:
+        item->currentValueIndex = newValue.toBool() ? 1 : 0;
+        break;
+        /** MULTI STATE Menu Item to be updated **/
+        case MenuItemKey::RADIO:
+        item->currentValueIndex = newValue.toInt() == RadioDriver::RadioState::OFF ? 0 :
+                                  newValue.toInt() == RadioDriver::RadioState::NOT_CONFIGURED ? 1:
+                                  newValue.toInt() == RadioDriver::RadioState::RUNNING ? 2 : 3;
+        break;
+        /** CUSTOM STRING Menu Item to be updated **/
+        case MenuItemKey::RADIO_FW_VERSION:
+        case MenuItemKey::RADIO_BAUD:
+        case MenuItemKey::RADIO_DEVICE:
+        case MenuItemKey::RADIO_RX_PIPE:
+        case MenuItemKey::RADIO_TX_PIPE:
+        case MenuItemKey::RADIO_TX_FREQ:
+        item->values.clear();
+        item->values.push_back(newValue);
+        break;
     default:
         break;
     }
@@ -66,9 +82,8 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
 
         switch (menuItem.key)
         {
-            /** On/Off Menu Items **/
+            /** Display On/Off Menu Items **/
             case MenuItemKey::JOYSTICK:
-            case MenuItemKey::RADIO:
                 if (itemValue.toBool())
                 {
                     painter.drawText(100, y, QString("ON"));
@@ -77,14 +92,19 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
                 {
                     painter.drawText(100, y, QString("OFF"));
                 }
+
             break;
 
-            /** Settings menu items **/
+            /** Display custom string menu item **/
+            case MenuItemKey::RADIO_FW_VERSION:
             case MenuItemKey::RADIO_DEVICE:
             case MenuItemKey::RADIO_BAUD:
             case MenuItemKey::RADIO_TX_FREQ:
+            case MenuItemKey::RADIO:
                 painter.drawText(100, y, itemValue.toString());
-                break;
+            break;
+
+            /** Display Hex menu items **/
             case MenuItemKey::RADIO_TX_PIPE:
             case MenuItemKey::RADIO_RX_PIPE:
                 painter.drawText(100, y,

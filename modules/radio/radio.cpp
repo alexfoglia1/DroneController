@@ -12,6 +12,7 @@ RadioDriver::RadioDriver()
     _serialPortName = s->getAttribute(Settings::Attribute::RADIO_DEVICE).toString();
     _baudRate = s->getAttribute(Settings::Attribute::RADIO_BAUD).toInt();
     _txTimeoutMillis = 1000.0 / s->getAttribute(Settings::Attribute::RADIO_TX_FREQ).toInt();
+    _rxTimeoutMillis = 1000.0;
 
     _serialPort = nullptr;
     _gotStart = false;
@@ -54,7 +55,11 @@ bool RadioDriver::init()
         _txTimer = new QTimer();
         _txTimer->setInterval(_txTimeoutMillis);
 
+        _downlinkTimer = new QTimer();
+        _downlinkTimer->setInterval(_rxTimeoutMillis);
+
         connect(_txTimer, &QTimer::timeout, this, &RadioDriver::transmitData);
+        connect(_downlinkTimer, &QTimer::timeout, this, &RadioDriver::downlink);
         return true;
     }
     catch (std::exception)
@@ -63,7 +68,6 @@ bool RadioDriver::init()
     }
 }
 
-#include <iostream>
 void RadioDriver::receiveData()
 {
     QByteArray chunk;
@@ -98,15 +102,16 @@ void RadioDriver::receiveData()
 
 void RadioDriver::handleError(QSerialPort::SerialPortError error)
 {
-    std::cout << "An error occurred... "<< error <<"\n";
+    Q_UNUSED(error);
 
+    _state = OFF;
+    emit radioChangedState(OFF);
 }
 
 void RadioDriver::downlink()
 {
-    std::cout << "Se stessi facendo il leoss alzerei un bit porca madonna\n";
-
-    emit radioAlive(false);
+    _state = OFF;
+    emit radioChangedState(OFF);
 }
 
 void RadioDriver::transmitData()
@@ -129,6 +134,7 @@ void RadioDriver::transmitData()
 
 void RadioDriver::dataIngest()
 {
+    _downlinkTimer->stop();
     uint32_t msgId = *reinterpret_cast<uint32_t*>(_rxBuffer.data());
     switch (msgId)
     {
@@ -148,44 +154,43 @@ void RadioDriver::dataIngest()
             break;
 
     }
+    _downlinkTimer->start();
 }
 
 void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
 {
     if (_state == OFF)
     {
-        std::cout << "Radio on but not yet configured\n";
-        QString _driverVersion = QString("%1.%2-%3").arg(msgParsed.major_v)
+        emit radioFirmwareVersion(QString("%1.%2-%3").arg(msgParsed.major_v)
                                               .arg(msgParsed.minor_v)
-                                              .arg(msgParsed.stage_v).toUpper();
+                                              .arg(msgParsed.stage_v).toUpper());
 
-        std::cout << "driverVersion: " << _driverVersion.toStdString().c_str() << std::endl;
+
+        _state = NOT_CONFIGURED;
+        emit radioChangedState(NOT_CONFIGURED);
 
         _txTimer->start();
-        _state = NOT_CONFIGURED;
-    }
+        _downlinkTimer->start();
 
-    emit radioAlive(true);
+    }
 }
 
 void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
 {
-    std::cout << "msgAcked(" << msgParsed.msg_acked << ")" << std::endl;
     switch (msgParsed.msg_acked)
     {
     case CTRL_TO_RADIO_CFG_ID:
     {
         if (_state == NOT_CONFIGURED)
         {
-            std::cout << "Radio configured!\n";
-            //emit state running
             _state = RUNNING;
+            emit radioChangedState(RUNNING);
         }
     }
     break;
     case CTRL_TO_RADIO_CMD_ID:
     {
-        std::cout << "Radio is echoing joystick!\n";
+        /** Do nothing **/
     }
     break;
     default:

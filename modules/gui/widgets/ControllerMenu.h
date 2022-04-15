@@ -16,6 +16,7 @@ public:
         /** Local **/
         JOYSTICK = 0,
         RADIO,
+        RADIO_FW_VERSION,
 
         /** Settings **/
         RADIO_DEVICE,

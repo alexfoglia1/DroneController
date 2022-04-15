@@ -17,7 +17,8 @@ void DroneControllerWindow::createFrames()
     _localFrame = new ControllerFrame(this, "LOCAL",
                                       {
                                           {ControllerMenu::MenuItemKey::JOYSTICK, "JOYSTICK", 0, {false, true}},
-                                          {ControllerMenu::MenuItemKey::RADIO,    "RADIO",    0, {false, true}},
+                                          {ControllerMenu::MenuItemKey::RADIO,    "RADIO",    0, {"OFF", "NOT CONFIGURED", "RUNNING", "UNVALID"}},
+                                          {ControllerMenu::MenuItemKey::RADIO_FW_VERSION, "R-FW-VER", 0, {"UNKNOWN"}},
                                           {ControllerMenu::MenuItemKey::RADIO_DEVICE, "R-DEVICE", 0, {s->getAttribute(Settings::Attribute::RADIO_DEVICE)}},
                                           {ControllerMenu::MenuItemKey::RADIO_BAUD, "R-BAUD", 0, {s->getAttribute(Settings::Attribute::RADIO_BAUD)}},
                                           {ControllerMenu::MenuItemKey::RADIO_TX_FREQ, "R-FREQ", 0, {s->getAttribute(Settings::Attribute::RADIO_TX_FREQ)}},
@@ -35,9 +36,14 @@ void DroneControllerWindow::createFrames()
     _jsFrame = new JoystickFrame(_localFrame);
 }
 
-void DroneControllerWindow::onRadioAlive(bool alive)
+void DroneControllerWindow::onRadioFirmwareVersion(QString version)
 {
-    _localFrame->updateMenuItem(ControllerMenu::MenuItemKey::RADIO, alive);
+    _localFrame->updateMenuItem(ControllerMenu::MenuItemKey::RADIO_FW_VERSION, version);
+}
+
+void DroneControllerWindow::onRadioChangedState(int newState)
+{
+    _localFrame->updateMenuItem(ControllerMenu::MenuItemKey::RADIO, newState);
 }
 
 void DroneControllerWindow::onJoystickConnected(bool connected)

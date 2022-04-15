@@ -59,7 +59,8 @@ int main(int argc, char** argv)
     }
 
     /** Connect radio to GUI **/
-    QObject::connect(&radio, SIGNAL(radioAlive(bool)), &window, SLOT(onRadioAlive(bool)));
+    QObject::connect(&radio, SIGNAL(radioFirmwareVersion(QString)), &window, SLOT(onRadioFirmwareVersion(QString)));
+    QObject::connect(&radio, SIGNAL(radioChangedState(int)), &window, SLOT(onRadioChangedState(int)));
 
     /** Launch app **/
     return app.exec();
