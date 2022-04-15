@@ -7,7 +7,7 @@ Joystick::Joystick()
     max_js_axis_value = 32767;
     act_state = IDLE;
 
-    _msgOut.msg_id = CTRL_TO_RADIO_MSG_ID;
+    _msgOut.msg_id = CTRL_TO_RADIO_CMD_ID;
     _msgOut.l2_axis = 0;
     _msgOut.r2_axis = 0;
     _msgOut.l3_x_axis = 0;
@@ -61,6 +61,7 @@ void Joystick::updateMsgOut(SDL_Event event)
             {
                 return;
             }
+
             if (R2_AXIS == event.jaxis.axis)
             {
                 _msgOut.r2_axis = map_js_axis_value_uint8(event.jaxis.value);

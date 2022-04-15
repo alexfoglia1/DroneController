@@ -29,7 +29,7 @@ public:
     const int L3_HORIZONTAL_AXIS = 0;
     const int R3_VERTICAL_AXIS = 4;
     const int R3_HORIZONTAL_AXIS = 3;
-    const int JOY_DEAD_CENTER_ZONE = 3000;
+    const int JOY_DEAD_CENTER_ZONE = 2000;
 
     enum js_thread_state_t
     {
@@ -43,14 +43,14 @@ public:
 
 signals:
     void jsConnected(bool connected);
-    void msgOut(CtrlToRadioMsg msgOut);
+    void msgOut(CtrlToRadioCommand msgOut);
 
 protected:
     void run() override;
 
 private:
     SDL_Joystick *js;
-    CtrlToRadioMsg _msgOut;
+    CtrlToRadioCommand _msgOut;
 
     int min_js_axis_value;
     int max_js_axis_value;
