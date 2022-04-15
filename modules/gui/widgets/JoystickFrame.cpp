@@ -17,7 +17,7 @@ JoystickFrame::JoystickFrame(QWidget* parent) : QFrame(parent)
                   "color: white;");
 }
 
-void JoystickFrame::updateMessageToDisplay(CtrlToRadioCommand msgToDisplay)
+void JoystickFrame::updateMessageToDisplay(CtrlToRadioCommandMessage msgToDisplay)
 {
     bool updated =
        (msgToDisplay.l2_axis != _msgToDisplay.l2_axis     ||

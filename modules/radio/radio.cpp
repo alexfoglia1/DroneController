@@ -167,6 +167,11 @@ void RadioDriver::onJsBtnPressed(int btnPressed)
     }
 }
 
+void RadioDriver::onJsMessageUpdate(CtrlToRadioCommandMessage msgOut)
+{
+    _commandMsg = msgOut;
+}
+
 void RadioDriver::dataIngest()
 {
     _downlinkTimer->stop();
@@ -187,10 +192,16 @@ void RadioDriver::dataIngest()
         }
         case RADIO_TO_CTRL_CFG_ID:
         {
-            RadioToCtrlConfig msgParsed = *reinterpret_cast<RadioToCtrlConfig*>(_rxBuffer.data());
+            RadioToCtrlConfigMessage msgParsed = *reinterpret_cast<RadioToCtrlConfigMessage*>(_rxBuffer.data());
             receivedRadioConfig(msgParsed);
             break;
         }
+    case RADIO_TO_CTRL_CMD_ID:
+    {
+        CtrlToRadioCommandMessage echoedBack = *reinterpret_cast<CtrlToRadioCommandMessage*>(_rxBuffer.data());
+        receivedRadioCmdEcho(echoedBack);
+        break;
+    }
         default:
             break;
 
@@ -222,7 +233,7 @@ void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
     {
     case CTRL_TO_RADIO_CFG_ID:
     {
-        if (_state == NOT_CONFIGURED)
+        if (_state == NOT_CONFIGURED && msgParsed.ack_status > 0)
         {
             _state = RUNNING;
             emit radioChangedState(RUNNING);
@@ -232,6 +243,7 @@ void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
     case CTRL_TO_RADIO_CMD_ID:
     {
         /** Do nothing **/
+
     }
     break;
     default:
@@ -239,7 +251,7 @@ void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
     }
 }
 
-void RadioDriver::receivedRadioConfig(RadioToCtrlConfig msgParsed)
+void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 {
     bool rxPipeOk = msgParsed.rx_pipe == _configMsg.rx_pipe;
     bool txPipeOk = msgParsed.tx_pipe == _configMsg.tx_pipe;
@@ -260,6 +272,11 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfig msgParsed)
             emit radioChangedState(RUNNING);
         }
     }
+}
+
+void RadioDriver::receivedRadioCmdEcho(CtrlToRadioCommandMessage msgParsed)
+{
+    printf("echoed r2 axis(%d)\n", msgParsed.r2_axis);
 }
 
 void RadioDriver::saveChunk(QByteArray chunk)

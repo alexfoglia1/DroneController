@@ -49,14 +49,14 @@ public:
 signals:
     void jsConnected(bool connected);
     void btnPressed(int btn);
-    void msgOut(CtrlToRadioCommand msgOut);
+    void msgOut(CtrlToRadioCommandMessage msgOut);
 
 protected:
     void run() override;
 
 private:
     SDL_Joystick *js;
-    CtrlToRadioCommand _msgOut;
+    CtrlToRadioCommandMessage _msgOut;
 
     int min_js_axis_value;
     int max_js_axis_value;

@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     app.setApplicationDisplayName(QString("%1 %2").arg(PROJECT_NAME).arg(app.applicationVersion()));
 
     /** Register metatypes **/
-    qRegisterMetaType<CtrlToRadioCommand>();
+    qRegisterMetaType<CtrlToRadioCommandMessage>();
 
     /** Read settings **/
     Settings* settings = Settings::instance();
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
     /** Connect joystick to GUI **/
     QObject::connect(&js, SIGNAL(jsConnected(bool)), &window, SLOT(onJoystickConnected(bool)));
-    QObject::connect(&js, SIGNAL(msgOut(CtrlToRadioCommand)), &window, SLOT(onJoystickMsgOut(CtrlToRadioCommand)));
+    QObject::connect(&js, SIGNAL(msgOut(CtrlToRadioCommandMessage)), &window, SLOT(onJoystickMsgOut(CtrlToRadioCommandMessage)));
 
     /** Launch joystick control **/
     js.start();
@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 
     /** Connect Joystick to radio**/
     QObject::connect(&js, SIGNAL(btnPressed(int)), &radio, SLOT(onJsBtnPressed(int)));
+    QObject::connect(&js, SIGNAL(msgOut(CtrlToRadioCommandMessage)), &radio, SLOT(onJsMessageUpdate(CtrlToRadioCommandMessage)));
 
     /** Launch app **/
     return app.exec();

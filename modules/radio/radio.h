@@ -27,6 +27,7 @@ public slots:
     void downlink();
     void transmitData();
     void onJsBtnPressed(int btn);
+    void onJsMessageUpdate(CtrlToRadioCommandMessage msgOut);
 
 signals:
     void radioChangedState(int newState);
@@ -37,8 +38,8 @@ private:
     QTimer* _downlinkTimer;
     QTimer* _txTimer;
     QString _serialPortName;
-    CtrlToRadioConfig _configMsg;
-    CtrlToRadioCommand _commandMsg;
+    CtrlToRadioConfigMessage _configMsg;
+    CtrlToRadioCommandMessage _commandMsg;
 
     bool _gotStart;
     bool _gotEnd;
@@ -53,7 +54,8 @@ private:
 
     void receivedRadioAlive(RadioToCtrlAliveMessage msgParsed);
     void receivedRadioAck(RadioToCtrlAckMessage msgParsed);
-    void receivedRadioConfig(RadioToCtrlConfig msgParsed);
+    void receivedRadioConfig(RadioToCtrlConfigMessage msgParsed);
+    void receivedRadioCmdEcho(CtrlToRadioCommandMessage msgParsed);
 
     void saveChunk(QByteArray chunk);
     void dataIngest();

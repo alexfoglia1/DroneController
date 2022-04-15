@@ -20,7 +20,7 @@ public slots:
     void onRadioFirmwareVersion(QString version);
     void onRadioChangedState(int newState);
     void onJoystickConnected(bool connected);
-    void onJoystickMsgOut(CtrlToRadioCommand msgOut);
+    void onJoystickMsgOut(CtrlToRadioCommandMessage msgOut);
 
 private:
     ControllerFrame* _localFrame;

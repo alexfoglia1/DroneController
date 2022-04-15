@@ -51,7 +51,7 @@ void DroneControllerWindow::onJoystickConnected(bool connected)
     _localFrame->updateMenuItem(ControllerMenu::MenuItemKey::JOYSTICK, connected);
 }
 
-void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommand msgOut)
+void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
 {
     _jsFrame->updateMessageToDisplay(msgOut);
 }

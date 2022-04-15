@@ -23,7 +23,6 @@ Joystick::Joystick()
     R3_HORIZONTAL_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_R3_X_AXIS).toInt();
     JOY_DEAD_CENTER_ZONE = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_DEAD_CENTER_ZONE).toInt();
 
-
     _msgOut.msg_id = CTRL_TO_RADIO_CMD_ID;
     _msgOut.l2_axis = 0;
     _msgOut.r2_axis = 0;

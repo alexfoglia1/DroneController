@@ -27,7 +27,9 @@ uint64_t tx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF
 uint64_t rx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF24L01 
 
 const byte numChars = 128;
-char rxBuffer[numChars];
+char serialRxBuffer[numChars];
+
+CtrlToRadioCommandMessage lastCmdMessage;
 
 boolean newData = false;
 boolean sendCfg = false;
@@ -38,8 +40,15 @@ void setup()
 {
     for (int i = 0; i < numChars; i++)
     {
-      rxBuffer[i] = 0;
+      serialRxBuffer[i] = 0;
     }
+
+    lastCmdMessage.l2_axis = 0;
+    lastCmdMessage.r2_axis = 0;
+    lastCmdMessage.l3_x_axis = 0;
+    lastCmdMessage.r3_y_axis = 0;
+    lastCmdMessage.r3_x_axis = 0;
+    lastCmdMessage.r3_y_axis = 0;
     
     Serial.begin(9600);
     
@@ -57,18 +66,18 @@ void loop()
   recvFromSerial();
   RadioToCtrlAckMessage ack;
   ack.msg_id = RADIO_TO_CTRL_ACK_ID;
-  RadioToCtrlConfig configMsg;
+  RadioToCtrlConfigMessage configMsg;
   configMsg.msg_id = RADIO_TO_CTRL_CFG_ID;
   
   if (newData)
   {
       newData = false;
-      uint32_t* msgId = (uint32_t*)(rxBuffer);
+      uint32_t* msgId = (uint32_t*)(serialRxBuffer);
       ack.msg_acked = *msgId;
       
       if (CTRL_TO_RADIO_CFG_ID == *msgId)
       {
-        CtrlToRadioConfig* msgIn = (CtrlToRadioConfig*)(rxBuffer);
+        CtrlToRadioConfigMessage* msgIn = (CtrlToRadioConfigMessage*)(serialRxBuffer);
         tx_pipe = msgIn->tx_pipe;
         rx_pipe = msgIn->rx_pipe;
         ack.ack_status = 1;
@@ -76,6 +85,15 @@ void loop()
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
       {
+        CtrlToRadioCommandMessage* msgIn = (CtrlToRadioCommandMessage*)(serialRxBuffer);
+
+        lastCmdMessage.l2_axis = msgIn->l2_axis;
+        lastCmdMessage.r2_axis = msgIn->r2_axis;
+        lastCmdMessage.l3_x_axis = msgIn->l3_x_axis;
+        lastCmdMessage.l3_y_axis = msgIn->l3_y_axis;
+        lastCmdMessage.r3_x_axis = msgIn->r3_x_axis;
+        lastCmdMessage.r3_y_axis = msgIn->r3_y_axis;
+        
         ack.ack_status = 1;
       }
       else
@@ -87,12 +105,17 @@ void loop()
       txToSerial((char*)&ack, sizeof(RadioToCtrlAckMessage));
   }
   
-  /** Mando sempre configurazione, comando, radio **/
+  /** Mando sempre configurazione **/
   configMsg.tx_pipe = tx_pipe;
   configMsg.rx_pipe = rx_pipe;
+  txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfigMessage));
 
-  txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfig));
-  //todo RadioToCtrlCmd
+  /** Mando sempre echo dell comando attuale **/
+  lastCmdMessage.msg_id = RADIO_TO_CTRL_CMD_ID;
+  txToSerial((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
+
+  /** Inoltro su radio il comando attuale **/
+  lastCmdMessage.msg_id = RADIO_TO_DRONE_CMD_ID;
   //todo RadioToDroneCmd
   delay(txDelayMillis);
 }
@@ -111,7 +134,7 @@ void recvFromSerial()
         {
             if (rc != endMarker)
             {
-                rxBuffer[ndx] = rc;
+                serialRxBuffer[ndx] = rc;
                 ndx++;
                 if (ndx >= numChars)
                 {
