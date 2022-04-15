@@ -36,16 +36,16 @@ RadioDriver::RadioDriver()
 bool RadioDriver::init()
 {
     _state = INIT;
+    _txBuffer.clear();
+    _rxBuffer.clear();
+
     emit radioChangedState(INIT);
 
     if (_serialPort)
     {
         _serialPort->close();
         delete _serialPort;
-        _state = OFF;
         _serialPort = nullptr;
-
-        emit radioChangedState(OFF);
     }
 
     if (_txTimer)
