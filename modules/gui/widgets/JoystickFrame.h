@@ -10,11 +10,13 @@ class JoystickFrame : public QFrame
     Q_OBJECT
 public:
     explicit JoystickFrame(QWidget* parent = nullptr);
-    void updateMessageToDisplay(CtrlToRadioMsg msgToDisplay);
+    void updateMessageToDisplay(CtrlToRadioCommand msgToDisplay);
     void paintEvent(QPaintEvent* paintEvent);
 
 private:
-    CtrlToRadioMsg _msgToDisplay;
+    CtrlToRadioCommand _msgToDisplay;
+
+    void paintAnalogRectangle(QString analogAxisName, int x0, int y0, int w, int h, int8_t xAxis, int8_t yAxis);
 
 };
 

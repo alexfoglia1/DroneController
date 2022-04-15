@@ -65,6 +65,7 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
 
         switch (menuItem.key)
         {
+            /** On/Off Menu Items **/
             case MenuItemKey::JOYSTICK:
             case MenuItemKey::RADIO:
                 if (itemValue.toBool())
@@ -76,8 +77,20 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
                     painter.drawText(100, y, QString("OFF"));
                 }
             break;
+
+            /** Settings menu items **/
+            case MenuItemKey::RADIO_DEVICE:
+            case MenuItemKey::RADIO_BAUD:
+            case MenuItemKey::RADIO_TX_FREQ:
+                painter.drawText(100, y, itemValue.toString());
+                break;
+            case MenuItemKey::RADIO_TX_PIPE:
+            case MenuItemKey::RADIO_RX_PIPE:
+                painter.drawText(100, y,
+                                 QString("0x%1").arg(QString::number(itemValue.toULongLong(), 16).toUpper()));
+                break;
             default:
-            break;
+                break;
         }
 
         y += 25;

@@ -17,6 +17,13 @@ public:
         JOYSTICK = 0,
         RADIO,
 
+        /** Settings **/
+        RADIO_DEVICE,
+        RADIO_BAUD,
+        RADIO_TX_FREQ,
+        RADIO_TX_PIPE,
+        RADIO_RX_PIPE,
+
         /** Remote **/
         DRONE_CONTROLLER,
         DRONE_MOTOR_1_POWER,

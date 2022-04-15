@@ -18,7 +18,7 @@ public:
 
 public slots:
     void onJoystickConnected(bool connected);
-    void onJoystickMsgOut(CtrlToRadioMsg msgOut);
+    void onJoystickMsgOut(CtrlToRadioCommand msgOut);
 
 private:
     ControllerFrame* _localFrame;
