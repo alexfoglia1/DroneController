@@ -62,6 +62,9 @@ int main(int argc, char** argv)
     QObject::connect(&radio, SIGNAL(radioFirmwareVersion(QString)), &window, SLOT(onRadioFirmwareVersion(QString)));
     QObject::connect(&radio, SIGNAL(radioChangedState(int)), &window, SLOT(onRadioChangedState(int)));
 
+    /** Connect Joystick to radio**/
+    QObject::connect(&js, SIGNAL(btnPressed(int)), &radio, SLOT(onJsBtnPressed(int)));
+
     /** Launch app **/
     return app.exec();
 }

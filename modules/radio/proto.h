@@ -6,6 +6,7 @@
 
 #define CTRL_TO_RADIO_CFG_ID 0
 #define CTRL_TO_RADIO_CMD_ID 1
+#define RADIO_TO_CTRL_CFG_ID 253
 #define RADIO_TO_CTRL_ALIVE_ID 254
 #define RADIO_TO_CTRL_ACK_ID 255
 
@@ -39,7 +40,6 @@ typedef struct __attribute__((packed))
   uint8_t  ack_status;
 } RadioToCtrlAckMessage;
 
-
 typedef struct __attribute__((packed))
 {
   uint32_t msg_id;
@@ -47,6 +47,15 @@ typedef struct __attribute__((packed))
   char  minor_v;
   char  stage_v;
 } RadioToCtrlAliveMessage;
+
+
+typedef struct __attribute__((packed))
+{
+    uint32_t msg_id;
+    uint64_t rx_pipe;
+    uint64_t tx_pipe;
+} RadioToCtrlConfig;
+
 
 Q_DECLARE_METATYPE(CtrlToRadioCommand)
 

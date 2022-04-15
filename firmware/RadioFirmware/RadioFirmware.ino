@@ -3,9 +3,23 @@
 #include "SPI.h"
 #include "proto.h"
 
+/**
+ * Lo sketch riceve in maniera asincrona 2 tipi di messaggi:
+ * msg_id(CTRL_TO_RADIO_CFG_ID): Cambia configurazione
+ * msg_id(CTRL_TO_RADIO_CMD_ID): Cambia messaggio tx radio
+ * A questi messaggi rispondo sempre con un msg_id(RADIO_TO_CTRL_ACK_ID)
+ * 
+ * Lo sketch invia con frequenza TX_FREQUENCY:
+ * msg_id(RADIO_TO_CTRL_CFG_ID): configurazione attuale, su seriale
+ * msg_id(RADIO_TO_CTRL_CMD_ID): messaggio tx radio attuale, su seriale
+ * msg_id(RADIO_TO_DRONE_CMD_ID): messaggio tx radio, su radio
+ * 
+ */
+
 #define MAJOR_VERSION '0'
 #define MINOR_VERSION '1'
 #define STAGE_VERSION 'b'
+#define TX_FREQUENCY 20
 
 RF24 radio(9,10);
 
@@ -13,10 +27,12 @@ uint64_t tx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF
 uint64_t rx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF24L01 
 
 const byte numChars = 128;
-
 char rxBuffer[numChars];
 
 boolean newData = false;
+boolean sendCfg = false;
+
+const float txDelayMillis = 1000.f / TX_FREQUENCY;
 
 void setup()
 {
@@ -41,6 +57,9 @@ void loop()
   recvFromSerial();
   RadioToCtrlAckMessage ack;
   ack.msg_id = RADIO_TO_CTRL_ACK_ID;
+  RadioToCtrlConfig configMsg;
+  configMsg.msg_id = RADIO_TO_CTRL_CFG_ID;
+  
   if (newData)
   {
       newData = false;
@@ -53,6 +72,7 @@ void loop()
         tx_pipe = msgIn->tx_pipe;
         rx_pipe = msgIn->rx_pipe;
         ack.ack_status = 1;
+        sendCfg = true;
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
       {
@@ -63,9 +83,18 @@ void loop()
         ack.ack_status = 0;
       }
 
-      /** Per il momento mando solo un ack **/
+      /** Mando un ack **/
       txToSerial((char*)&ack, sizeof(RadioToCtrlAckMessage));
   }
+  
+  /** Mando sempre configurazione, comando, radio **/
+  configMsg.tx_pipe = tx_pipe;
+  configMsg.rx_pipe = rx_pipe;
+
+  txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfig));
+  //todo RadioToCtrlCmd
+  //todo RadioToDroneCmd
+  delay(txDelayMillis);
 }
 
 void recvFromSerial()
@@ -112,6 +141,7 @@ void txToSerial(char* data, int len)
     Serial.write(data[i]);
   }
   Serial.write(endMarker);
+  Serial.flush();
 }
 
 void handleCfgMsg()

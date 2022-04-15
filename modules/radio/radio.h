@@ -14,6 +14,7 @@ public:
     {
         OFF,
         NOT_CONFIGURED,
+        CONFIG_MISMATCH,
         RUNNING
     };
 
@@ -22,9 +23,9 @@ public:
 
 public slots:
     void receiveData();
-    void handleError(QSerialPort::SerialPortError error);
     void downlink();
     void transmitData();
+    void onJsBtnPressed(int btn);
 
 signals:
     void radioChangedState(int newState);
@@ -51,6 +52,7 @@ private:
 
     void receivedRadioAlive(RadioToCtrlAliveMessage msgParsed);
     void receivedRadioAck(RadioToCtrlAckMessage msgParsed);
+    void receivedRadioConfig(RadioToCtrlConfig msgParsed);
 
     void saveChunk(QByteArray chunk);
     void dataIngest();

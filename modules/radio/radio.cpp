@@ -15,6 +15,8 @@ RadioDriver::RadioDriver()
     _rxTimeoutMillis = 1000.0;
 
     _serialPort = nullptr;
+    _txTimer = nullptr;
+    _downlinkTimer = nullptr;
     _gotStart = false;
     _gotEnd = false;
 
@@ -33,6 +35,27 @@ RadioDriver::RadioDriver()
 
 bool RadioDriver::init()
 {
+    if (_serialPort)
+    {
+        _serialPort->close();
+        delete _serialPort;
+        _state = OFF;
+
+        emit radioChangedState(OFF);
+    }
+
+    if (_txTimer)
+    {
+        _txTimer->stop();
+        delete _txTimer;
+    }
+
+    if (_downlinkTimer)
+    {
+        _downlinkTimer->stop();
+        delete _downlinkTimer;
+    }
+
     try
     {
         _serialPort = new QSerialPort();
@@ -50,7 +73,6 @@ bool RadioDriver::init()
         _serialPort->setFlowControl(QSerialPort::NoFlowControl);
 
         connect(_serialPort, &QSerialPort::readyRead, this, &RadioDriver::receiveData);
-        connect(_serialPort, &QSerialPort::errorOccurred, this, &RadioDriver::handleError);
 
         _txTimer = new QTimer();
         _txTimer->setInterval(_txTimeoutMillis);
@@ -100,14 +122,6 @@ void RadioDriver::receiveData()
     }
 }
 
-void RadioDriver::handleError(QSerialPort::SerialPortError error)
-{
-    Q_UNUSED(error);
-
-    _state = OFF;
-    emit radioChangedState(OFF);
-}
-
 void RadioDriver::downlink()
 {
     _state = OFF;
@@ -122,6 +136,7 @@ void RadioDriver::transmitData()
         clearTxBuffer();
         break;
         case NOT_CONFIGURED:
+        case CONFIG_MISMATCH:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
         break;
         case RUNNING:
@@ -130,6 +145,19 @@ void RadioDriver::transmitData()
     }
 
     _serialPort->write(_txBuffer);
+}
+
+void RadioDriver::onJsBtnPressed(int btnPressed)
+{
+    if (btnPressed == Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS))
+    {
+        printf("BTN PS pressed\n");
+        init();
+    }
+    else
+    {
+        printf("BTN pressed (%d)\n", btnPressed);
+    }
 }
 
 void RadioDriver::dataIngest()
@@ -148,6 +176,12 @@ void RadioDriver::dataIngest()
         {
             RadioToCtrlAckMessage msgParsed = *reinterpret_cast<RadioToCtrlAckMessage*>(_rxBuffer.data());
             receivedRadioAck(msgParsed);
+            break;
+        }
+        case RADIO_TO_CTRL_CFG_ID:
+        {
+            RadioToCtrlConfig msgParsed = *reinterpret_cast<RadioToCtrlConfig*>(_rxBuffer.data());
+            receivedRadioConfig(msgParsed);
             break;
         }
         default:
@@ -195,6 +229,29 @@ void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
     break;
     default:
     break;
+    }
+}
+
+void RadioDriver::receivedRadioConfig(RadioToCtrlConfig msgParsed)
+{
+    bool rxPipeOk = msgParsed.rx_pipe == _configMsg.rx_pipe;
+    bool txPipeOk = msgParsed.tx_pipe == _configMsg.tx_pipe;
+
+    if (!rxPipeOk || !txPipeOk)
+    {
+        if (RadioState::NOT_CONFIGURED == _state)
+        {
+            _state = CONFIG_MISMATCH;
+            emit radioChangedState(CONFIG_MISMATCH);
+        }
+    }
+    else
+    {
+        if (CONFIG_MISMATCH == _state)
+        {
+            _state = RUNNING;
+            emit radioChangedState(RUNNING);
+        }
     }
 }
 
