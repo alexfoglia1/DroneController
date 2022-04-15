@@ -55,8 +55,6 @@ bool RadioDriver::init()
         _txTimer->setInterval(_txTimeoutMillis);
 
         connect(_txTimer, &QTimer::timeout, this, &RadioDriver::transmitData);
-        _txTimer->start();
-
         return true;
     }
     catch (std::exception)
@@ -131,19 +129,67 @@ void RadioDriver::transmitData()
 
 void RadioDriver::dataIngest()
 {
-    emit radioAlive(true);
-    std::cout << "Received " << _rxBuffer.size() << "bytes: " << _rxBuffer.toStdString() << std::endl;
-    switch (_state)
+    uint32_t msgId = *reinterpret_cast<uint32_t*>(_rxBuffer.data());
+    switch (msgId)
     {
-        case OFF:
-            _state = NOT_CONFIGURED;
+        case RADIO_TO_CTRL_ALIVE_ID:
+        {
+            RadioToCtrlAliveMessage msgParsed = *reinterpret_cast<RadioToCtrlAliveMessage*>(_rxBuffer.data());
+            receivedRadioAlive(msgParsed);
             break;
-        case NOT_CONFIGURED:
-            _state = RUNNING; //todo, basati sulla risposta che per ora è fissa
+        }
+        case RADIO_TO_CTRL_ACK_ID:
+        {
+            RadioToCtrlAckMessage msgParsed = *reinterpret_cast<RadioToCtrlAckMessage*>(_rxBuffer.data());
+            receivedRadioAck(msgParsed);
             break;
-        case RUNNING:
-            _state = NOT_CONFIGURED; //come sopra
+        }
+        default:
             break;
+
+    }
+}
+
+void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
+{
+    if (_state == OFF)
+    {
+        std::cout << "Radio on but not yet configured\n";
+        QString _driverVersion = QString("%1.%2-%3").arg(msgParsed.major_v)
+                                              .arg(msgParsed.minor_v)
+                                              .arg(msgParsed.stage_v).toUpper();
+
+        std::cout << "driverVersion: " << _driverVersion.toStdString().c_str() << std::endl;
+
+        _txTimer->start();
+        _state = NOT_CONFIGURED;
+    }
+
+    emit radioAlive(true);
+}
+
+void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
+{
+    std::cout << "msgAcked(" << msgParsed.msg_acked << ")" << std::endl;
+    switch (msgParsed.msg_acked)
+    {
+    case CTRL_TO_RADIO_CFG_ID:
+    {
+        if (_state == NOT_CONFIGURED)
+        {
+            std::cout << "Radio configured!\n";
+            //emit state running
+            _state = RUNNING;
+        }
+    }
+    break;
+    case CTRL_TO_RADIO_CMD_ID:
+    {
+        std::cout << "Radio is echoing joystick!\n";
+    }
+    break;
+    default:
+    break;
     }
 }
 

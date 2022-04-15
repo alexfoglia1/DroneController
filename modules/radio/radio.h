@@ -47,6 +47,9 @@ private:
 
     RadioState _state;
 
+    void receivedRadioAlive(RadioToCtrlAliveMessage msgParsed);
+    void receivedRadioAck(RadioToCtrlAckMessage msgParsed);
+
     void saveChunk(QByteArray chunk);
     void dataIngest();
     void clearTxBuffer();
