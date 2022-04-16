@@ -276,7 +276,7 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
 void RadioDriver::receivedRadioCmdEcho(CtrlToRadioCommandMessage msgParsed)
 {
-    printf("echoed r2 axis(%d)\n", msgParsed.r2_axis);
+    //printf("echoed r2 axis(%d)\n", msgParsed.r2_axis);
 }
 
 void RadioDriver::saveChunk(QByteArray chunk)
