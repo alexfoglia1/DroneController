@@ -48,13 +48,15 @@ void setup(void)
   motor4.attach(MOTOR_PIN4);
   
   radio.begin();
+
+  radio.openWritingPipe(tx_pipe);
+  radio.openReadingPipe(1, rx_pipe);
 }
 
 void loop(void)
 {
   /** Read from radio and apply to motors **/
   radio.startListening();
-  radio.openReadingPipe(1, rx_pipe);
   
   boolean radioRx = false;
   while (radio.available())
@@ -107,7 +109,7 @@ void loop(void)
 
   /** Build and send response **/
   radio.stopListening();
-  radio.openWritingPipe(tx_pipe);
+
   responseMsg.echoed = commandMsg;
   responseMsg.motor1_speed = DELAY;
   responseMsg.motor2_speed = DELAY;
@@ -118,8 +120,7 @@ void loop(void)
   responseMsg.roll = 0;
   responseMsg.baro_altitude = 0;
 
-  radio.write((char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
-  
+  radio.writeAckPayload(tx_pipe, (char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
 }
 
 void printFullName()
