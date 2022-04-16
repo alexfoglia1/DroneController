@@ -8,7 +8,8 @@
  * msg_id(CTRL_TO_RADIO_CFG_ID): Cambia configurazione
  * msg_id(CTRL_TO_RADIO_CMD_ID): Cambia messaggio tx radio
  * 
- * Lo sketch invia con periodo 1 micro:
+ * Lo sketch invia con frequenza 33Hz (3 sleep totali di 10 milli)
+ * msg_id(RADIO_TO_CTRL_ALIVE_ID): keep alive
  * msg_id(RADIO_TO_CTRL_CFG_ID): configurazione attuale, su seriale
  * msg_id(RADIO_TO_CTRL_ECHO_ID): messaggio tx radio attuale, su seriale
  * msg_id(RADIO_TO_DRONE_CMD_ID): messaggio tx radio, su radio
@@ -30,6 +31,7 @@ char serialRxBuffer[numChars];
 
 CtrlToRadioCommandMessage   lastCmdMessage;
 DroneToRadioResponseMessage lastDroneResponse;
+RadioToCtrlAliveMessage     alive;
 
 bool configured = false;
 
@@ -61,17 +63,16 @@ void setup()
     radio.begin();
     radio.enableAckPayload();
     
-    RadioToCtrlAliveMessage alive;
     alive.msg_id  = RADIO_TO_CTRL_ALIVE_ID;
     alive.major_v = MAJOR_VERSION;
     alive.minor_v = MINOR_VERSION;
     alive.stage_v = STAGE_VERSION;
-    
-    txToSerial((char*)&alive, sizeof(RadioToCtrlAliveMessage));
 }
-
+  
 void loop()
 {
+  txToSerial((char*)&alive, sizeof(RadioToCtrlAliveMessage));
+      
   boolean dataFromSerial = recvFromSerial();
   
   if (dataFromSerial)
@@ -82,10 +83,11 @@ void loop()
       if (CTRL_TO_RADIO_CFG_ID == *msgId)
       {
         CtrlToRadioConfigMessage* msgIn = (CtrlToRadioConfigMessage*)(serialRxBuffer);
+        tx_pipe = msgIn->tx_pipe;
+        rx_pipe = msgIn->rx_pipe;
         if (0 == msgIn->config_ok)
         {
-          tx_pipe = msgIn->tx_pipe;
-          rx_pipe = msgIn->rx_pipe;
+          configured = false;
         }
         else
         {

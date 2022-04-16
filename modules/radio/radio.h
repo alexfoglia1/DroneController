@@ -15,7 +15,6 @@ public:
         OFF,
         INIT,
         CONFIG_MISMATCH,
-        MISMATCH_TO_RUNNING,
         RUNNING
     };
 
