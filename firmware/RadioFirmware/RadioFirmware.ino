@@ -94,7 +94,6 @@ void loop()
           configured = true;
           radio.openWritingPipe(tx_pipe);
           radio.openReadingPipe(1, rx_pipe);
-
         }
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
@@ -120,18 +119,21 @@ void loop()
   /** Inoltro su radio il comando attuale **/
   lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
   if (configured == true)
+  {
+    radio.stopListening();
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
-
+    radio.startListening();
+  }
   
-  /** Aspetto la risposta del drone **/
-  //if (configured)
-  //{
-   // if (radio.isAckPayloadAvailable())
-   // {
-   //   radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
-    //}
-  //}
-  
+  /** Aggiorno eventualmente la risposta del drone **/
+  if (configured)
+  {
+    while (radio.available())
+    {
+      radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    }
+  }
+ 
   /** Mando risposta del drone a controller **/
   lastDroneResponse.msg_id = RADIO_TO_CTRL_ECHO_ID;
   txToSerial((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
