@@ -45,6 +45,10 @@ public:
 
     Joystick();
     void updateState(js_thread_state_t newState);
+    js_thread_state_t acquireState();
+
+public slots:
+    void onApplicationQuit();
 
 signals:
     void jsConnected(bool connected);

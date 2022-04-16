@@ -39,6 +39,15 @@ void Joystick::updateState(js_thread_state_t newState)
     statesMutex.unlock();
 }
 
+Joystick::js_thread_state_t Joystick::acquireState()
+{
+    statesMutex.lock();
+    js_thread_state_t __act_state__ = act_state;
+    statesMutex.unlock();
+
+    return __act_state__;
+}
+
 int8_t Joystick::map_js_axis_value_int8(int js_axis_value)
 {
     int js_axis_span = max_js_axis_value - min_js_axis_value;
@@ -144,8 +153,12 @@ void Joystick::updateMsgOut(SDL_Event event)
 
 void Joystick::run()
 {
-    while (act_state != EXIT)
+    js_thread_state_t  __act_state__ = IDLE;
+
+    while (__act_state__ != EXIT)
     {
+        __act_state__ = acquireState();
+
         emit msgOut(_msgOut);
         switch (act_state)
         {
@@ -186,4 +199,9 @@ void Joystick::run()
             break;
         }
     }
+}
+
+void Joystick::onApplicationQuit()
+{
+    updateState(EXIT);
 }

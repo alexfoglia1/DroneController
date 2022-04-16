@@ -15,6 +15,7 @@ public:
     static const int WINDOW_HEIGHT = 650;
 
     explicit DroneControllerWindow(QWidget *parent = nullptr);
+    void closeEvent(QCloseEvent* event) override;
 
 public slots:
     void onRadioFirmwareVersion(QString version);
@@ -30,7 +31,7 @@ private:
     void createFrames();
 
 signals:
-
+    void guiExit();
 };
 
 #endif // DRONECONTROLLERWINDOW_H

@@ -55,3 +55,8 @@ void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
 {
     _jsFrame->updateMessageToDisplay(msgOut);
 }
+
+void DroneControllerWindow::closeEvent(QCloseEvent *event)
+{
+    emit guiExit();
+}
