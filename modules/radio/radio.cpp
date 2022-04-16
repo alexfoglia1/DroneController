@@ -302,7 +302,7 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
 void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
-#if 0
+
     printf("Drone response:\n");
     printf("l2 axis(%d)\n", msgParsed.echoed.l2_axis);
     printf("r2 axis(%d)\n", msgParsed.echoed.r2_axis);
@@ -317,8 +317,8 @@ void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
     printf("motor 1 speed(%d)\n", msgParsed.motor1_speed);
     printf("motor 2 speed(%d)\n", msgParsed.motor2_speed);
     printf("motor 3 speed(%d)\n", msgParsed.motor3_speed);
-    printf("motor 4 speed(%d)\n", msgParsed.motor4_speed);
-#endif
+    printf("motor 4 speed(%d)\n\n", msgParsed.motor4_speed);
+
 }
 
 bool RadioDriver::saveChunk(QByteArray chunk)
