@@ -93,7 +93,7 @@ void loop()
         {
           configured = true;
           radio.openWritingPipe(tx_pipe);
-          //radio.openReadingPipe(1, rx_pipe);
+          radio.openReadingPipe(1, rx_pipe);
 
         }
       }
