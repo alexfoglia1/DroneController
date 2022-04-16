@@ -23,6 +23,15 @@ ${CMAKE_SOURCE_DIR}/modules/joystick/joystick.h
 ${CMAKE_SOURCE_DIR}/modules/joystick/joystick.cpp
 
 ${CMAKE_SOURCE_DIR}/modules/radio/proto.h
+${CMAKE_SOURCE_DIR}/modules/radio/radio.h
+${CMAKE_SOURCE_DIR}/modules/radio/radio.cpp
+
+${CMAKE_SOURCE_DIR}/modules/settings/rapidxml.hpp
+${CMAKE_SOURCE_DIR}/modules/settings/rapidxml_iterators.hpp
+${CMAKE_SOURCE_DIR}/modules/settings/rapidxml_print.hpp
+${CMAKE_SOURCE_DIR}/modules/settings/rapidxml_utils.hpp
+${CMAKE_SOURCE_DIR}/modules/settings/settings.h
+${CMAKE_SOURCE_DIR}/modules/settings/settings.cpp
 
 
 ${CMAKE_SOURCE_DIR}/modules/app/app.h
@@ -32,13 +41,13 @@ ${CMAKE_SOURCE_DIR}/modules/app/app.cpp
 target_include_directories(DroneController PRIVATE ${CMAKE_SOURCE_DIR}/modules)
 
 find_package(Threads REQUIRED)
-find_package(Qt5 COMPONENTS Core Gui Widgets Network OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Network OpenGL SerialPort REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(SDL2 REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
-target_link_libraries(DroneController ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${SDL2_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Network stdc++fs pthread)
+target_link_libraries(DroneController ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${SDL2_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Network Qt5::SerialPort stdc++fs pthread)
 
 install(TARGETS DroneController DESTINATION bin)

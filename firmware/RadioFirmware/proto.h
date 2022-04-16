@@ -1,19 +1,18 @@
 #ifndef PROTO_H
 #define PROTO_H
 
-#include <stdint.h>
-#include <QObject>
-
 #define CTRL_TO_RADIO_CFG_ID 0
 #define CTRL_TO_RADIO_CMD_ID 1
+
 #define RADIO_TO_CTRL_CMD_ID 252
 #define RADIO_TO_CTRL_CFG_ID 253
 #define RADIO_TO_CTRL_ALIVE_ID 254
 #define RADIO_TO_CTRL_ACK_ID 255
 
-#define START_MARKER 60 // '<'
-#define END_MARKER   62 // '>'
+#define RADIO_TO_DRONE_CMD_ID 100
 
+uint8_t startMarker = 60;
+uint8_t endMarker = 62;
 
 typedef struct __attribute__((packed))
 {
@@ -33,7 +32,6 @@ typedef struct __attribute__((packed))
     int8_t r3_y_axis;
 } CtrlToRadioCommandMessage;
 
-
 typedef struct __attribute__((packed))
 {
   uint32_t msg_id;
@@ -49,7 +47,6 @@ typedef struct __attribute__((packed))
   char  stage_v;
 } RadioToCtrlAliveMessage;
 
-
 typedef struct __attribute__((packed))
 {
     uint32_t msg_id;
@@ -58,6 +55,5 @@ typedef struct __attribute__((packed))
 } RadioToCtrlConfigMessage;
 
 
-Q_DECLARE_METATYPE(CtrlToRadioCommandMessage)
 
 #endif //PROTO_H

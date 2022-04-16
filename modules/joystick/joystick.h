@@ -2,6 +2,7 @@
 #define JOYSTICK_H
 
 #include "modules/radio/proto.h"
+#include "modules/settings/settings.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -19,17 +20,21 @@ class Joystick : public QThread
     Q_OBJECT
 
 public:
-    const int R2_AXIS = 5;
-    const int L2_AXIS = 2;
-    const int X_BUTTON = 1;
-    const int R1_BUTTON = 5;
-    const int L1_BUTTON = 4;
-    const int PS_BUTTON = 12;
-    const int L3_VERTICAL_AXIS = 1;
-    const int L3_HORIZONTAL_AXIS = 0;
-    const int R3_VERTICAL_AXIS = 4;
-    const int R3_HORIZONTAL_AXIS = 3;
-    const int JOY_DEAD_CENTER_ZONE = 3000;
+
+    int R2_AXIS;
+    int L2_AXIS;
+    int X_BUTTON;
+    int CIRCLE_BUTTON;
+    int TRIANGLE_BUTTON;
+    int SQUARE_BUTTON;
+    int R1_BUTTON;
+    int L1_BUTTON;
+    int PS_BUTTON;
+    int L3_VERTICAL_AXIS;
+    int L3_HORIZONTAL_AXIS;
+    int R3_VERTICAL_AXIS;
+    int R3_HORIZONTAL_AXIS;
+    int JOY_DEAD_CENTER_ZONE;
 
     enum js_thread_state_t
     {
@@ -43,14 +48,15 @@ public:
 
 signals:
     void jsConnected(bool connected);
-    void msgOut(CtrlToRadioMsg msgOut);
+    void btnPressed(int btn);
+    void msgOut(CtrlToRadioCommandMessage msgOut);
 
 protected:
     void run() override;
 
 private:
     SDL_Joystick *js;
-    CtrlToRadioMsg _msgOut;
+    CtrlToRadioCommandMessage _msgOut;
 
     int min_js_axis_value;
     int max_js_axis_value;

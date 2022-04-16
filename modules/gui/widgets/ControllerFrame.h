@@ -13,7 +13,7 @@ class ControllerFrame : public QFrame
 public:
     explicit ControllerFrame(QWidget* parent = nullptr, const QString& title = "", std::vector<ControllerMenu::ControllerMenuItem> menuItems = std::vector<ControllerMenu::ControllerMenuItem>());
     void place(int x, int y, int w, int h);
-    void updateMenuItem(ControllerMenu::MenuItemKey key, bool connected);
+    void updateMenuItem(ControllerMenu::MenuItemKey key, QVariant newValue);
 
 private:
     QLabel* _lblTitle;

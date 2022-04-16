@@ -16,6 +16,14 @@ public:
         /** Local **/
         JOYSTICK = 0,
         RADIO,
+        RADIO_FW_VERSION,
+
+        /** Settings **/
+        RADIO_DEVICE,
+        RADIO_BAUD,
+        RADIO_TX_FREQ,
+        RADIO_TX_PIPE,
+        RADIO_RX_PIPE,
 
         /** Remote **/
         DRONE_CONTROLLER,

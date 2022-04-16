@@ -17,8 +17,10 @@ public:
     explicit DroneControllerWindow(QWidget *parent = nullptr);
 
 public slots:
+    void onRadioFirmwareVersion(QString version);
+    void onRadioChangedState(int newState);
     void onJoystickConnected(bool connected);
-    void onJoystickMsgOut(CtrlToRadioMsg msgOut);
+    void onJoystickMsgOut(CtrlToRadioCommandMessage msgOut);
 
 private:
     ControllerFrame* _localFrame;
