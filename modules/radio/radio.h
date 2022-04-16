@@ -14,8 +14,8 @@ public:
     {
         OFF,
         INIT,
-        NOT_CONFIGURED,
         CONFIG_MISMATCH,
+        MISMATCH_TO_RUNNING,
         RUNNING
     };
 
@@ -53,11 +53,11 @@ private:
     RadioState _state;
 
     void receivedRadioAlive(RadioToCtrlAliveMessage msgParsed);
-    void receivedRadioAck(RadioToCtrlAckMessage msgParsed);
     void receivedRadioConfig(RadioToCtrlConfigMessage msgParsed);
-    void receivedRadioCmdEcho(CtrlToRadioCommandMessage msgParsed);
+    void receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed);
 
-    void saveChunk(QByteArray chunk);
+    bool saveChunk(QByteArray chunk); //<< Returns true if chunk contains endMarker
+
     void dataIngest();
     void clearTxBuffer();
     void setupTxBuffer(char* data, quint64 size);

@@ -7,21 +7,17 @@
  * Lo sketch riceve in maniera asincrona 2 tipi di messaggi:
  * msg_id(CTRL_TO_RADIO_CFG_ID): Cambia configurazione
  * msg_id(CTRL_TO_RADIO_CMD_ID): Cambia messaggio tx radio
- * A questi messaggi rispondo sempre con un msg_id(RADIO_TO_CTRL_ACK_ID)
  * 
- * Lo sketch invia con frequenza:
- * TX_CONFIG_FREQUENCY_HZ msg_id(RADIO_TO_CTRL_CFG_ID): configurazione attuale, su seriale
- * TX_ECHO_FREQUENCY_HZ msg_id(RADIO_TO_CTRL_CMD_ID): messaggio tx radio attuale, su seriale
- * TX_RADIO_FREQUENCY_HZ msg_id(RADIO_TO_DRONE_CMD_ID): messaggio tx radio, su radio
+ * Lo sketch invia con periodo 1 micro:
+ * msg_id(RADIO_TO_CTRL_CFG_ID): configurazione attuale, su seriale
+ * msg_id(RADIO_TO_CTRL_ECHO_ID): messaggio tx radio attuale, su seriale
+ * msg_id(RADIO_TO_DRONE_CMD_ID): messaggio tx radio, su radio
  * 
  */
 
 #define MAJOR_VERSION '0'
 #define MINOR_VERSION '1'
 #define STAGE_VERSION 'b'
-#define TX_CONFIG_FREQUENCY_HZ 1
-#define TX_ECHO_FREQUENCY_HZ   10
-#define TX_RADIO_FREQUENCY_HZ  100
 
 
 RF24 radio(9,10);
@@ -32,19 +28,10 @@ uint64_t rx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF
 const byte numChars = 128;
 char serialRxBuffer[numChars];
 
-CtrlToRadioCommandMessage lastCmdMessage;
+CtrlToRadioCommandMessage   lastCmdMessage;
 DroneToRadioResponseMessage lastDroneResponse;
 
-boolean newData = false;
-boolean sendAck = false;
-
-long count_to_cfg = 0;
-long count_to_echo = 0;
-long count_to_radio = 0;
-
-const long cfgPeriod_us = 1e6 / TX_CONFIG_FREQUENCY_HZ;
-const long echoPeriod_us = 1e6 / TX_ECHO_FREQUENCY_HZ;
-const long radioPeriod_us = 1e6 / TX_RADIO_FREQUENCY_HZ;
+bool configured = false;
 
 void setup()
 {
@@ -59,9 +46,20 @@ void setup()
     lastCmdMessage.r3_y_axis = 0;
     lastCmdMessage.r3_x_axis = 0;
     lastCmdMessage.r3_y_axis = 0;
+
+    lastDroneResponse.echoed = lastCmdMessage;
+    lastDroneResponse.motor1_speed = 0;
+    lastDroneResponse.motor2_speed = 0;
+    lastDroneResponse.motor3_speed = 0;
+    lastDroneResponse.motor4_speed = 0;
+    lastDroneResponse.heading = 0;
+    lastDroneResponse.pitch = 0;
+    lastDroneResponse.roll = 0;
+    lastDroneResponse.baro_altitude = 0;
     
-    Serial.begin(9600);
+    Serial.begin(115200);
     radio.begin();
+    radio.enableAckPayload();
     
     RadioToCtrlAliveMessage alive;
     alive.msg_id  = RADIO_TO_CTRL_ALIVE_ID;
@@ -74,24 +72,27 @@ void setup()
 
 void loop()
 {
-  recvFromSerial();
-  RadioToCtrlAckMessage ack;
-  ack.msg_id = RADIO_TO_CTRL_ACK_ID;
-  RadioToCtrlConfigMessage configMsg;
-  configMsg.msg_id = RADIO_TO_CTRL_CFG_ID;
+  boolean dataFromSerial = recvFromSerial();
   
-  if (newData)
+  if (dataFromSerial)
   {
-      newData = false;
+      dataFromSerial = false;
       uint32_t* msgId = (uint32_t*)(serialRxBuffer);
-      ack.msg_acked = *msgId;
       
       if (CTRL_TO_RADIO_CFG_ID == *msgId)
       {
         CtrlToRadioConfigMessage* msgIn = (CtrlToRadioConfigMessage*)(serialRxBuffer);
-        tx_pipe = msgIn->tx_pipe;
-        rx_pipe = msgIn->rx_pipe;
-        ack.ack_status = 1;
+        if (0 == msgIn->config_ok)
+        {
+          tx_pipe = msgIn->tx_pipe;
+          rx_pipe = msgIn->rx_pipe;
+        }
+        else
+        {
+          configured = true;
+          radio.openReadingPipe(1, rx_pipe);
+          radio.openWritingPipe(tx_pipe);
+        }
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
       {
@@ -103,67 +104,44 @@ void loop()
         lastCmdMessage.l3_y_axis = msgIn->l3_y_axis;
         lastCmdMessage.r3_x_axis = msgIn->r3_x_axis;
         lastCmdMessage.r3_y_axis = msgIn->r3_y_axis;
-        
-        ack.ack_status = 1;
       }
-      else
-      {
-        ack.ack_status = 0;
-      }
-
-      /** Mando un ack **/
-      txToSerial((char*)&ack, sizeof(RadioToCtrlAckMessage));
-      sendAck = false;
   }
-  
-  /** Mando configurazione **/
+
+  /** Mando configurazione su seriale **/
+  RadioToCtrlConfigMessage configMsg;
+  configMsg.msg_id  = RADIO_TO_CTRL_CFG_ID;
   configMsg.tx_pipe = tx_pipe;
   configMsg.rx_pipe = rx_pipe;
-  count_to_cfg += 1;
-  if (cfgPeriod_us == count_to_cfg)
-  {
-    txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfigMessage));
-    count_to_cfg = 0;
-  }
+  txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfigMessage));
 
   /** Inoltro su radio il comando attuale **/
-  count_to_radio += 1;
-  if (radioPeriod_us == count_to_radio)
-  {
-    lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
-    radio.openWritingPipe(tx_pipe);
+  lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
+  if (configured)
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
-    count_to_radio = 0;
-  }
+
   
   /** Aspetto la risposta del drone **/
-  radio.startListening();
-  radio.openReadingPipe(1, rx_pipe);
-  while (radio.available())
+  if (configured)
   {
-    radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    if (radio.isAckPayloadAvailable())
+    {
+      radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    }
   }
-  radio.stopListening();
   
   /** Mando risposta del drone a controller **/
-  count_to_echo += 1;
-  if (echoPeriod_us == count_to_echo)
-  {
-    lastCmdMessage.msg_id = RADIO_TO_CTRL_CMD_ID;
-    txToSerial((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
-    count_to_echo = 0;
-  }
-  
-  delayMicroseconds(1);
+  lastDroneResponse.msg_id = RADIO_TO_CTRL_ECHO_ID;
+  txToSerial((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
 }
 
-void recvFromSerial()
+boolean recvFromSerial()
 {
     static boolean recvInProgress = false;
     static byte ndx = 0;
+    boolean dataFromSerial = false;
     char rc;
  
-    while (Serial.available() > 0 && newData == false)
+    while (Serial.available() > 0)
     {
         rc = Serial.read();
 
@@ -181,8 +159,8 @@ void recvFromSerial()
             else
             {
                 recvInProgress = false;
+                dataFromSerial = true;
                 ndx = 0;
-                newData = true;
             }
         }
 
@@ -191,29 +169,20 @@ void recvFromSerial()
             recvInProgress = true;
         }
     }
+
+    return dataFromSerial;
 }
 
 void txToSerial(char* data, int len)
 {
-  Serial.write(startMarker);
+  char txBuffer[len + 2];
+  txBuffer[0] = startMarker;
   for (int i = 0; i < len; i++)
   {
-    Serial.write(data[i]);
+    txBuffer[i + 1] = data[i];
   }
-  Serial.write(endMarker);
-}
+  txBuffer[len + 1] = endMarker;
 
-void handleCfgMsg()
-{
-
-}
-
-void handleCmdMsg()
-{
-
-}
-
-void handleUnknownMsgId(uint32_t msgId)
-{
-
+  Serial.write(txBuffer, len + 2);
+  delay(10);
 }

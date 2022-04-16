@@ -23,6 +23,7 @@ RadioDriver::RadioDriver()
     _configMsg.msg_id = CTRL_TO_RADIO_CFG_ID;
     _configMsg.rx_pipe = s->getAttribute(Settings::Attribute::RADIO_RX_PIPE).toULongLong();
     _configMsg.tx_pipe = s->getAttribute(Settings::Attribute::RADIO_TX_PIPE).toULongLong();
+    _configMsg.config_ok = 0;
 
     _commandMsg.msg_id = CTRL_TO_RADIO_CMD_ID;
     _commandMsg.l2_axis = 0x00;
@@ -105,25 +106,49 @@ void RadioDriver::receiveData()
 {
     QByteArray chunk;
     chunk = _serialPort->readAll();
+
     if (!_gotStart)
     {
+        /** Ho un chunk, ma non ho ancora letto lo startMarker **/
         _rxBuffer.clear();
-        _gotStart = START_MARKER == chunk.at(0);
+        _gotStart = (START_MARKER == chunk.at(0));
+
         if (_gotStart)
         {
+            /** Ho un chunk e lo startMarker, salvo il chunk nel buffer di ricezione **/
             chunk.remove(0, 1);
-            saveChunk(chunk);
+            _gotEnd = saveChunk(chunk);
+
+            if (_gotEnd)
+            {
+                /** In un unico chunk ho sia start che end, ottimo! **/
+                if (_gotEnd)
+                {
+                    dataIngest();
+
+                    _rxBuffer.clear();
+                    _gotStart = false;
+                    _gotEnd = false;
+                }
+            }
+        }
+        else
+        {
+            /** Ho ricevuto un messaggio senza startMarker quando me lo aspettavo:
+             *  Lo scarto **/
         }
     }
-    else
+    else if (_gotStart && !_gotEnd)
     {
-        if (!_gotEnd)
-        {
-            saveChunk(chunk);
-        }
+        /** Ho un chunk, ho già ricevuto lo startMarker ma mi manca l'end:
+         *  Accodo il chunk e controllo se contiene endMarker **/
+
+        _gotEnd = saveChunk(chunk);
 
         if (_gotEnd)
         {
+            /** Questo chunk è buono perchè completa il buffer di ricezione con un endMarker
+             *  quando ho già ricevuto lo startMarker: ottimo! **/
             dataIngest();
 
             _rxBuffer.clear();
@@ -144,12 +169,18 @@ void RadioDriver::transmitData()
     switch (_state)
     {
         case OFF:
+        break;
         case INIT:
         clearTxBuffer();
         break;
-        case NOT_CONFIGURED:
         case CONFIG_MISMATCH:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
+        break;
+        case MISMATCH_TO_RUNNING:
+        _configMsg.config_ok = 1;
+        setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
+        _state = RUNNING;
+        emit radioChangedState(RUNNING);
         break;
         case RUNNING:
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
@@ -184,24 +215,18 @@ void RadioDriver::dataIngest()
             receivedRadioAlive(msgParsed);
             break;
         }
-        case RADIO_TO_CTRL_ACK_ID:
-        {
-            RadioToCtrlAckMessage msgParsed = *reinterpret_cast<RadioToCtrlAckMessage*>(_rxBuffer.data());
-            receivedRadioAck(msgParsed);
-            break;
-        }
         case RADIO_TO_CTRL_CFG_ID:
         {
             RadioToCtrlConfigMessage msgParsed = *reinterpret_cast<RadioToCtrlConfigMessage*>(_rxBuffer.data());
             receivedRadioConfig(msgParsed);
             break;
         }
-    case RADIO_TO_CTRL_CMD_ID:
-    {
-        CtrlToRadioCommandMessage echoedBack = *reinterpret_cast<CtrlToRadioCommandMessage*>(_rxBuffer.data());
-        receivedRadioCmdEcho(echoedBack);
-        break;
-    }
+        case RADIO_TO_CTRL_ECHO_ID:
+        {
+            DroneToRadioResponseMessage echoedBack = *reinterpret_cast<DroneToRadioResponseMessage*>(_rxBuffer.data());
+            receivedRadioCmdEcho(echoedBack);
+            break;
+        }
         default:
             break;
 
@@ -218,36 +243,11 @@ void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
                                               .arg(msgParsed.stage_v).toUpper());
 
 
-        _state = NOT_CONFIGURED;
-        emit radioChangedState(NOT_CONFIGURED);
+        _state = CONFIG_MISMATCH;
+        emit radioChangedState(CONFIG_MISMATCH);
 
         _txTimer->start();
         _downlinkTimer->start();
-
-    }
-}
-
-void RadioDriver::receivedRadioAck(RadioToCtrlAckMessage msgParsed)
-{
-    switch (msgParsed.msg_acked)
-    {
-    case CTRL_TO_RADIO_CFG_ID:
-    {
-        if (_state == NOT_CONFIGURED && msgParsed.ack_status > 0)
-        {
-            _state = RUNNING;
-            emit radioChangedState(RUNNING);
-        }
-    }
-    break;
-    case CTRL_TO_RADIO_CMD_ID:
-    {
-        /** Do nothing **/
-
-    }
-    break;
-    default:
-    break;
     }
 }
 
@@ -258,40 +258,38 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
     if (!rxPipeOk || !txPipeOk)
     {
-        if (RadioState::NOT_CONFIGURED == _state)
-        {
-            _state = CONFIG_MISMATCH;
-            emit radioChangedState(CONFIG_MISMATCH);
-        }
+       _state = CONFIG_MISMATCH;
+       emit radioChangedState(CONFIG_MISMATCH);
     }
-    else
+    else if (_state != RUNNING)
     {
-        if (CONFIG_MISMATCH == _state)
-        {
-            _state = RUNNING;
-            emit radioChangedState(RUNNING);
-        }
+        /** Stato temporaneo per inviare config_ok su seriale **/
+        _state = MISMATCH_TO_RUNNING;
     }
 }
 
-void RadioDriver::receivedRadioCmdEcho(CtrlToRadioCommandMessage msgParsed)
+void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
-    //printf("echoed r2 axis(%d)\n", msgParsed.r2_axis);
+    //printf("got drone response!\n");
 }
 
-void RadioDriver::saveChunk(QByteArray chunk)
+bool RadioDriver::saveChunk(QByteArray chunk)
 {
-    for (int i = 0; i < chunk.size(); i++)
+    bool end = false;
+
+    for (int i = 0; i < chunk.size() && !end; i++)
     {
         if (chunk.at(i) == END_MARKER)
         {
-            _gotEnd = true;
+            end = true;
         }
         else if (!_gotEnd)
         {
             _rxBuffer.push_back(chunk.at(i));
         }
     }
+
+    return end;
 }
 
 void RadioDriver::clearTxBuffer()

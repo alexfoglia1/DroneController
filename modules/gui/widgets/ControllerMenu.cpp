@@ -46,10 +46,9 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
         /** MULTI STATE Menu Item to be updated **/
         case MenuItemKey::RADIO:
         item->currentValueIndex = newValue.toInt() == RadioDriver::RadioState::OFF ? 0 :
-                                  newValue.toInt() == RadioDriver::RadioState::NOT_CONFIGURED ? 1:
-                                  newValue.toInt() == RadioDriver::RadioState::RUNNING ? 2 :
-                                  newValue.toInt() == RadioDriver::RadioState::CONFIG_MISMATCH ? 3 :
-                                  newValue.toInt() == RadioDriver::RadioState::INIT ? 4 : 5;
+                                  newValue.toInt() == RadioDriver::RadioState::RUNNING ? 1 :
+                                  newValue.toInt() == RadioDriver::RadioState::CONFIG_MISMATCH ? 2 :
+                                  newValue.toInt() == RadioDriver::RadioState::INIT ? 3 : 4;
         break;
         /** CUSTOM STRING Menu Item to be updated **/
         case MenuItemKey::RADIO_FW_VERSION:

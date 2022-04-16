@@ -17,7 +17,7 @@ void DroneControllerWindow::createFrames()
     _localFrame = new ControllerFrame(this, "LOCAL",
                                       {
                                           {ControllerMenu::MenuItemKey::JOYSTICK, "JOYSTICK", 0, {false, true}},
-                                          {ControllerMenu::MenuItemKey::RADIO,    "RADIO",    0, {"OFF", "NOT CONFIGURED", "RUNNING", "CONFIG. MISMATCH", "INIT", "UNVALID"}},
+                                          {ControllerMenu::MenuItemKey::RADIO,    "RADIO",    0, {"OFF", "RUNNING", "CONFIG. MISMATCH", "INIT", "UNVALID"}},
                                           {ControllerMenu::MenuItemKey::RADIO_FW_VERSION, "R-FW-VER", 0, {"UNKNOWN"}},
                                           {ControllerMenu::MenuItemKey::RADIO_DEVICE, "R-DEVICE", 0, {s->getAttribute(Settings::Attribute::RADIO_DEVICE)}},
                                           {ControllerMenu::MenuItemKey::RADIO_BAUD, "R-BAUD", 0, {s->getAttribute(Settings::Attribute::RADIO_BAUD)}},
