@@ -20,8 +20,8 @@
 #define MINOR_VERSION '1'
 #define STAGE_VERSION 'b'
 #define TX_CONFIG_FREQUENCY_HZ 1
-#define TX_ECHO_FREQUENCY_HZ  20
-#define TX_RADIO_FREQUENCY_HZ 50
+#define TX_ECHO_FREQUENCY_HZ   10
+#define TX_RADIO_FREQUENCY_HZ  100
 
 
 RF24 radio(9,10);
@@ -127,7 +127,7 @@ void loop()
 
   /** Inoltro su radio il comando attuale **/
   count_to_radio += 1;
-  if (true)
+  if (radioPeriod_us == count_to_radio)
   {
     lastCmdMessage.msg_id = RADIO_TO_DRONE_CMD_ID;
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
