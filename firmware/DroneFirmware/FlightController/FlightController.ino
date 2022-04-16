@@ -48,14 +48,13 @@ void setup(void)
   motor4.attach(MOTOR_PIN4);
   
   radio.begin();
+  radio.openWritingPipe(tx_pipe);
+  radio.openReadingPipe(1, rx_pipe);
 }
 
 void loop(void)
 {
   /** Read from radio and apply to motors **/
-  radio.startListening();
-  radio.openReadingPipe(1, rx_pipe);
-  
   boolean radioRx = false;
   while (radio.available())
   {
@@ -76,7 +75,7 @@ void loop(void)
   if (countToRxTimeout > MAX_PKT_LOSS * radioRxPeriod_micros)
   {
     countToRxTimeout = 0;
-    clearMessages();
+    //clearMessages();
   }
   
   int DELAY = 0;
@@ -106,8 +105,7 @@ void loop(void)
   /** Todo: read from BLE Sense sensors state **/
 
   /** Build and send response **/
-  radio.stopListening();
-  radio.openWritingPipe(tx_pipe);
+
   responseMsg.echoed = commandMsg;
   responseMsg.motor1_speed = DELAY;
   responseMsg.motor2_speed = DELAY;
@@ -117,9 +115,10 @@ void loop(void)
   responseMsg.pitch = 0;
   responseMsg.roll = 0;
   responseMsg.baro_altitude = 0;
-
-  radio.write((char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
   
+  radio.stopListening();
+  radio.write((char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
+  radio.startListening();
 }
 
 void printFullName()
