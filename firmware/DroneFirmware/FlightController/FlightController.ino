@@ -26,7 +26,9 @@ Servo motor2;
 Servo motor3;
 Servo motor4;
 
-RadioToDroneCommandMessage commandMsg;
+CtrlToRadioCommandMessage commandMsg;
+DroneToRadioResponseMessage responseMsg;
+
 RF24 radio(9,10);
 
 const uint64_t rx_pipe = 0xE6E6E6E6E6E6;
@@ -38,7 +40,7 @@ void setup(void)
 {
   Serial.begin(9600);
   printFullName();
-  clearCommandMsg();
+  clearMessages();
     
   motor1.attach(MOTOR_PIN1);
   motor2.attach(MOTOR_PIN2);
@@ -46,17 +48,18 @@ void setup(void)
   motor4.attach(MOTOR_PIN4);
   
   radio.begin();
-  radio.openReadingPipe(1, rx_pipe);
-  radio.startListening();
- 
 }
 
 void loop(void)
 {
+  /** Read from radio and apply to motors **/
+  radio.startListening();
+  radio.openReadingPipe(1, rx_pipe);
+  
   boolean radioRx = false;
   while (radio.available())
   {
-    radio.read((char*)&commandMsg, sizeof(RadioToDroneCommandMessage));
+    radio.read((char*)&commandMsg, sizeof(CtrlToRadioCommandMessage));
     radioRx = true;
   }
 
@@ -73,7 +76,7 @@ void loop(void)
   if (countToRxTimeout > MAX_PKT_LOSS * radioRxPeriod_micros)
   {
     countToRxTimeout = 0;
-    clearCommandMsg();
+    clearMessages();
   }
   
   int DELAY = 0;
@@ -99,6 +102,24 @@ void loop(void)
   Serial.print("\n");
   Serial.println("Motor speed:"); Serial.print("  "); Serial.print(SPEED); Serial.print("%");
   countToRxTimeout += (4 * DELAY) * deltaTimeout;
+
+  /** Todo: read from BLE Sense sensors state **/
+
+  /** Build and send response **/
+  radio.stopListening();
+  radio.openWritingPipe(tx_pipe);
+  responseMsg.echoed = commandMsg;
+  responseMsg.motor1_speed = DELAY;
+  responseMsg.motor2_speed = DELAY;
+  responseMsg.motor3_speed = DELAY;
+  responseMsg.motor4_speed = DELAY;
+  responseMsg.heading = 0;
+  responseMsg.pitch = 0;
+  responseMsg.roll = 0;
+  responseMsg.baro_altitude = 0;
+
+  radio.write((char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
+  
 }
 
 void printFullName()
@@ -119,9 +140,8 @@ int jsAxisToSpeed(uint8_t jsAxis)
   return (MIN_SIGNAL + ARM_THRESHOLD) + ( (signalSpan - ARM_THRESHOLD) * jsAxisPercentage);
 }
 
-void clearCommandMsg()
+void clearMessages()
 {
-  Serial.println("Clearing command msg");
   commandMsg.msg_id = 0;
   commandMsg.r2_axis = 0;
   commandMsg.l2_axis = 0;
@@ -129,4 +149,15 @@ void clearCommandMsg()
   commandMsg.r3_y_axis = 0;
   commandMsg.l3_x_axis = 0;
   commandMsg.l3_y_axis = 0;
+
+  responseMsg.msg_id = DRONE_TO_RADIO_MSG_ID;
+  responseMsg.echoed = commandMsg;
+  responseMsg.motor1_speed = 0;
+  responseMsg.motor2_speed = 0;
+  responseMsg.motor3_speed = 0;
+  responseMsg.motor4_speed = 0;
+  responseMsg.heading = 0;
+  responseMsg.pitch = 0;
+  responseMsg.roll = 0;
+  responseMsg.baro_altitude = 0;
 }

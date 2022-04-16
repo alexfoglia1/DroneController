@@ -33,6 +33,7 @@ const byte numChars = 128;
 char serialRxBuffer[numChars];
 
 CtrlToRadioCommandMessage lastCmdMessage;
+DroneToRadioResponseMessage lastDroneResponse;
 
 boolean newData = false;
 boolean sendAck = false;
@@ -91,7 +92,6 @@ void loop()
         tx_pipe = msgIn->tx_pipe;
         rx_pipe = msgIn->rx_pipe;
         ack.ack_status = 1;
-        radio.openWritingPipe(tx_pipe); // Get NRF24L01 ready to transmit
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
       {
@@ -112,7 +112,8 @@ void loop()
       }
 
       /** Mando un ack **/
-      sendAck = true;
+      txToSerial((char*)&ack, sizeof(RadioToCtrlAckMessage));
+      sendAck = false;
   }
   
   /** Mando configurazione **/
@@ -129,24 +130,28 @@ void loop()
   count_to_radio += 1;
   if (radioPeriod_us == count_to_radio)
   {
-    lastCmdMessage.msg_id = RADIO_TO_DRONE_CMD_ID;
+    lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
+    radio.openWritingPipe(tx_pipe);
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
     count_to_radio = 0;
   }
   
-  /** Mando echo del comando attuale **/
+  /** Aspetto la risposta del drone **/
+  radio.startListening();
+  radio.openReadingPipe(1, rx_pipe);
+  while (radio.available())
+  {
+    radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+  }
+  radio.stopListening();
+  
+  /** Mando risposta del drone a controller **/
   count_to_echo += 1;
   if (echoPeriod_us == count_to_echo)
   {
     lastCmdMessage.msg_id = RADIO_TO_CTRL_CMD_ID;
-    txToSerial((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
+    txToSerial((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
     count_to_echo = 0;
-  }
-
-  if (sendAck)
-  {
-    txToSerial((char*)&ack, sizeof(RadioToCtrlAckMessage));
-    sendAck = false;
   }
   
   delayMicroseconds(1);
