@@ -172,11 +172,9 @@ void RadioDriver::transmitData()
             clearTxBuffer();
         case INIT:
         case CONFIG_MISMATCH:
-        printf("send config (%d)\n", _configMsg.config_ok);
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
         break;
         default:
-        printf("send command\n");
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
         break;
     }
@@ -293,7 +291,21 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
 void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
-    //printf("got drone response!\n");
+    printf("Drone response:\n");
+    printf("l2 axis(%d)\n", msgParsed.echoed.l2_axis);
+    printf("r2 axis(%d)\n", msgParsed.echoed.r2_axis);
+    printf("l3 x axis(%d)\n", msgParsed.echoed.l3_x_axis);
+    printf("l3 y axis(%d)\n", msgParsed.echoed.l3_y_axis);
+    printf("r3 x axis(%d)\n", msgParsed.echoed.r3_x_axis);
+    printf("r3 y axis(%d)\n", msgParsed.echoed.r3_y_axis);
+    printf("heading(%d)\n", msgParsed.heading);
+    printf("roll(%d)\n", msgParsed.roll);
+    printf("pitch(%d)\n", msgParsed.pitch);
+    printf("baro altitude(%d)\n", msgParsed.baro_altitude);
+    printf("motor 1 speed(%d)\n", msgParsed.motor1_speed);
+    printf("motor 2 speed(%d)\n", msgParsed.motor2_speed);
+    printf("motor 3 speed(%d)\n", msgParsed.motor3_speed);
+    printf("motor 4 speed(%d)\n", msgParsed.motor4_speed);
 }
 
 bool RadioDriver::saveChunk(QByteArray chunk)

@@ -23,8 +23,8 @@
 
 RF24 radio(9,10);
 
-uint64_t tx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF24L01 
-uint64_t rx_pipe = 0x00; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t rx_pipe = 0x6E6E6E6E6E6E; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t tx_pipe = 0xE6E6E6E6E6E6; // Needs to be the same for communicating between 2 NRF24L01 
 
 const byte numChars = 128;
 char serialRxBuffer[numChars];
@@ -59,10 +59,11 @@ void setup()
     lastDroneResponse.roll = 0;
     lastDroneResponse.baro_altitude = 0;
     
-    Serial.begin(115200);
     radio.begin();
-    radio.enableAckPayload();
+    radio.openWritingPipe(tx_pipe);
     
+    Serial.begin(115200); 
+     
     alive.msg_id  = RADIO_TO_CTRL_ALIVE_ID;
     alive.major_v = MAJOR_VERSION;
     alive.minor_v = MINOR_VERSION;
@@ -92,8 +93,8 @@ void loop()
         else
         {
           configured = true;
-          radio.openReadingPipe(1, rx_pipe);
-          radio.openWritingPipe(tx_pipe);
+          //radio.openReadingPipe(1, rx_pipe);
+
         }
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
@@ -118,18 +119,18 @@ void loop()
 
   /** Inoltro su radio il comando attuale **/
   lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
-  if (configured)
+  //if (configured)
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
 
   
   /** Aspetto la risposta del drone **/
-  if (configured)
-  {
-    if (radio.isAckPayloadAvailable())
-    {
-      radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
-    }
-  }
+  //if (configured)
+  //{
+   // if (radio.isAckPayloadAvailable())
+   // {
+   //   radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    //}
+  //}
   
   /** Mando risposta del drone a controller **/
   lastDroneResponse.msg_id = RADIO_TO_CTRL_ECHO_ID;
