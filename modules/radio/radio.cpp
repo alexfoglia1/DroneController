@@ -172,7 +172,9 @@ void RadioDriver::transmitData()
             clearTxBuffer();
         case INIT:
         case CONFIG_MISMATCH:
+        case TO_RUNNING:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
+        printf("Sending config(%d)\n", _configMsg.config_ok);
         break;
         default:
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
@@ -182,6 +184,13 @@ void RadioDriver::transmitData()
 
     _serialPort->write(_txBuffer);
     _serialPort->waitForBytesWritten(_txTimeoutMillis);
+
+    if (_state == TO_RUNNING)
+    {
+        printf("Switch to running\n");
+        _state = RUNNING;
+        emit radioChangedState(RUNNING);
+    }
 }
 
 void RadioDriver::onJsBtnPressed(int btnPressed)
@@ -284,13 +293,16 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
     else
     {
         _configMsg.config_ok = 1;
-        _state = RUNNING;
-        emit radioChangedState(RUNNING);
+        if (_state != RUNNING)
+        {
+            _state = TO_RUNNING;
+        }
     }
 }
 
 void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
+#if 0
     printf("Drone response:\n");
     printf("l2 axis(%d)\n", msgParsed.echoed.l2_axis);
     printf("r2 axis(%d)\n", msgParsed.echoed.r2_axis);
@@ -306,6 +318,7 @@ void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
     printf("motor 2 speed(%d)\n", msgParsed.motor2_speed);
     printf("motor 3 speed(%d)\n", msgParsed.motor3_speed);
     printf("motor 4 speed(%d)\n", msgParsed.motor4_speed);
+#endif
 }
 
 bool RadioDriver::saveChunk(QByteArray chunk)

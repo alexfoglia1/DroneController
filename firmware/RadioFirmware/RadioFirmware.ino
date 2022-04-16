@@ -23,8 +23,9 @@
 
 RF24 radio(9,10);
 
-uint64_t rx_pipe = 0x6E6E6E6E6E6E; // Needs to be the same for communicating between 2 NRF24L01 
-uint64_t tx_pipe = 0xE6E6E6E6E6E6; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t rx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t tx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01 
+bool configured = false;
 
 const byte numChars = 128;
 char serialRxBuffer[numChars];
@@ -33,7 +34,6 @@ CtrlToRadioCommandMessage   lastCmdMessage;
 DroneToRadioResponseMessage lastDroneResponse;
 RadioToCtrlAliveMessage     alive;
 
-bool configured = false;
 
 void setup()
 {
@@ -60,7 +60,6 @@ void setup()
     lastDroneResponse.baro_altitude = 0;
     
     radio.begin();
-    radio.openWritingPipe(tx_pipe);
     
     Serial.begin(115200); 
      
@@ -93,6 +92,7 @@ void loop()
         else
         {
           configured = true;
+          radio.openWritingPipe(tx_pipe);
           //radio.openReadingPipe(1, rx_pipe);
 
         }
@@ -119,7 +119,7 @@ void loop()
 
   /** Inoltro su radio il comando attuale **/
   lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
-  //if (configured)
+  if (configured == true)
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
 
   
