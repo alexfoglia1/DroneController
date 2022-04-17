@@ -60,7 +60,8 @@ void setup()
     lastDroneResponse.baro_altitude = 0;
     
     radio.begin();
-    
+    radio.enableAckPayload();
+    radio.setRetries(5,5);
     Serial.begin(115200); 
      
     alive.msg_id  = RADIO_TO_CTRL_ALIVE_ID;
@@ -68,7 +69,7 @@ void setup()
     alive.minor_v = MINOR_VERSION;
     alive.stage_v = STAGE_VERSION;
 }
-  
+
 void loop()
 {
   txToSerial((char*)&alive, sizeof(RadioToCtrlAliveMessage));
@@ -93,7 +94,6 @@ void loop()
         {
           configured = true;
           radio.openWritingPipe(tx_pipe);
-          radio.openReadingPipe(1, rx_pipe);
         }
       }
       else if (CTRL_TO_RADIO_CMD_ID == *msgId)
@@ -120,20 +120,14 @@ void loop()
   lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
   if (configured == true)
   {
-    radio.stopListening();
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
-    radio.startListening();
+    while ( radio.isAckPayloadAvailable() )
+    {
+      radio.read(&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    }
+ 
   }
   
-  /** Aggiorno eventualmente la risposta del drone **/
-  if (configured)
-  {
-    while (radio.available())
-    {
-      radio.read((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
-    }
-  }
- 
   /** Mando risposta del drone a controller **/
   lastDroneResponse.msg_id = RADIO_TO_CTRL_ECHO_ID;
   txToSerial((char*)&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
