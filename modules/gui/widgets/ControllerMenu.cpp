@@ -36,22 +36,27 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
 
     ControllerMenuItem* item = &_menuItems[index];
     int oldValueIndex = item->currentValueIndex;
+    QVariant oldValue = item->values[oldValueIndex];
 
     switch(key)
     {
-        /** ON/OFF Menu Item to be updated **/
+        /** Binary Menu Item to be updated **/
+        case MenuItemKey::DRONE_STATUS:
+        case MenuItemKey::DRONE_MOTOR_STATUS:
         case MenuItemKey::JOYSTICK:
         item->currentValueIndex = newValue.toBool() ? 1 : 0;
         break;
-        /** MULTI STATE Menu Item to be updated **/
+        /** Radio item key to be updated **/
         case MenuItemKey::RADIO:
         item->currentValueIndex = newValue.toInt() == RadioDriver::RadioState::OFF ? 0 :
                                   newValue.toInt() == RadioDriver::RadioState::RUNNING ? 1 :
                                   newValue.toInt() == RadioDriver::RadioState::CONFIG_MISMATCH ? 2 :
                                   newValue.toInt() == RadioDriver::RadioState::INIT ? 3 : 4;
         break;
+
         /** CUSTOM STRING Menu Item to be updated **/
         case MenuItemKey::RADIO_FW_VERSION:
+        case MenuItemKey::DRONE_FW_VERSION:
         case MenuItemKey::RADIO_BAUD:
         case MenuItemKey::RADIO_DEVICE:
         case MenuItemKey::RADIO_RX_PIPE:
@@ -64,7 +69,7 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
         break;
     }
 
-    if (oldValueIndex != item->currentValueIndex)
+    if (oldValueIndex != item->currentValueIndex || oldValue != item->values[item->currentValueIndex])
     {
         repaint();
     }
@@ -83,20 +88,11 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
 
         switch (menuItem.key)
         {
-            /** Display On/Off Menu Items **/
+            /** Normal string item to be displayed **/
+            case MenuItemKey::DRONE_MOTOR_STATUS:
+            case MenuItemKey::DRONE_STATUS:
             case MenuItemKey::JOYSTICK:
-                if (itemValue.toBool())
-                {
-                    painter.drawText(100, y, QString("ON"));
-                }
-                else
-                {
-                    painter.drawText(100, y, QString("OFF"));
-                }
-
-            break;
-
-            /** Display custom string menu item **/
+            case MenuItemKey::DRONE_FW_VERSION:
             case MenuItemKey::RADIO_FW_VERSION:
             case MenuItemKey::RADIO_DEVICE:
             case MenuItemKey::RADIO_BAUD:
@@ -105,7 +101,7 @@ void ControllerMenu::paintEvent(QPaintEvent* paintEvent)
                 painter.drawText(100, y, itemValue.toString());
             break;
 
-            /** Display Hex menu items **/
+            /** Hex string item to be displayed **/
             case MenuItemKey::RADIO_TX_PIPE:
             case MenuItemKey::RADIO_RX_PIPE:
                 painter.drawText(100, y,

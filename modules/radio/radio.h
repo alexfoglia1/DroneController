@@ -32,6 +32,7 @@ public slots:
 signals:
     void radioChangedState(int newState);
     void radioFirmwareVersion(QString version);
+    void droneResponse(DroneToRadioResponseMessage responseMsg);
 
 private:
     QSerialPort* _serialPort;
