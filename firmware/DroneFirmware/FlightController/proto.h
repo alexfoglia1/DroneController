@@ -3,7 +3,7 @@
 
 typedef struct __attribute__((packed))
 {
-    uint32_t msg_id;
+    uint8_t msg_id;
     uint8_t l2_axis;
     uint8_t r2_axis;
     int8_t l3_x_axis;
@@ -14,8 +14,12 @@ typedef struct __attribute__((packed))
 
 typedef struct __attribute__((packed))
 {
-  uint32_t msg_id;
+  uint8_t msg_id;
   CtrlToRadioCommandMessage echoed;
+  byte     fw_major_v;
+  byte     fw_minor_v;
+  byte     fw_stage_v;
+  uint8_t  motors_armed;
   uint16_t motor1_speed;
   uint16_t motor2_speed;
   uint16_t motor3_speed;
