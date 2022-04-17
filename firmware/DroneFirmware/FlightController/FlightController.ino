@@ -104,6 +104,7 @@ void loop(void)
     
     /** Build and send response **/
     responseMsg.echoed = commandMsg;
+    responseMsg.motors_armed = motorsArmed ? 0x01 : 0x00;
     responseMsg.motor1_speed = DELAY_M1;
     responseMsg.motor2_speed = DELAY_M2;
     responseMsg.motor3_speed = DELAY_M3;
@@ -163,6 +164,7 @@ void clearMessages()
 
   responseMsg.msg_id = DRONE_TO_RADIO_MSG_ID;
   responseMsg.echoed = commandMsg;
+  responseMsg.motors_armed = 0;
   responseMsg.motor1_speed = 0;
   responseMsg.motor2_speed = 0;
   responseMsg.motor3_speed = 0;
