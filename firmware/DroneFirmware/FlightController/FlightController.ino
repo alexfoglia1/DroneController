@@ -56,7 +56,7 @@ void setup(void)
 
 void loop(void)
 {
-  while (radio.available())
+  if (radio.available())
   {
     boolean radioRx = false;
     int DELAY = MIN_SIGNAL;
