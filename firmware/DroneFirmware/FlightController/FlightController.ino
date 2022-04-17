@@ -113,7 +113,7 @@ void loop(void)
     /** Todo: read from BLE Sense sensors state **/
     responseMsg.heading = (uint16_t)(360 * sin(0.01 * millis()/1000.0));
     responseMsg.roll = (uint16_t)(360 * cos(0.01 * millis()/1000.0));
-    responseMsg.pitch = (uint16_t)(responseMsg.heading/(responseMsg.roll == 0 ? 1.0 : responseMsg.roll));
+    responseMsg.pitch = (uint16_t)90 * sin(2 + 0.01 * millis()/1000.0);
     responseMsg.baro_altitude = (uint16_t)(100 * cos(0.1 * millis() /1000.0));
     
     radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
