@@ -121,7 +121,7 @@ void loop()
   if (configured == true)
   {
     radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
-    while ( radio.isAckPayloadAvailable() )
+    if ( radio.isAckPayloadAvailable() )
     {
       radio.read(&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
     }
