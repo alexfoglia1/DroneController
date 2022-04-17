@@ -107,11 +107,6 @@ void RadioDriver::receiveData()
 
     QByteArray chunk;
     chunk = _serialPort->readAll();
-    printf("data in\n");
-    for (int i = 0; i < chunk.size(); i++)
-    {
-        printf("data[i] = %c\n", chunk.at(i));
-    }
     if (!_gotStart)
     {
         /** Ho un chunk, ma non ho ancora letto lo startMarker **/
@@ -171,7 +166,6 @@ void RadioDriver::downlink()
 
 void RadioDriver::transmitData()
 {
-    printf("Transmit data\n");
     switch (_state)
     {
         case OFF:
@@ -180,7 +174,6 @@ void RadioDriver::transmitData()
         case CONFIG_MISMATCH:
         case TO_RUNNING:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
-        printf("Sending config(%d)\n", _configMsg.config_ok);
         break;
         default:
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
@@ -193,7 +186,6 @@ void RadioDriver::transmitData()
 
     if (_state == TO_RUNNING)
     {
-        printf("Switch to running\n");
         _state = RUNNING;
         emit radioChangedState(RUNNING);
     }
@@ -245,7 +237,6 @@ void RadioDriver::dataIngest()
 
 void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
 {
-    printf("got alive\n");
     emit radioFirmwareVersion(QString("%1.%2-%3").arg(msgParsed.major_v)
                                               .arg(msgParsed.minor_v)
                                               .arg(msgParsed.stage_v).toUpper());
@@ -254,7 +245,6 @@ void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
     {
         _configMsg.config_ok = 0;
         _state = CONFIG_MISMATCH;
-        printf("Radio alive while off or init: mismatch\n");
         emit radioChangedState(CONFIG_MISMATCH);
 
         _txTimer->start();
@@ -282,7 +272,6 @@ void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
 
 void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 {
-    printf("got radio config\n");
     bool rxPipeOk = msgParsed.rx_pipe == _configMsg.rx_pipe;
     bool txPipeOk = msgParsed.tx_pipe == _configMsg.tx_pipe;
 
