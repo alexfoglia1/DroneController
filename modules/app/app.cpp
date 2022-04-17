@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 
     /** Register metatypes **/
     qRegisterMetaType<CtrlToRadioCommandMessage>();
+    qRegisterMetaType<DroneToRadioResponseMessage>();
 
     /** Read settings **/
     Settings* settings = Settings::instance();

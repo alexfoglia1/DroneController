@@ -207,7 +207,7 @@ void RadioDriver::onJsMessageUpdate(CtrlToRadioCommandMessage msgOut)
 void RadioDriver::dataIngest()
 {
     _downlinkTimer->stop();
-    uint32_t msgId = *reinterpret_cast<uint32_t*>(_rxBuffer.data());
+    uint8_t msgId = *reinterpret_cast<uint8_t*>(_rxBuffer.data());
     switch (msgId)
     {
         case RADIO_TO_CTRL_ALIVE_ID:
@@ -300,14 +300,16 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
 void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
-
+    //emit droneResponse(msgParsed);
     printf("Drone response:\n");
+    printf("ArduinoFlightController %c-%c.%c\n", msgParsed.fw_major_v, msgParsed.fw_minor_v, msgParsed.fw_stage_v);
     printf("l2 axis(%d)\n", msgParsed.echoed.l2_axis);
     printf("r2 axis(%d)\n", msgParsed.echoed.r2_axis);
     printf("l3 x axis(%d)\n", msgParsed.echoed.l3_x_axis);
     printf("l3 y axis(%d)\n", msgParsed.echoed.l3_y_axis);
     printf("r3 x axis(%d)\n", msgParsed.echoed.r3_x_axis);
     printf("r3 y axis(%d)\n", msgParsed.echoed.r3_y_axis);
+    printf("motors armed(%d)\n", msgParsed.motors_armed);
     printf("heading(%d)\n", msgParsed.heading);
     printf("roll(%d)\n", msgParsed.roll);
     printf("pitch(%d)\n", msgParsed.pitch);

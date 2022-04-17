@@ -164,6 +164,9 @@ void clearMessages()
 
   responseMsg.msg_id = DRONE_TO_RADIO_MSG_ID;
   responseMsg.echoed = commandMsg;
+  responseMsg.fw_major_v = MAJOR_VERSION;
+  responseMsg.fw_minor_v = MINOR_VERSION;
+  responseMsg.fw_stage_v = STAGE_VERSION;
   responseMsg.motors_armed = 0;
   responseMsg.motor1_speed = 0;
   responseMsg.motor2_speed = 0;

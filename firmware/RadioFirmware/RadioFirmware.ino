@@ -50,6 +50,9 @@ void setup()
     lastCmdMessage.r3_y_axis = 0;
 
     lastDroneResponse.echoed = lastCmdMessage;
+    lastDroneResponse.fw_major_v = '?';
+    lastDroneResponse.fw_minor_v = '?';
+    lastDroneResponse.fw_stage_v = '?';
     lastDroneResponse.motors_armed = 0;
     lastDroneResponse.motor1_speed = 0;
     lastDroneResponse.motor2_speed = 0;
@@ -80,7 +83,7 @@ void loop()
   if (dataFromSerial)
   {
       dataFromSerial = false;
-      uint32_t* msgId = (uint32_t*)(serialRxBuffer);
+      uint8_t* msgId = (uint8_t*)(serialRxBuffer);
       
       if (CTRL_TO_RADIO_CFG_ID == *msgId)
       {

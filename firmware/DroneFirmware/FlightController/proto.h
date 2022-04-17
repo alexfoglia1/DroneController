@@ -16,6 +16,9 @@ typedef struct __attribute__((packed))
 {
   uint32_t msg_id;
   CtrlToRadioCommandMessage echoed;
+  char     fw_major_v;
+  char     fw_minor_v;
+  char     fw_stage_v;
   uint8_t  motors_armed;
   uint16_t motor1_speed;
   uint16_t motor2_speed;
