@@ -48,77 +48,77 @@ void setup(void)
   motor4.attach(MOTOR_PIN4);
   
   radio.begin();
-  radio.openWritingPipe(tx_pipe);
   radio.openReadingPipe(1, rx_pipe);
+  radio.enableAckPayload();
+  radio.startListening();
+  radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
 }
 
 void loop(void)
 {
-  /** Read from radio and apply to motors **/
-  boolean radioRx = false;
   while (radio.available())
   {
+    boolean radioRx = false;
+    int DELAY = MIN_SIGNAL;
     radio.read((char*)&commandMsg, sizeof(CtrlToRadioCommandMessage));
-    radioRx = true;
-  }
+    
+    if (RADIO_TO_DRONE_MSG_ID == commandMsg.msg_id)
+    {
+      if (radioRx)
+      {
+        countToRxTimeout = 0;
+      }
+      DELAY = jsAxisToSpeed(commandMsg.r2_axis);
+    }
+    else
+    {
+     DELAY = MIN_SIGNAL;
+    }
+    
+    /** Build and send response **/
+    responseMsg.echoed = commandMsg;
+    responseMsg.motor1_speed = DELAY;
+    responseMsg.motor2_speed = DELAY;
+    responseMsg.motor3_speed = DELAY;
+    responseMsg.motor4_speed = DELAY;
 
-  int deltaTimeout;
-  if (!radioRx)
-  {
-    deltaTimeout = 1;
-  }
-  else
-  {
-    deltaTimeout = 0;
-  }
-
-  if (countToRxTimeout > MAX_PKT_LOSS * radioRxPeriod_micros)
-  {
-    countToRxTimeout = 0;
-    //clearMessages();
-  }
+    /** Todo: read from BLE Sense sensors state **/
+    responseMsg.heading = (uint16_t)(360 * sin(0.01 * millis()/1000.0));
+    responseMsg.roll = (uint16_t)(360 * cos(0.01 * millis()/1000.0));
+    responseMsg.pitch = (uint16_t)(responseMsg.heading/(responseMsg.roll == 0 ? 1.0 : responseMsg.roll));
+    responseMsg.baro_altitude = (uint16_t)(100 * cos(0.1 * millis() /1000.0));
+    
+    radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
+    
+    motor1.writeMicroseconds(DELAY);
+    motor2.writeMicroseconds(DELAY);
+    motor3.writeMicroseconds(DELAY);
+    motor4.writeMicroseconds(DELAY);
+       
+    float SPEED = (DELAY - 1000) / 10;
+    Serial.print("\n");
+    Serial.println("Motor speed:"); Serial.print("  "); Serial.print(SPEED); Serial.print("%");
+    
+    int deltaTimeout;
+    if (!radioRx)
+    {
+      deltaTimeout = 1;
+    }
+    else
+    {
+      deltaTimeout = 0;
+    }
   
-  int DELAY = 0;
-  if (RADIO_TO_DRONE_MSG_ID == commandMsg.msg_id)
-  {
-    if (radioRx)
+    if (countToRxTimeout > MAX_PKT_LOSS * radioRxPeriod_micros)
     {
       countToRxTimeout = 0;
+      //clearMessages();
     }
-    DELAY = jsAxisToSpeed(commandMsg.r2_axis);
+    countToRxTimeout += (4 * DELAY) * deltaTimeout;
+
+    
+    radioRx = true;
   }
-  else
-  {
-   DELAY = MIN_SIGNAL;
-  }
-   
-  motor1.writeMicroseconds(DELAY);
-  motor2.writeMicroseconds(DELAY);
-  motor3.writeMicroseconds(DELAY);
-  motor4.writeMicroseconds(DELAY);
-   
-  float SPEED = (DELAY - 1000) / 10;
-  Serial.print("\n");
-  Serial.println("Motor speed:"); Serial.print("  "); Serial.print(SPEED); Serial.print("%");
-  countToRxTimeout += (4 * DELAY) * deltaTimeout;
-
-  /** Todo: read from BLE Sense sensors state **/
-
-  /** Build and send response **/
-
-  responseMsg.echoed = commandMsg;
-  responseMsg.motor1_speed = DELAY;
-  responseMsg.motor2_speed = DELAY;
-  responseMsg.motor3_speed = DELAY;
-  responseMsg.motor4_speed = DELAY;
-  responseMsg.heading = 0;
-  responseMsg.pitch = 0;
-  responseMsg.roll = 0;
-  responseMsg.baro_altitude = 0;
-  
-  radio.stopListening();
-  radio.write((char*)&responseMsg, sizeof(DroneToRadioResponseMessage));
-  radio.startListening();
 }
 
 void printFullName()
