@@ -40,6 +40,7 @@ void DroneControllerWindow::createFrames()
                         DroneControllerWindow::WINDOW_WIDTH/2, DroneControllerWindow::WINDOW_HEIGHT);
 
     _jsFrame = new JoystickFrame(_localFrame);
+    _droneFrame = new DroneFrame(_remoteFrame);
 }
 
 void DroneControllerWindow::onRadioFirmwareVersion(QString version)
@@ -73,6 +74,8 @@ void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage m
 
     /** per ora metto a true, in realtà dovrebbe dirmelo la radio se ci sta parlando **/
     _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_STATUS, true);
+
+    _droneFrame->updateMessageToDisplay(msgIn);
 }
 
 void DroneControllerWindow::closeEvent(QCloseEvent *event)

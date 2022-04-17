@@ -77,6 +77,18 @@ void setup()
 void loop()
 {
   txToSerial((char*)&alive, sizeof(RadioToCtrlAliveMessage));
+  
+  /** Inoltro su radio il comando attuale **/
+  lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
+  if (configured == true)
+  {
+    radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
+    if ( radio.isAckPayloadAvailable() )
+    {
+      radio.read(&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+    }
+ 
+  }
       
   boolean dataFromSerial = recvFromSerial();
   
@@ -119,18 +131,6 @@ void loop()
   configMsg.tx_pipe = tx_pipe;
   configMsg.rx_pipe = rx_pipe;
   txToSerial((char*)&configMsg, sizeof(RadioToCtrlConfigMessage));
-
-  /** Inoltro su radio il comando attuale **/
-  lastCmdMessage.msg_id = RADIO_TO_DRONE_MSG_ID;
-  if (configured == true)
-  {
-    radio.write((char*)&lastCmdMessage, sizeof(CtrlToRadioCommandMessage));
-    if ( radio.isAckPayloadAvailable() )
-    {
-      radio.read(&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
-    }
- 
-  }
   
   /** Mando risposta del drone a controller **/
   lastDroneResponse.msg_id = RADIO_TO_CTRL_ECHO_ID;

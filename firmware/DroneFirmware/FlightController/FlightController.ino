@@ -16,7 +16,7 @@
 #define APP_NAME "Arduino Flight Controller"
 #define MAJOR_VERSION '0'
 #define MINOR_VERSION '1'
-#define STAGE_VERSION 'b'
+#define STAGE_VERSION 'B'
 
 Servo motor1;
 Servo motor2;

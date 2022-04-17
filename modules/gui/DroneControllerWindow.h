@@ -3,6 +3,7 @@
 
 #include "modules/gui/widgets/ControllerFrame.h"
 #include "modules/gui/widgets/JoystickFrame.h"
+#include "modules/gui/widgets/DroneFrame.h"
 #include "modules/radio/proto.h"
 
 #include <QMainWindow>
@@ -28,6 +29,7 @@ private:
     ControllerFrame* _localFrame;
     ControllerFrame* _remoteFrame;
     JoystickFrame*   _jsFrame;
+    DroneFrame*      _droneFrame;
 
     void createFrames();
 
