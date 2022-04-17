@@ -50,6 +50,7 @@ void setup()
     lastCmdMessage.r3_y_axis = 0;
 
     lastDroneResponse.echoed = lastCmdMessage;
+    lastDroneResponse.motors_armed = 0;
     lastDroneResponse.motor1_speed = 0;
     lastDroneResponse.motor2_speed = 0;
     lastDroneResponse.motor3_speed = 0;
