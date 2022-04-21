@@ -1,3 +1,8 @@
+<gui
+    wwidth="1200"
+    wheight="650"
+/>
+
 <joystick
     deadcenterzone="2000"
     cross="0"
@@ -23,7 +28,7 @@
 
 <radio
     serialport="/dev/ttyUSB0"
-    baud="9600"
+    baud="115200"
     freq="10"
     txpipe="253879390758630"
     rxpipe="121420578188910"

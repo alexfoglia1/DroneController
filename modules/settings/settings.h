@@ -11,6 +11,10 @@ public:
 
     enum Attribute
     {
+        /** Gui settings **/
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+
         /** Joystick settings **/
         JOYSTICK_DEAD_CENTER_ZONE,
         JOYSTICK_BTN_CROSS,
@@ -43,6 +47,7 @@ public:
 
     enum SettingsType
     {
+        GUI,
         JOYSTICK,
         RADIO
     };

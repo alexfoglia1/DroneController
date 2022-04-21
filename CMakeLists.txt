@@ -8,6 +8,19 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+if (WIN32)
+    set(SDL2_INCLUDE_DIRS "C:/SDL2-devel-2.0.20-VC/SDL2-2.0.20/include")
+
+    # Support both 32 and 64 bit builds
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+        set(SDL2_LIBRARIES "C:/SDL2-devel-2.0.20-VC/SDL2-2.0.20/lib/x64/SDL2.lib;C:/SDL2-devel-2.0.20-VC/SDL2-2.0.20/lib/x64/SDL2main.lib")
+    else ()
+        set(SDL2_LIBRARIES "C:/SDL2-devel-2.0.20-VC/SDL2-2.0.20/lib/x86/SDL2.lib;C:/SDL2-devel-2.0.20-VC/SDL2-2.0.20/lib/x86/SDL2main.lib")
+    endif ()
+
+    string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
+endif()
+
 add_executable(
 DroneController
 ${CMAKE_SOURCE_DIR}/modules/gui/DroneControllerWindow.h
@@ -44,12 +57,18 @@ target_include_directories(DroneController PRIVATE ${CMAKE_SOURCE_DIR}/modules)
 
 find_package(Threads REQUIRED)
 find_package(Qt5 COMPONENTS Core Gui Widgets Network OpenGL SerialPort REQUIRED)
-find_package(OpenCV REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(SDL2 REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
-target_link_libraries(DroneController ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${SDL2_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Network Qt5::SerialPort stdc++fs pthread)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    find_package(SDL2 REQUIRED)
+endif()
 
-install(TARGETS DroneController DESTINATION bin)
+include_directories(${SDL2_INCLUDE_DIRS})
+if (WIN32)
+    target_link_libraries(DroneController ${SDL2_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Network Qt5::SerialPort)
+else()
+    target_link_libraries(DroneController ${SDL2_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Network Qt5::SerialPort pthread)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    install(TARGETS DroneController DESTINATION bin)
+endif()

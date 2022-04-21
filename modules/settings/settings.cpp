@@ -9,6 +9,8 @@ using namespace rapidxml;
 
 const QMap<QString, Settings::Attribute> Settings::_xmlToAttribute =
 {
+    {"wwidth", WINDOW_WIDTH},
+    {"wheight", WINDOW_HEIGHT},
     {"deadcenterzone", JOYSTICK_DEAD_CENTER_ZONE},
     {"cross", JOYSTICK_BTN_CROSS},
     {"square", JOYSTICK_BTN_SQUARE},
@@ -39,6 +41,7 @@ const QMap<QString, Settings::Attribute> Settings::_xmlToAttribute =
 
 const QMap<Settings::SettingsType, QString> Settings::_settingsTypeToXml =
 {
+    {GUI, "gui"},
     {JOYSTICK, "joystick"},
     {RADIO, "radio"}
 };
@@ -54,6 +57,8 @@ Settings::Settings()
 {
     _attributes =
     {
+        {WINDOW_WIDTH, 1200},
+        {WINDOW_HEIGHT, 650},
         {JOYSTICK_DEAD_CENTER_ZONE, 2000},
         {JOYSTICK_BTN_CROSS, 0},
         {JOYSTICK_BTN_CIRCLE, 0},
@@ -97,8 +102,8 @@ bool Settings::readSettings(const char *filename)
 
     /** QString to C String for the xml library ... **/
     QByteArray ba = xml.toLocal8Bit();
-    char xmlContent[ba.size() + 1];
-    memset(xmlContent, 0x00, ba.size() + 1);
+    char* xmlContent = new char [(int)(ba.size() + 1L)];
+    memset(xmlContent, 0x00, (int)(ba.size() + 1L));
     memcpy(xmlContent, ba.data(), ba.size());
 
     xml_document<> doc;
@@ -111,6 +116,16 @@ bool Settings::readSettings(const char *filename)
         return false;
     }
 
+    xml_node<>* nodeGui = doc.first_node(_settingsTypeToXml[GUI].toStdString().c_str());
+    for (xml_attribute<>* attr = nodeGui->first_attribute();
+        attr; attr = attr->next_attribute())
+    {
+        if (_xmlToAttribute.contains(QString(attr->name())))
+        {
+            Attribute actual = _xmlToAttribute[attr->name()];
+            _attributes[actual] = attr->value();
+        }
+    }
 
     xml_node<> *nodeJs = doc.first_node(_settingsTypeToXml[JOYSTICK].toStdString().c_str());
     for (xml_attribute<> *attr = nodeJs->first_attribute();
@@ -134,6 +149,8 @@ bool Settings::readSettings(const char *filename)
         }
     }
 
+
+    delete[] xmlContent;
     return true;
 }
 

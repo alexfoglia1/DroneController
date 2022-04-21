@@ -6,12 +6,15 @@
 
 #include <fcntl.h>
 #include <stdio.h>
+
+#ifndef WIN32
 #include <unistd.h>
+#endif
+
 #include <stdint.h>
 #include <limits>
 #include <string.h>
 #include <QThread>
-#include <signal.h>
 #include <SDL.h>
 #include <QMutex>
 

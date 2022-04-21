@@ -5,7 +5,7 @@
 
 DroneControllerWindow::DroneControllerWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setGeometry(10, 10, DroneControllerWindow::WINDOW_WIDTH, DroneControllerWindow::WINDOW_HEIGHT);
+    setGeometry(10, 10, Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt(), Settings::instance()->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
 
     createFrames();
 }
@@ -27,7 +27,8 @@ void DroneControllerWindow::createFrames()
                                       });
 
     _localFrame->place(0, 0,
-                       DroneControllerWindow::WINDOW_WIDTH/2, DroneControllerWindow::WINDOW_HEIGHT);
+        Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt() /2,
+        Settings::instance()->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
 
     _remoteFrame = new ControllerFrame(this, "REMOTE",
                                        {
@@ -36,8 +37,9 @@ void DroneControllerWindow::createFrames()
                                            {ControllerMenu::MenuItemKey::DRONE_MOTOR_STATUS, "MOTORS", 0, {"DISARMED", "ARMED"}}
                                        });
 
-    _remoteFrame->place(DroneControllerWindow::WINDOW_WIDTH/2, 0,
-                        DroneControllerWindow::WINDOW_WIDTH/2, DroneControllerWindow::WINDOW_HEIGHT);
+    _remoteFrame->place(Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt() /2, 0,
+        Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt() /2,
+        Settings::instance()->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
 
     _jsFrame = new JoystickFrame(_localFrame);
     _droneFrame = new DroneFrame(_remoteFrame);

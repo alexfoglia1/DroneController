@@ -2,6 +2,10 @@
 
 #include <QPainter>
 #include <QColor>
+
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 DroneFrame::DroneFrame(QWidget* parent) : QFrame(parent)
