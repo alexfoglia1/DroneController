@@ -7,7 +7,10 @@
 
 #define MAX_SIGNAL 2000
 #define MIN_SIGNAL 1000
-#define ARM_THRESHOLD 200
+#define ARM_THRESHOLD_1 0
+#define ARM_THRESHOLD_2 100
+#define ARM_THRESHOLD_3 350
+#define ARM_THRESHOLD_4 350
 #define MOTOR_PIN1 8
 #define MOTOR_PIN2 7
 #define MOTOR_PIN3 6
@@ -51,20 +54,41 @@ void setup(void)
   radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
 }
 
+const int MAX_TIMEOUT = 50;
+int count = 0;
+
 void loop(void)
 {
+  /** todo: leggi ultrasuoni **/
+  
   int DELAY_M1 = MIN_SIGNAL;
   int DELAY_M2 = MIN_SIGNAL;
   int DELAY_M3 = MIN_SIGNAL;
   int DELAY_M4 = MIN_SIGNAL;
-  
-  if (radio.available())
+
+  boolean radioAvailable = false;
+  if (!radio.available())
   {
+    count += 1;
+    radioAvailable = false;
+  }
+  else
+  {
+    radioAvailable = true;
+    count = 0;
     radio.read((char*)&commandMsg, sizeof(CtrlToRadioCommandMessage));
+  }
+  if (true)
+  {
+    if (count == MAX_TIMEOUT)
+    {
+      count = 0;
+      commandMsg.r3_y_axis = 1;
+      
+    }
     
     if (RADIO_TO_DRONE_MSG_ID == commandMsg.msg_id)
     {
-      
       if (0xFF == commandMsg.r2_axis && !armSwitched)
       {
         motorsArmed = !motorsArmed;
@@ -86,20 +110,33 @@ void loop(void)
       int appDelayM3 = 0;
       int appDelayM4 = 0;
 
-      int verticalSpeed = /** Near zero: keep motors armed **/
-                          abs(commandMsg.r3_y_axis) < 10 ? MIN_SIGNAL + ARM_THRESHOLD :
-                          /** Greater than zero (toward down on js):  stop for the moment!! **/
-                          commandMsg.r3_y_axis >=  10 ? MIN_SIGNAL :
+      int verticalSpeed_2 = 
+                          /** Greater than zero (toward down on js): set to min_signal + arm threshold **/
+                          commandMsg.r3_y_axis > 0 ? MIN_SIGNAL + ARM_THRESHOLD_2 :
                           /** Less than zero (toward up on js): map 128 values to [1100 - 2000] **/
-                          MIN_SIGNAL + ARM_THRESHOLD + (MAX_SIGNAL - MIN_SIGNAL - ARM_THRESHOLD) * ((-1 * commandMsg.r3_y_axis)/128.f);
+                          MIN_SIGNAL + ARM_THRESHOLD_2 + (MAX_SIGNAL - MIN_SIGNAL - ARM_THRESHOLD_2) * ((-1 * commandMsg.r3_y_axis)/128.f);
 
+      int verticalSpeed_4 = /** Greater than zero (toward down on js): set to min_signal + arm threshold **/
+                          commandMsg.r3_y_axis > 0 ? MIN_SIGNAL + ARM_THRESHOLD_4 :
+                          /** Less than zero (toward up on js): map 128 values to [1100 - 2000] **/
+                          MIN_SIGNAL + ARM_THRESHOLD_4 + (MAX_SIGNAL - MIN_SIGNAL - ARM_THRESHOLD_4) * ((-1 * commandMsg.r3_y_axis)/128.f);
                             /** Keep motors armed for the moment **/
-      int horizontalSpeed = MIN_SIGNAL + ARM_THRESHOLD;
-      
-      DELAY_M1 = (motorsArmed) ? verticalSpeed : MIN_SIGNAL;
-      DELAY_M3 = (motorsArmed) ? horizontalSpeed : MIN_SIGNAL;
-      DELAY_M2 = (motorsArmed) ? verticalSpeed : MIN_SIGNAL;
-      DELAY_M4 = (motorsArmed) ? horizontalSpeed : MIN_SIGNAL;
+      int horizontalSpeed = MIN_SIGNAL;
+
+      if (motorsArmed)
+      {
+        DELAY_M2 = verticalSpeed_2;
+        DELAY_M1 = horizontalSpeed;
+        DELAY_M4 = verticalSpeed_4;
+        DELAY_M3 = horizontalSpeed;
+      }
+      else
+      {
+        DELAY_M1 = MIN_SIGNAL;
+        DELAY_M2 = MIN_SIGNAL;
+        DELAY_M3 = MIN_SIGNAL;
+        DELAY_M4 = MIN_SIGNAL;
+      }
     }
     
     /** Build and send response **/
@@ -128,12 +165,19 @@ void loop(void)
   float SPEED_M2 = (DELAY_M2 - 1000) / 10;
   float SPEED_M3 = (DELAY_M3 - 1000) / 10;
   float SPEED_M4 = (DELAY_M4 - 1000) / 10;
-    
-  Serial.print("Motor speed:");
-  Serial.print("  "); Serial.print(SPEED_M1); Serial.print("%");
-  Serial.print("  "); Serial.print(SPEED_M2); Serial.print("%");
-  Serial.print("  "); Serial.print(SPEED_M3); Serial.print("%");
-  Serial.print("  "); Serial.print(SPEED_M4); Serial.println("%");
+
+  if (radioAvailable)
+  {
+    Serial.print("Motor speed:");
+    Serial.print("  "); Serial.print(SPEED_M1); Serial.print("%");
+    Serial.print("  "); Serial.print(SPEED_M2); Serial.print("%");
+    Serial.print("  "); Serial.print(SPEED_M3); Serial.print("%");
+    Serial.print("  "); Serial.print(SPEED_M4); Serial.println("%");
+  }
+  else
+  {
+    Serial.println("Radio unavailable");
+  }
 }
 
 void printFullName()
