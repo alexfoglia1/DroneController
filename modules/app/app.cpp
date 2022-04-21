@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 
     /** Register metatypes **/
     qRegisterMetaType<CtrlToRadioCommandMessage>();
+    qRegisterMetaType<DroneToRadioResponseMessage>();
 
     /** Read settings **/
     Settings* settings = Settings::instance();
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
     /** Connect radio to GUI **/
     QObject::connect(&radio, SIGNAL(radioFirmwareVersion(QString)), &window, SLOT(onRadioFirmwareVersion(QString)));
     QObject::connect(&radio, SIGNAL(radioChangedState(int)), &window, SLOT(onRadioChangedState(int)));
+    QObject::connect(&radio, SIGNAL(droneResponse(DroneToRadioResponseMessage)), &window, SLOT(onDroneResponseMessage(DroneToRadioResponseMessage)));
 
     /** Connect Joystick to radio**/
     QObject::connect(&js, SIGNAL(btnPressed(int)), &radio, SLOT(onJsBtnPressed(int)));

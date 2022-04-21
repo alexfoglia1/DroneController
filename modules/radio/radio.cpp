@@ -104,9 +104,9 @@ bool RadioDriver::init()
 
 void RadioDriver::receiveData()
 {
+
     QByteArray chunk;
     chunk = _serialPort->readAll();
-
     if (!_gotStart)
     {
         /** Ho un chunk, ma non ho ancora letto lo startMarker **/
@@ -169,25 +169,26 @@ void RadioDriver::transmitData()
     switch (_state)
     {
         case OFF:
-        break;
+            clearTxBuffer();
         case INIT:
-        clearTxBuffer();
-        break;
         case CONFIG_MISMATCH:
+        case TO_RUNNING:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
         break;
-        case MISMATCH_TO_RUNNING:
-        _configMsg.config_ok = 1;
-        setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
-        _state = RUNNING;
-        emit radioChangedState(RUNNING);
-        break;
-        case RUNNING:
+        default:
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
         break;
     }
 
+
     _serialPort->write(_txBuffer);
+    _serialPort->waitForBytesWritten(_txTimeoutMillis);
+
+    if (_state == TO_RUNNING)
+    {
+        _state = RUNNING;
+        emit radioChangedState(RUNNING);
+    }
 }
 
 void RadioDriver::onJsBtnPressed(int btnPressed)
@@ -206,7 +207,7 @@ void RadioDriver::onJsMessageUpdate(CtrlToRadioCommandMessage msgOut)
 void RadioDriver::dataIngest()
 {
     _downlinkTimer->stop();
-    uint32_t msgId = *reinterpret_cast<uint32_t*>(_rxBuffer.data());
+    uint8_t msgId = *reinterpret_cast<uint8_t*>(_rxBuffer.data());
     switch (msgId)
     {
         case RADIO_TO_CTRL_ALIVE_ID:
@@ -236,18 +237,36 @@ void RadioDriver::dataIngest()
 
 void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
 {
-    if (_state == INIT)
-    {
-        emit radioFirmwareVersion(QString("%1.%2-%3").arg(msgParsed.major_v)
+    emit radioFirmwareVersion(QString("%1.%2-%3").arg(msgParsed.major_v)
                                               .arg(msgParsed.minor_v)
                                               .arg(msgParsed.stage_v).toUpper());
 
-
+    if (_state == OFF || _state == INIT)
+    {
+        _configMsg.config_ok = 0;
         _state = CONFIG_MISMATCH;
         emit radioChangedState(CONFIG_MISMATCH);
 
         _txTimer->start();
         _downlinkTimer->start();
+    }
+    else if (_state == CONFIG_MISMATCH)
+    {
+        if (_txTimer)
+        {
+            _txTimer->stop();
+            _txTimer->start();
+        }
+
+        if (_downlinkTimer)
+        {
+            _downlinkTimer->stop();
+            _downlinkTimer->start();
+        }
+    }
+    else
+    {
+        /** Sono in running, ignoro l'alive **/
     }
 }
 
@@ -258,19 +277,30 @@ void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)
 
     if (!rxPipeOk || !txPipeOk)
     {
-       _state = CONFIG_MISMATCH;
-       emit radioChangedState(CONFIG_MISMATCH);
+#if 0
+        printf("config mismatch due to failed config read\n");
+        printf("expected rx(0x%lX)\n", _configMsg.rx_pipe);
+        printf("actual rx(0x%lX)\n", msgParsed.rx_pipe);
+        printf("expected tx(0x%lX)\n", _configMsg.tx_pipe);
+        printf("actual tx(0x%lX)\n\n", msgParsed.tx_pipe);
+#endif
+        _configMsg.config_ok = 0;
+        _state = CONFIG_MISMATCH;
+        emit radioChangedState(CONFIG_MISMATCH);
     }
-    else if (_state != RUNNING)
+    else
     {
-        /** Stato temporaneo per inviare config_ok su seriale **/
-        _state = MISMATCH_TO_RUNNING;
+        _configMsg.config_ok = 1;
+        if (_state != RUNNING)
+        {
+            _state = TO_RUNNING;
+        }
     }
 }
 
 void RadioDriver::receivedRadioCmdEcho(DroneToRadioResponseMessage msgParsed)
 {
-    //printf("got drone response!\n");
+    emit droneResponse(msgParsed);
 }
 
 bool RadioDriver::saveChunk(QByteArray chunk)

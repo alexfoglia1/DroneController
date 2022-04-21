@@ -18,6 +18,8 @@ ${CMAKE_SOURCE_DIR}/modules/gui/widgets/ControllerMenu.h
 ${CMAKE_SOURCE_DIR}/modules/gui/widgets/ControllerMenu.cpp
 ${CMAKE_SOURCE_DIR}/modules/gui/widgets/JoystickFrame.h
 ${CMAKE_SOURCE_DIR}/modules/gui/widgets/JoystickFrame.cpp
+${CMAKE_SOURCE_DIR}/modules/gui/widgets/DroneFrame.h
+${CMAKE_SOURCE_DIR}/modules/gui/widgets/DroneFrame.cpp
 
 ${CMAKE_SOURCE_DIR}/modules/joystick/joystick.h
 ${CMAKE_SOURCE_DIR}/modules/joystick/joystick.cpp

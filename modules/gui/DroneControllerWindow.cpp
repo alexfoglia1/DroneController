@@ -16,7 +16,7 @@ void DroneControllerWindow::createFrames()
 
     _localFrame = new ControllerFrame(this, "LOCAL",
                                       {
-                                          {ControllerMenu::MenuItemKey::JOYSTICK, "JOYSTICK", 0, {false, true}},
+                                          {ControllerMenu::MenuItemKey::JOYSTICK, "JOYSTICK", 0, {"OFF", "ON"}},
                                           {ControllerMenu::MenuItemKey::RADIO,    "RADIO",    0, {"OFF", "RUNNING", "CONFIG. MISMATCH", "INIT", "UNVALID"}},
                                           {ControllerMenu::MenuItemKey::RADIO_FW_VERSION, "R-FW-VER", 0, {"UNKNOWN"}},
                                           {ControllerMenu::MenuItemKey::RADIO_DEVICE, "R-DEVICE", 0, {s->getAttribute(Settings::Attribute::RADIO_DEVICE)}},
@@ -29,11 +29,18 @@ void DroneControllerWindow::createFrames()
     _localFrame->place(0, 0,
                        DroneControllerWindow::WINDOW_WIDTH/2, DroneControllerWindow::WINDOW_HEIGHT);
 
-    _remoteFrame = new ControllerFrame(this, "REMOTE");
+    _remoteFrame = new ControllerFrame(this, "REMOTE",
+                                       {
+                                           {ControllerMenu::MenuItemKey::DRONE_STATUS,      "DRONE", 0, {"OFF", "ON"}},
+                                           {ControllerMenu::MenuItemKey::DRONE_FW_VERSION,  "FW-VER", 0, {"UNKNOWN"}},
+                                           {ControllerMenu::MenuItemKey::DRONE_MOTOR_STATUS, "MOTORS", 0, {"DISARMED", "ARMED"}}
+                                       });
+
     _remoteFrame->place(DroneControllerWindow::WINDOW_WIDTH/2, 0,
                         DroneControllerWindow::WINDOW_WIDTH/2, DroneControllerWindow::WINDOW_HEIGHT);
 
     _jsFrame = new JoystickFrame(_localFrame);
+    _droneFrame = new DroneFrame(_remoteFrame);
 }
 
 void DroneControllerWindow::onRadioFirmwareVersion(QString version)
@@ -54,6 +61,21 @@ void DroneControllerWindow::onJoystickConnected(bool connected)
 void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
 {
     _jsFrame->updateMessageToDisplay(msgOut);
+}
+
+void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage msgIn)
+{
+    _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_FW_VERSION, QString("%1.%2-%3")
+                                                                                        .arg(msgIn.fw_major_v)
+                                                                                        .arg(msgIn.fw_minor_v)
+                                                                                        .arg(msgIn.fw_stage_v));
+
+    _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_MOTOR_STATUS, msgIn.motors_armed);
+
+    /** per ora metto a true, in realtà dovrebbe dirmelo la radio se ci sta parlando **/
+    _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_STATUS, true);
+
+    _droneFrame->updateMessageToDisplay(msgIn);
 }
 
 void DroneControllerWindow::closeEvent(QCloseEvent *event)

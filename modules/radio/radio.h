@@ -15,7 +15,7 @@ public:
         OFF,
         INIT,
         CONFIG_MISMATCH,
-        MISMATCH_TO_RUNNING,
+        TO_RUNNING,
         RUNNING
     };
 
@@ -32,6 +32,7 @@ public slots:
 signals:
     void radioChangedState(int newState);
     void radioFirmwareVersion(QString version);
+    void droneResponse(DroneToRadioResponseMessage responseMsg);
 
 private:
     QSerialPort* _serialPort;

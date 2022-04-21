@@ -26,7 +26,9 @@ public:
         RADIO_RX_PIPE,
 
         /** Remote **/
-        DRONE_CONTROLLER,
+        DRONE_STATUS,
+        DRONE_MOTOR_STATUS,
+        DRONE_FW_VERSION,
         DRONE_MOTOR_1_POWER,
         DRONE_MOTOR_2_POWER,
         DRONE_MOTOR_3_POWER,
@@ -35,7 +37,6 @@ public:
         DRONE_MOTOR_2_SPEED,
         DRONE_MOTOR_3_SPEED,
         DRONE_MOTOR_4_SPEED,
-        DRONE_VOLTAGE_IN,
         DRONE_HEADING,
         DRONE_ROLL,
         DRONE_PITCH,

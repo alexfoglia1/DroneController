@@ -3,6 +3,7 @@
 
 #include "modules/gui/widgets/ControllerFrame.h"
 #include "modules/gui/widgets/JoystickFrame.h"
+#include "modules/gui/widgets/DroneFrame.h"
 #include "modules/radio/proto.h"
 
 #include <QMainWindow>
@@ -22,11 +23,13 @@ public slots:
     void onRadioChangedState(int newState);
     void onJoystickConnected(bool connected);
     void onJoystickMsgOut(CtrlToRadioCommandMessage msgOut);
+    void onDroneResponseMessage(DroneToRadioResponseMessage msgIn);
 
 private:
     ControllerFrame* _localFrame;
     ControllerFrame* _remoteFrame;
     JoystickFrame*   _jsFrame;
+    DroneFrame*      _droneFrame;
 
     void createFrames();
 
