@@ -131,100 +131,111 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     double act_pitch_deg = _msgToDisplay.pitch;
     double act_roll_deg = _msgToDisplay.roll;
 
-    int recwidth = width()/3;
-    int recheight = height()/3;
-    const int LOS_RAY = std::min<int>(recwidth, recheight);
-    int losx0 = width() - 2 * LOS_RAY - 5;
-    int losy0 = height() - 2 * LOS_RAY - 5;
+    int recwidth = 8.5 * width() / 20.0;
+    int recheight = recwidth;
+    const int LOS_RAY = recwidth / 2;
+    int losx0 = width() - 2 * LOS_RAY - w/10;
+    int losy0 = h/10;
 
     QPoint losCenter = QPoint(losx0 + LOS_RAY, losy0 + LOS_RAY);
 
     painter.fillRect(losx0, losy0, recwidth, recheight, blue);
     painter.fillRect(losx0, losy0 + recheight/2, recwidth, recheight / 2, brown);
-   
+
     double pitch90 = -asin(sin((atan2(sin(act_pitch_deg * 3.14 / 180.0), cos(act_pitch_deg * 3.14 / 180.0)) * 180.0 / 3.14) * 3.14 / 180.0)) * 180.0 / 3.14;
     double elevPercentage = pitch90 / 90;
 
     QPoint losElev(losCenter.x(), losCenter.y() + elevPercentage * LOS_RAY);
-    QPoint losRollRight(losCenter.x() + (2 * LOS_RAY / 3) * cos((180.0 /3.14) * (act_roll_deg)), losCenter.y() + (2 * LOS_RAY / 3) * sin((180.0 / 3.14) * (act_roll_deg)));
-    QPoint losRollLeft(losCenter.x() - (2 * LOS_RAY / 3) * cos((180.0 / 3.14) * (act_roll_deg)), losCenter.y() - (2 * LOS_RAY / 3) * sin((180.0 / 3.14) * (act_roll_deg)));
+    /** 0 del roll a destra **/
+    QPoint losRollRight(losCenter.x() + LOS_RAY * cos((180.0 /3.14) * (act_roll_deg)), losCenter.y() + LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
+    QPoint losRollLeft(losCenter.x() - LOS_RAY * cos((180.0 / 3.14) * (act_roll_deg)), losCenter.y() - LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
+    QPoint headingBottom = losCenter;
 
+    /** O dell'heading in alto **/
+    QPoint headingTop(losCenter.x() + LOS_RAY * cos((180.0 / 3.14) * act_yaw_deg - M_PI / 2), losCenter.y() + LOS_RAY * sin((180.0 / 3.14) * act_yaw_deg - M_PI/2));
+    
     /** Plot actual attitude **/
     pen.setColor(green);
     painter.setPen(pen);
     painter.drawLine(losRollLeft, losRollRight);
     painter.drawLine(losElev.x() - 10, losElev.y(), losElev.x() + 10, losElev.y());
     painter.drawLine(losElev.x(), losElev.y() - 10, losElev.x(), losElev.y() + 10);
+    painter.drawLine(headingBottom, headingTop);
 
     /** Scales **/
-    /** External ellipse: for yaw **/
+    /** Ellipse: for yaw and roll **/
     pen.setColor(white);
     painter.setPen(pen);
-    painter.drawEllipse(losCenter.x(), losCenter.y(), LOS_RAY, LOS_RAY);
- 
-    double grad_scale_yaw_deg = 0.0;
-    while (grad_scale_yaw_deg < 360)
+    painter.drawEllipse(losCenter.x() - LOS_RAY, losCenter.y() - LOS_RAY, 2 * LOS_RAY, 2 * LOS_RAY);
+
+    double grad_scale_yaw_rad = 0.0;
+    while (grad_scale_yaw_rad < 2*M_PI)
     {
-        char buf[64];
-        sprintf(buf, "%.1f", grad_scale_yaw_deg);
-        double notch_start_x = losCenter.x() + LOS_RAY * cos((180.0 / 3.14) * (grad_scale_yaw_deg - 90));
-        double notch_start_y = losCenter.y() + LOS_RAY * sin((180.0 / 3.14) * (grad_scale_yaw_deg - 90));
-        double notch_end_x = losCenter.x() + (LOS_RAY - 10) * cos((180.0 / 3.14) * (grad_scale_yaw_deg - 90));
-        double notch_end_y = losCenter.y() + (LOS_RAY - 10) * sin((180.0 / 3.14) * (grad_scale_yaw_deg - 90));
-        double txt_x = losCenter.x() + (LOS_RAY - 20) * cos((180.0 / 3.14) * (grad_scale_yaw_deg - 90)) - 10;
-        double txt_y = losCenter.y() + (LOS_RAY - 20) * sin((180.0 / 3.14) * (grad_scale_yaw_deg - 90));
-        QPoint notch_start(notch_start_x, notch_start_y);
-        QPoint notch_end(notch_end_x, notch_end_y);
+        double notch_start_x = losCenter.x() + (LOS_RAY * cos(grad_scale_yaw_rad));
+        double notch_start_y = losCenter.y() + (LOS_RAY * sin(grad_scale_yaw_rad));
+        double notch_end_x = losCenter.x() + ((LOS_RAY - 10.0) * cos(grad_scale_yaw_rad));
+        double notch_end_y = losCenter.y() + ((LOS_RAY - 10.0) * sin(grad_scale_yaw_rad));
 
-        painter.drawLine(notch_start, notch_end);
-        painter.drawText(txt_x, txt_y, QString(buf));
-
-        grad_scale_yaw_deg += 45.0 / 2;
-    }
-    /** Internal ellipse: for roll **/
-    painter.drawEllipse(losCenter.x(), losCenter.y(), 2 * LOS_RAY / 3, 2 * LOS_RAY / 3);
-
-    double grad_scale_roll_deg = 0.0;
-    while (grad_scale_roll_deg < 360)
-    {
-        char buf[64];
-        if (grad_scale_roll_deg < 180)
-        {
-            sprintf(buf, "%.1f", grad_scale_roll_deg);
-        }
-        else
-        {
-            sprintf(buf, "%.1f", grad_scale_roll_deg - 180);
-        }
-        double notch_start_x = losCenter.x() + (2 * LOS_RAY / 3) * cos((180.0 / 3.14) * (grad_scale_roll_deg));
-        double notch_start_y = losCenter.y() + (2 * LOS_RAY / 3) * sin((180.0 / 3.14) * (grad_scale_roll_deg));
-        double notch_end_x = losCenter.x() + (2 * LOS_RAY / 3 - 10) * cos((180.0 / 3.14) * (grad_scale_roll_deg));
-        double notch_end_y = losCenter.y() + (2 * LOS_RAY / 3 - 10) * sin((180.0 / 3.14) * (grad_scale_roll_deg));
-        double txt_x = losCenter.x() + (2 * LOS_RAY / 3 - 20) * cos((180.0 / 3.14) * (grad_scale_roll_deg)) - 10;
-        double txt_y = losCenter.y() + (2 * LOS_RAY / 3 - 20) * sin((180.0 / 3.14) * (grad_scale_roll_deg));
-
-        QPoint notch_start(notch_start_x, notch_start_y);
-        QPoint notch_end(notch_end_x, notch_end_y);
-
-        painter.drawLine(notch_start, notch_end);
-        painter.drawText(txt_x, txt_y, QString(buf));
-        grad_scale_roll_deg += 45.0 / 2;
+        painter.drawLine(notch_start_x, notch_start_y, notch_end_x, notch_end_y);
+        grad_scale_yaw_rad += (M_PI / 8);
     }
 
-    double grad_scale_pitch_deg = -90;
-    while (grad_scale_pitch_deg < 90)
+    /** Vertical notches: for pitch **/
+    double grad_scale_pitch_rad = -M_PI/2;
+    while (grad_scale_pitch_rad < M_PI/2)
     {
-
-        double elevPercentage = grad_scale_pitch_deg / 90;
-        double notch_start_x = losCenter.x() - 5;
+        double elevPercentage = grad_scale_pitch_rad / (M_PI / 2);
+        double notch_start_x = losCenter.x() - 5.0;
         double notch_start_y = losCenter.y() + elevPercentage * LOS_RAY;
-        double notch_end_x = losCenter.x() + 5;
+        double notch_end_x = losCenter.x() + 5.0;
         double notch_end_y = losCenter.y() + elevPercentage * LOS_RAY;
 
         QPoint notch_start(notch_start_x, notch_start_y);
         QPoint notch_end(notch_end_x, notch_end_y);
 
         painter.drawLine(notch_start, notch_end);
-        grad_scale_pitch_deg += 45.0 / 2;
+        grad_scale_pitch_rad += M_PI/8;
     }
+
+    /** Draw values **/
+    int displayWidth = recwidth / 3 - 10;
+    int displayHeight = 30;
+    int headingDisplayX0 = losx0;
+    int headingDisplayY0 = losy0 + 2.5 * LOS_RAY;
+    int rollDisplayX0 = headingDisplayX0 + displayWidth + 10;
+    int rollDisplayY0 = headingDisplayY0;
+    int pitchDisplayX0 = rollDisplayX0 + displayWidth + 10;
+    int pitchDisplayY0 = rollDisplayY0;
+
+    int groundDistanceDisplayX0 = wing1Xf;
+    int groundDistanceDisplayY0 = pitchDisplayY0;
+
+    int baroAltitudeDisplayX0 = wing1Xf + 2 * displayWidth;
+    int baroAltitudeDisplayY0 = pitchDisplayY0;
+
+    painter.drawText(headingDisplayX0, headingDisplayY0 - 10, "HEADING");
+    painter.fillRect(headingDisplayX0, headingDisplayY0, displayWidth, displayHeight, white);
+
+    painter.drawText(rollDisplayX0, rollDisplayY0 - 10, "ROLL");
+    painter.fillRect(rollDisplayX0, rollDisplayY0, displayWidth, displayHeight, white);
+
+    painter.drawText(pitchDisplayX0, pitchDisplayY0 - 10, "PITCH");
+    painter.fillRect(pitchDisplayX0, pitchDisplayY0, displayWidth, displayHeight, white);
+
+    painter.drawText(groundDistanceDisplayX0, groundDistanceDisplayY0 - 10, "GND DIST.");
+    painter.fillRect(groundDistanceDisplayX0, groundDistanceDisplayY0, displayWidth, displayHeight, white);
+
+    painter.drawText(baroAltitudeDisplayX0, baroAltitudeDisplayY0 - 10, "ALTITUDE");
+    painter.fillRect(baroAltitudeDisplayX0, baroAltitudeDisplayY0, displayWidth, displayHeight, white);
+
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(headingDisplayX0 + 5, headingDisplayY0 + 20, QString::number(act_yaw_deg));
+    painter.drawText(rollDisplayX0 + 5, rollDisplayY0 + 20, QString::number(act_roll_deg));
+    painter.drawText(pitchDisplayX0 + 5, pitchDisplayY0 + 20, QString::number(act_pitch_deg));
+
+    /** Todo in flight controller **/
+    painter.drawText(groundDistanceDisplayX0 + 5, groundDistanceDisplayY0 + 20, QString::number(0.0));
+
+    painter.drawText(baroAltitudeDisplayX0 + 5, baroAltitudeDisplayY0 + 20, QString::number(_msgToDisplay.baro_altitude));
 }
