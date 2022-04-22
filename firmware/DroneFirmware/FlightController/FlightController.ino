@@ -7,10 +7,10 @@
 
 #define MAX_SIGNAL 2000
 #define MIN_SIGNAL 1000
-#define ARM_THRESHOLD_1 0
-#define ARM_THRESHOLD_2 100
-#define ARM_THRESHOLD_3 350
-#define ARM_THRESHOLD_4 350
+#define ARM_THRESHOLD_1 200
+#define ARM_THRESHOLD_2 200
+#define ARM_THRESHOLD_3 200
+#define ARM_THRESHOLD_4 200
 #define MOTOR_PIN1 8
 #define MOTOR_PIN2 7
 #define MOTOR_PIN3 6
@@ -121,14 +121,15 @@ void loop(void)
                           /** Less than zero (toward up on js): map 128 values to [1100 - 2000] **/
                           MIN_SIGNAL + ARM_THRESHOLD_4 + (MAX_SIGNAL - MIN_SIGNAL - ARM_THRESHOLD_4) * ((-1 * commandMsg.r3_y_axis)/128.f);
                             /** Keep motors armed for the moment **/
-      int horizontalSpeed = MIN_SIGNAL;
+      int verticalSpeed_1 = verticalSpeed_2;
+      int verticalSpeed_3 = verticalSpeed_4;
 
       if (motorsArmed)
       {
         DELAY_M2 = verticalSpeed_2;
-        DELAY_M1 = horizontalSpeed;
+        DELAY_M1 = verticalSpeed_1;
         DELAY_M4 = verticalSpeed_4;
-        DELAY_M3 = horizontalSpeed;
+        DELAY_M3 = verticalSpeed_3;
       }
       else
       {
