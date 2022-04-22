@@ -103,7 +103,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
 
     /** Draw drone motors **/
     pen.setColor(_msgToDisplay.motors_armed == 0 ? red : green);
-    painter.setPen(pen);
+    painter.setPen(pen);     
 
     painter.drawEllipse(wing1Xf - 2 * motorSpriteSize, wing1Yf - 2 * motorSpriteSize,  4 * motorSpriteSize, 4 * motorSpriteSize);
     painter.drawEllipse(wing2Xf - 2 * motorSpriteSize, wing2Yf - 2 * motorSpriteSize,  4 * motorSpriteSize, 4 * motorSpriteSize);
@@ -210,7 +210,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     int groundDistanceDisplayX0 = wing1Xf;
     int groundDistanceDisplayY0 = pitchDisplayY0;
 
-    int baroAltitudeDisplayX0 = wing1Xf + 2 * displayWidth;
+    int baroAltitudeDisplayX0 = wing1Xf + 10 + displayWidth;
     int baroAltitudeDisplayY0 = pitchDisplayY0;
 
     painter.drawText(headingDisplayX0, headingDisplayY0 - 10, "HEADING");
