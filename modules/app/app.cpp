@@ -11,7 +11,6 @@
 
 int main(int argc, char** argv)
 {
-
     QApplication app(argc, argv);
     app.setApplicationName(PROJECT_NAME);
     app.setApplicationVersion(QString("%1.%2-%3").arg(MAJOR_VERSION).arg(MINOR_VERSION).arg(STAGE_VERSION));

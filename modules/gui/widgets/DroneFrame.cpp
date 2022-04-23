@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QColor>
+#include <limits>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -127,9 +128,10 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     painter.drawLine(arrowXf, arrowYf, arrowXf + (arrowLen / 5) * cos(3 * M_PI/4), arrowYf + (arrowLen / 5) * sin(3 * M_PI/4));
 
     /** Draw LOS **/
-    double act_yaw_deg = _msgToDisplay.heading;
-    double act_pitch_deg = _msgToDisplay.pitch;
-    double act_roll_deg = _msgToDisplay.roll;
+    double bitResolution = 360.0 / std::numeric_limits<uint16_t>::max();
+    double act_yaw_deg = _msgToDisplay.heading * bitResolution;
+    double act_pitch_deg = _msgToDisplay.pitch * bitResolution;
+    double act_roll_deg = _msgToDisplay.roll * bitResolution;
 
     int recwidth = 8.5 * width() / 20.0;
     int recheight = recwidth;
@@ -235,7 +237,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     painter.drawText(pitchDisplayX0 + 5, pitchDisplayY0 + 20, QString::number(act_pitch_deg));
 
     /** Todo in flight controller **/
-    painter.drawText(groundDistanceDisplayX0 + 5, groundDistanceDisplayY0 + 20, QString::number(0.0));
+    painter.drawText(groundDistanceDisplayX0 + 5, groundDistanceDisplayY0 + 20, QString::number(_msgToDisplay.gnd_distance));
 
     painter.drawText(baroAltitudeDisplayX0 + 5, baroAltitudeDisplayY0 + 20, QString::number(_msgToDisplay.baro_altitude));
 }

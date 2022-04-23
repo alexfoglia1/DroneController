@@ -76,7 +76,6 @@ typedef struct __attribute__((packed))
 #endif
 {
   uint8_t msg_id;
-  CtrlToRadioCommandMessage echoed;
   char     fw_major_v;
   char     fw_minor_v;
   char     fw_stage_v;
@@ -88,7 +87,8 @@ typedef struct __attribute__((packed))
   uint16_t heading;
   uint16_t pitch;
   uint16_t roll;
-  uint16_t baro_altitude;
+  float baro_altitude;
+  float gnd_distance;
 } DroneToRadioResponseMessage;
 
 Q_DECLARE_METATYPE(CtrlToRadioCommandMessage)

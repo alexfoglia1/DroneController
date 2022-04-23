@@ -2,6 +2,7 @@
 #include "RF24.h"
 #include "SPI.h"
 #include "proto.h"
+#include "UltraSonic.h"
 
 #include <Servo.h>
 
@@ -25,11 +26,11 @@ Servo motor1;
 Servo motor2;
 Servo motor3;
 Servo motor4;
+RF24 radio(9,10);
+UltraSonic ultraSonic(2,3);
 
 CtrlToRadioCommandMessage commandMsg;
 DroneToRadioResponseMessage responseMsg;
-
-RF24 radio(9,10);
 
 const uint64_t rx_pipe = 0xE6E6E6E6E6E6;
 const uint64_t tx_pipe = 0x6E6E6E6E6E6E;
@@ -59,7 +60,7 @@ int count = 0;
 
 void loop(void)
 {
-  /** todo: leggi ultrasuoni **/
+  float gndDistance = ultraSonic.distance();
   
   int DELAY_M1 = MIN_SIGNAL;
   int DELAY_M2 = MIN_SIGNAL;
@@ -141,7 +142,6 @@ void loop(void)
     }
     
     /** Build and send response **/
-    responseMsg.echoed = commandMsg;
     responseMsg.motors_armed = motorsArmed ? 0x01 : 0x00;
     responseMsg.motor1_speed = DELAY_M1;
     responseMsg.motor2_speed = DELAY_M2;
@@ -149,10 +149,11 @@ void loop(void)
     responseMsg.motor4_speed = DELAY_M4;
 
     /** Todo: read from BLE Sense sensors state **/
-    responseMsg.heading = (uint16_t)(360 * sin(0.01 * millis()/1000.0));
-    responseMsg.roll = (uint16_t)(360 * cos(0.01 * millis()/1000.0));
-    responseMsg.pitch = (uint16_t)90 * sin(2 + 0.01 * millis()/1000.0);
-    responseMsg.baro_altitude = (uint16_t)(100 * cos(0.1 * millis() /1000.0));
+    responseMsg.heading = 0;
+    responseMsg.roll = 0;
+    responseMsg.pitch = 0;
+    responseMsg.baro_altitude = 0;
+    responseMsg.gnd_distance = gndDistance;
     
     radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
   }
@@ -208,7 +209,6 @@ void clearMessages()
   commandMsg.l3_y_axis = 0;
 
   responseMsg.msg_id = DRONE_TO_RADIO_MSG_ID;
-  responseMsg.echoed = commandMsg;
   responseMsg.fw_major_v = MAJOR_VERSION;
   responseMsg.fw_minor_v = MINOR_VERSION;
   responseMsg.fw_stage_v = STAGE_VERSION;

@@ -1,3 +1,6 @@
+#ifndef PROTO_H
+#define PROTO_H
+
 #define RADIO_TO_DRONE_MSG_ID 100
 #define DRONE_TO_RADIO_MSG_ID 101
 
@@ -14,8 +17,7 @@ typedef struct __attribute__((packed))
 
 typedef struct __attribute__((packed))
 {
-  uint8_t msg_id;
-  CtrlToRadioCommandMessage echoed;
+  uint8_t  msg_id;
   byte     fw_major_v;
   byte     fw_minor_v;
   byte     fw_stage_v;
@@ -27,5 +29,8 @@ typedef struct __attribute__((packed))
   uint16_t heading;
   uint16_t pitch;
   uint16_t roll;
-  uint16_t baro_altitude;
+  float baro_altitude;
+  float gnd_distance;
 } DroneToRadioResponseMessage;
+
+#endif //PROTO_H

@@ -104,7 +104,6 @@ bool RadioDriver::init()
 
 void RadioDriver::receiveData()
 {
-
     QByteArray chunk;
     chunk = _serialPort->readAll();
     if (!_gotStart)
@@ -122,14 +121,12 @@ void RadioDriver::receiveData()
             if (_gotEnd)
             {
                 /** In un unico chunk ho sia start che end, ottimo! **/
-                if (_gotEnd)
-                {
-                    dataIngest();
+                dataIngest();
 
-                    _rxBuffer.clear();
-                    _gotStart = false;
-                    _gotEnd = false;
-                }
+                _rxBuffer.clear();
+                _gotStart = false;
+                _gotEnd = false;
+                
             }
         }
         else

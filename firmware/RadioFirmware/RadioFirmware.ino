@@ -20,7 +20,6 @@
 #define MINOR_VERSION '1'
 #define STAGE_VERSION 'b'
 
-
 RF24 radio(9,10);
 
 uint64_t rx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01 
@@ -49,7 +48,6 @@ void setup()
     lastCmdMessage.r3_x_axis = 0;
     lastCmdMessage.r3_y_axis = 0;
 
-    lastDroneResponse.echoed = lastCmdMessage;
     lastDroneResponse.fw_major_v = '?';
     lastDroneResponse.fw_minor_v = '?';
     lastDroneResponse.fw_stage_v = '?';

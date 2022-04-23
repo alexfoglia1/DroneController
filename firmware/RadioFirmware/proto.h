@@ -50,8 +50,7 @@ typedef struct __attribute__((packed))
 
 typedef struct __attribute__((packed))
 {
-  uint8_t msg_id;
-  CtrlToRadioCommandMessage echoed;
+  uint8_t  msg_id;
   byte     fw_major_v;
   byte     fw_minor_v;
   byte     fw_stage_v;
@@ -60,10 +59,11 @@ typedef struct __attribute__((packed))
   uint16_t motor2_speed;
   uint16_t motor3_speed;
   uint16_t motor4_speed;
-  uint16_t heading;
-  uint16_t pitch;
-  uint16_t roll;
-  uint16_t baro_altitude;
+  uint16_t    heading;
+  uint16_t    pitch;
+  uint16_t    roll;
+  float    baro_altitude;
+  float    gnd_distance;
 } DroneToRadioResponseMessage;
 
 
