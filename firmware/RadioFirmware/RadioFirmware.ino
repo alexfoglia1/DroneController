@@ -63,7 +63,7 @@ void setup()
     
     radio.begin();
     radio.enableAckPayload();
-    radio.setRetries(5,5);
+    radio.setRetries(2,2);
     Serial.begin(115200); 
      
     alive.msg_id  = RADIO_TO_CTRL_ALIVE_ID;
