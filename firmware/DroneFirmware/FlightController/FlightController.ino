@@ -61,7 +61,6 @@ int count = 0;
 void loop(void)
 {
   float gndDistance = ultraSonic.distance();
-  
   int DELAY_M1 = MIN_SIGNAL;
   int DELAY_M2 = MIN_SIGNAL;
   int DELAY_M3 = MIN_SIGNAL;
@@ -167,7 +166,7 @@ void loop(void)
   float SPEED_M2 = (DELAY_M2 - 1000) / 10;
   float SPEED_M3 = (DELAY_M3 - 1000) / 10;
   float SPEED_M4 = (DELAY_M4 - 1000) / 10;
-
+#if 0
   if (radioAvailable)
   {
     Serial.print("Motor speed:");
@@ -180,6 +179,8 @@ void loop(void)
   {
     Serial.println("Radio unavailable");
   }
+  #endif
+  Serial.println(gndDistance);
 }
 
 void printFullName()

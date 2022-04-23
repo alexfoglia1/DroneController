@@ -37,7 +37,8 @@ void DroneFrame::updateMessageToDisplay(DroneToRadioResponseMessage msgToDisplay
         msgToDisplay.motor2_speed != _msgToDisplay.motor2_speed   ||
         msgToDisplay.motor3_speed != _msgToDisplay.motor3_speed   ||
         msgToDisplay.motor4_speed != _msgToDisplay.motor4_speed   ||
-        msgToDisplay.motors_armed != _msgToDisplay.motors_armed);
+        msgToDisplay.motors_armed != _msgToDisplay.motors_armed   ||
+        msgToDisplay.gnd_distance != _msgToDisplay.gnd_distance);
 
     _msgToDisplay = msgToDisplay;
 
