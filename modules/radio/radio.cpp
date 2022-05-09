@@ -261,10 +261,8 @@ void RadioDriver::receivedRadioAlive(RadioToCtrlAliveMessage msgParsed)
             _downlinkTimer->start();
         }
     }
-    else
-    {
-        /** Sono in running, ignoro l'alive **/
-    }
+
+    emit droneAlive(msgParsed.drone_alive == 1);
 }
 
 void RadioDriver::receivedRadioConfig(RadioToCtrlConfigMessage msgParsed)

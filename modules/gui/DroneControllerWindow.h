@@ -20,6 +20,7 @@ public slots:
     void onRadioChangedState(int newState);
     void onJoystickConnected(bool connected);
     void onJoystickMsgOut(CtrlToRadioCommandMessage msgOut);
+    void onDroneAlive(bool alive);
     void onDroneResponseMessage(DroneToRadioResponseMessage msgIn);
 
 private:

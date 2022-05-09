@@ -37,8 +37,8 @@ void DroneFrame::updateMessageToDisplay(DroneToRadioResponseMessage msgToDisplay
         msgToDisplay.motor2_speed != _msgToDisplay.motor2_speed   ||
         msgToDisplay.motor3_speed != _msgToDisplay.motor3_speed   ||
         msgToDisplay.motor4_speed != _msgToDisplay.motor4_speed   ||
-        msgToDisplay.motors_armed != _msgToDisplay.motors_armed   ||
-        msgToDisplay.gnd_distance != _msgToDisplay.gnd_distance);
+        msgToDisplay.motors_armed != _msgToDisplay.motors_armed   /*||*/
+        /*msgToDisplay.gnd_distance != _msgToDisplay.gnd_distance*/);
 
     _msgToDisplay = msgToDisplay;
 
@@ -105,7 +105,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
 
     /** Draw drone motors **/
     pen.setColor(_msgToDisplay.motors_armed == 0 ? red : green);
-    painter.setPen(pen);     
+    painter.setPen(pen);
 
     painter.drawEllipse(wing1Xf - 2 * motorSpriteSize, wing1Yf - 2 * motorSpriteSize,  4 * motorSpriteSize, 4 * motorSpriteSize);
     painter.drawEllipse(wing2Xf - 2 * motorSpriteSize, wing2Yf - 2 * motorSpriteSize,  4 * motorSpriteSize, 4 * motorSpriteSize);
@@ -114,6 +114,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
 
     /** Write drone motors status **/
     pen.setWidth(1);
+    pen.setColor(white);
     painter.setPen(pen);
     painter.drawText(wing1Xf - 2 * motorSpriteSize, wing1Yf + 2 * motorSpriteSize - 50, QString("M1: %1").arg(_msgToDisplay.motor1_speed));
     painter.drawText(wing2Xf - 2 * motorSpriteSize, wing2Yf + 2 * motorSpriteSize + 20, QString("M2: %1").arg(_msgToDisplay.motor2_speed));
@@ -137,11 +138,12 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     int recwidth = 8.5 * width() / 20.0;
     int recheight = recwidth;
     const int LOS_RAY = recwidth / 2;
-    int losx0 = width() - 2 * LOS_RAY - w/10;
+    int losx0 = width() - 2 * LOS_RAY - w/15;
     int losy0 = h/10;
 
     QPoint losCenter = QPoint(losx0 + LOS_RAY, losy0 + LOS_RAY);
 
+    painter.fillRect(losx0-1, losy0-1, recwidth + 2, recheight + 2, white);
     painter.fillRect(losx0, losy0, recwidth, recheight, blue);
     painter.fillRect(losx0, losy0 + recheight/2, recwidth, recheight / 2, brown);
 
@@ -238,7 +240,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     painter.drawText(pitchDisplayX0 + 5, pitchDisplayY0 + 20, QString::number(act_pitch_deg));
 
     /** Todo in flight controller **/
-    painter.drawText(groundDistanceDisplayX0 + 5, groundDistanceDisplayY0 + 20, QString::number(_msgToDisplay.gnd_distance));
+    painter.drawText(groundDistanceDisplayX0 + 5, groundDistanceDisplayY0 + 20, QString::number(0));
 
     painter.drawText(baroAltitudeDisplayX0 + 5, baroAltitudeDisplayY0 + 20, QString::number(_msgToDisplay.baro_altitude));
 }

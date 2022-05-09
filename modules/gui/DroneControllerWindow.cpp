@@ -65,6 +65,11 @@ void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
     _jsFrame->updateMessageToDisplay(msgOut);
 }
 
+void DroneControllerWindow::onDroneAlive(bool alive)
+{
+    _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_STATUS, alive);
+}
+
 void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage msgIn)
 {
     _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_FW_VERSION, QString("%1.%2-%3")
@@ -73,10 +78,6 @@ void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage m
                                                                                         .arg(msgIn.fw_stage_v));
 
     _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_MOTOR_STATUS, msgIn.motors_armed);
-
-    /** per ora metto a true, in realtà dovrebbe dirmelo la radio se ci sta parlando **/
-    _remoteFrame->updateMenuItem(ControllerMenu::MenuItemKey::DRONE_STATUS, true);
-
     _droneFrame->updateMessageToDisplay(msgIn);
 }
 

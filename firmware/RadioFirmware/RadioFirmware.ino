@@ -23,8 +23,9 @@
 RF24 radio(9,10);
 
 uint64_t rx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01 
-uint64_t tx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01 
+uint64_t tx_pipe = 0; // Needs to be the same for communicating between 2 NRF24L01
 bool configured = false;
+uint64_t count_to_timeout = 0;
 
 const byte numChars = 128;
 char serialRxBuffer[numChars];
@@ -70,10 +71,16 @@ void setup()
     alive.major_v = MAJOR_VERSION;
     alive.minor_v = MINOR_VERSION;
     alive.stage_v = STAGE_VERSION;
+
+    alive.drone_alive = 0x00;
 }
 
 void loop()
 {
+  if ( 50 == count_to_timeout )
+  {
+    alive.drone_alive = 0x00;
+  }
   txToSerial((char*)&alive, sizeof(RadioToCtrlAliveMessage));
   
   /** Inoltro su radio il comando attuale **/
@@ -84,6 +91,12 @@ void loop()
     if ( radio.isAckPayloadAvailable() )
     {
       radio.read(&lastDroneResponse, sizeof(DroneToRadioResponseMessage));
+      count_to_timeout = 0;
+      alive.drone_alive = 0x01;
+    }
+    else
+    {
+      count_to_timeout += 1;
     }
  
   }

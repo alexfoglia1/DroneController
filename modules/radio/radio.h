@@ -33,6 +33,7 @@ signals:
     void radioChangedState(int newState);
     void radioFirmwareVersion(QString version);
     void droneResponse(DroneToRadioResponseMessage responseMsg);
+    void droneAlive(bool alive);
 
 private:
     QSerialPort* _serialPort;
