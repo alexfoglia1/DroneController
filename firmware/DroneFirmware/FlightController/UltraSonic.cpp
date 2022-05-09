@@ -15,7 +15,7 @@ float UltraSonic::distance()
   digitalWrite(_trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(_trigPin, HIGH);
-  delayMicroseconds(5);
+  delayMicroseconds(10);
   digitalWrite(_trigPin, LOW);
   int duration = pulseIn(_echoPin, HIGH);
   float distance = duration * 0.034f / 2.0f;
