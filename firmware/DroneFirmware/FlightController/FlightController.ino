@@ -4,6 +4,8 @@
 #include "proto.h"
 #include "UltraSonic.h"
 
+#include <avr/wdt.h>
+
 #include <Servo.h>
 
 #define MAX_SIGNAL 2000
@@ -27,6 +29,7 @@ Servo motor2;
 Servo motor3;
 Servo motor4;
 RF24 radio(9,10);
+
 //UltraSonic ultraSonic(2,3);
 
 CtrlToRadioCommandMessage commandMsg;
@@ -56,6 +59,8 @@ void setup(void)
   radio.enableAckPayload();
   radio.startListening();
   radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
+  
+  wdt_enable(WDTO_500MS);
 }
 
 const int MAX_TIMEOUT = 50;
@@ -79,6 +84,7 @@ void loop(void)
   }
   else
   {
+    wdt_reset();
     radioAvailable = true;
     count = 0;
     radio.read((char*)&commandMsg, sizeof(CtrlToRadioCommandMessage));
