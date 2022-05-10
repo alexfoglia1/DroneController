@@ -38,7 +38,7 @@ void ControllerMenu::updateItem(MenuItemKey key, QVariant newValue)
     int oldValueIndex = item->currentValueIndex;
     QVariant oldValue = item->values[oldValueIndex];
 
-    switch(key)
+    switch (key)
     {
         /** Binary Menu Item to be updated **/
         case MenuItemKey::DRONE_STATUS:

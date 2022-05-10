@@ -37,8 +37,7 @@ void DroneFrame::updateMessageToDisplay(DroneToRadioResponseMessage msgToDisplay
         msgToDisplay.motor2_speed != _msgToDisplay.motor2_speed   ||
         msgToDisplay.motor3_speed != _msgToDisplay.motor3_speed   ||
         msgToDisplay.motor4_speed != _msgToDisplay.motor4_speed   ||
-        msgToDisplay.motors_armed != _msgToDisplay.motors_armed   /*||*/
-        /*msgToDisplay.gnd_distance != _msgToDisplay.gnd_distance*/);
+        msgToDisplay.motors_armed != _msgToDisplay.motors_armed   );
 
     _msgToDisplay = msgToDisplay;
 
@@ -149,8 +148,8 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
 
     double pitch90 = -asin(sin((atan2(sin(act_pitch_deg * 3.14 / 180.0), cos(act_pitch_deg * 3.14 / 180.0)) * 180.0 / 3.14) * 3.14 / 180.0)) * 180.0 / 3.14;
     double elevPercentage = pitch90 / 90;
-
     QPoint losElev(losCenter.x(), losCenter.y() + elevPercentage * LOS_RAY);
+
     /** 0 del roll a destra **/
     QPoint losRollRight(losCenter.x() + LOS_RAY * cos((180.0 /3.14) * (act_roll_deg)), losCenter.y() + LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
     QPoint losRollLeft(losCenter.x() - LOS_RAY * cos((180.0 / 3.14) * (act_roll_deg)), losCenter.y() - LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
