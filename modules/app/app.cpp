@@ -61,6 +61,8 @@ int main(int argc, char** argv)
     QObject::connect(&js, SIGNAL(msgOut(CtrlToRadioCommandMessage)), &radio, SLOT(onJsMessageUpdate(CtrlToRadioCommandMessage)));
 
     QObject::connect(&window, SIGNAL(guiExit()), &js, SLOT(onApplicationQuit()));
+    QObject::connect(&js, SIGNAL(jsThreadExit()), &app, SLOT(quit()));
+
     /** Launch app **/
     return app.exec();
 }

@@ -171,7 +171,6 @@ void Joystick::run()
                 }
                 else
                 {
-                    updateState(IDLE);
                     emit jsConnected(false);
                 }
             }
@@ -199,6 +198,7 @@ void Joystick::run()
             break;
         }
     }
+    emit jsThreadExit();
 }
 
 void Joystick::onApplicationQuit()

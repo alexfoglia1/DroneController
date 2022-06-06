@@ -57,6 +57,7 @@ signals:
     void jsConnected(bool connected);
     void btnPressed(int btn);
     void msgOut(CtrlToRadioCommandMessage msgOut);
+    void jsThreadExit();
 
 protected:
     void run() override;

@@ -7,13 +7,16 @@
 #include "modules/radio/proto.h"
 
 #include <QMainWindow>
+#include <QKeyEvent>
+
+#define QKEY_ESCAPE 16777216
 
 class DroneControllerWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit DroneControllerWindow(QWidget *parent = nullptr);
-    void closeEvent(QCloseEvent* event) override;
+    bool eventFilter(QObject* target, QEvent* event);
 
 public slots:
     void onRadioFirmwareVersion(QString version);
@@ -30,6 +33,7 @@ private:
     DroneFrame*      _droneFrame;
 
     void createFrames();
+    void onKeyPressed(int key);
 
 signals:
     void guiExit();

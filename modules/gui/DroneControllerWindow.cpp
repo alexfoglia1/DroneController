@@ -8,6 +8,8 @@ DroneControllerWindow::DroneControllerWindow(QWidget *parent) : QMainWindow(pare
     setGeometry(10, 10, Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt(), Settings::instance()->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
 
     createFrames();
+
+    installEventFilter(this);
 }
 
 void DroneControllerWindow::createFrames()
@@ -81,7 +83,24 @@ void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage m
     _droneFrame->updateMessageToDisplay(msgIn);
 }
 
-void DroneControllerWindow::closeEvent(QCloseEvent *event)
+
+bool DroneControllerWindow::eventFilter(QObject* target, QEvent *event)
 {
-    emit guiExit();
+    if (event->type() == QEvent::KeyPress)
+    {
+          QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+          onKeyPressed(keyEvent->key());
+
+          return true;
+    }
+
+    return QMainWindow::eventFilter(target, event);
+}
+
+void DroneControllerWindow::onKeyPressed(int key)
+{
+    if (QKEY_ESCAPE == key)
+    {
+        emit guiExit();
+    }
 }
