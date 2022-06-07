@@ -163,23 +163,29 @@ void RadioDriver::downlink()
 
 void RadioDriver::transmitData()
 {
+    bool sendFlag = false;
     switch (_state)
     {
         case OFF:
             clearTxBuffer();
+            break;
         case INIT:
         case CONFIG_MISMATCH:
         case TO_RUNNING:
         setupTxBuffer((char*)&_configMsg, sizeof(_configMsg));
+        sendFlag = true;
         break;
         default:
         setupTxBuffer((char*)&_commandMsg, sizeof(_commandMsg));
+        sendFlag = true;
         break;
     }
 
-
-    _serialPort->write(_txBuffer);
-    _serialPort->waitForBytesWritten(_txTimeoutMillis);
+    if (sendFlag)
+    {
+        _serialPort->write(_txBuffer);
+        _serialPort->waitForBytesWritten(_txTimeoutMillis);
+    }
 
     if (_state == TO_RUNNING)
     {
