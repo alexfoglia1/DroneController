@@ -74,5 +74,5 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 add_custom_command(TARGET DroneController POST_BUILD
-    COMMAND cp ${CMAKE_SOURCE_DIR}/modules/settings/DefaultSettings.xml ${CMAKE_CURRENT_BINARY_DIR}/Settings.xml
+    COMMAND cp -n ${CMAKE_SOURCE_DIR}/modules/settings/DefaultSettings.xml ${CMAKE_CURRENT_BINARY_DIR}/Settings.xml
 )

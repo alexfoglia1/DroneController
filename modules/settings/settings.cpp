@@ -134,6 +134,7 @@ bool Settings::readSettings(const char *filename)
         if (_xmlToAttribute.contains(QString(attr->name())))
         {
             Attribute actual = _xmlToAttribute[attr->name()];
+            QVariant actualValue = attr->value();
             _attributes[actual] = attr->value();
         }
     }
