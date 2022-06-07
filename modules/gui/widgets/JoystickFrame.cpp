@@ -40,22 +40,70 @@ void JoystickFrame::paintEvent(QPaintEvent* paintEvent)
     QFrame::paintEvent(paintEvent);
 
     QPainter painter(this);
+    QPen original = painter.pen();
+    QPen pen;
+    QColor white(255, 255, 255);
+    QColor blue(0, 0, 200);
 
     int w = width();
     int h = height();
-    painter.drawText(10, 20, QString("L2: %1").arg(_msgToDisplay.l2_axis));
-    painter.drawText(10, 40, QString("R2: %1").arg(_msgToDisplay.r2_axis));
-    painter.drawText(10, 60, QString("L3 X: %1").arg(_msgToDisplay.l3_x_axis));
-    painter.drawText(10, 80, QString("L3 Y: %1").arg(_msgToDisplay.l3_y_axis));
-    painter.drawText(10, 100, QString("R3 X: %1").arg(_msgToDisplay.r3_x_axis));
-    painter.drawText(10, 120, QString("R3 Y: %1").arg(_msgToDisplay.r3_y_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(10, 20, "L2");
+    painter.fillRect(10, 30, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(10 + 5, 30 + 17, QString::number(_msgToDisplay.l2_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(10, 70, "L3 X");
+    painter.fillRect(10, 80, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(10 + 5, 80 + 17, QString::number(_msgToDisplay.l3_x_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(10, 120, "L3 Y");
+    painter.fillRect(10, 130, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(10 + 5, 130 + 17, QString::number(_msgToDisplay.l3_y_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(w - 50, 20, "R2");
+    painter.fillRect(w - 50, 30, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(w - 50 + 5, 30 + 17, QString::number(_msgToDisplay.r2_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(w - 50, 70, "R3 X");
+    painter.fillRect(w - 50, 80, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(w - 50 + 5, 80 + 17, QString::number(_msgToDisplay.r3_x_axis));
+
+    pen.setColor(white);
+    painter.setPen(pen);
+    painter.drawText(w - 50, 120, "R3 Y");
+    painter.fillRect(w - 50, 130, 40, 20, white);
+    pen.setColor(blue);
+    painter.setPen(pen);
+    painter.drawText(w - 50 + 5, 130 + 17, QString::number(_msgToDisplay.r3_y_axis));
+
+    painter.setPen(original);
 
     int analogAxisRectWidth = w/3;
     int analogAxisRectHeight = h/3;
     int l3AnalogAxisX = 10;
     int r3AnalogAxisX = w - 10 - analogAxisRectWidth;
-    int l3AnalogAxisY = h/2;
-    int r3AnalogAxisY = h/2;
+    int l3AnalogAxisY = h/2 + 20;
+    int r3AnalogAxisY = h/2 + 20;
 
     paintAnalogRectangle("L3", l3AnalogAxisX, l3AnalogAxisY, analogAxisRectWidth, analogAxisRectHeight, _msgToDisplay.l3_x_axis, _msgToDisplay.l3_y_axis);
     paintAnalogRectangle("R3", r3AnalogAxisX, r3AnalogAxisY, analogAxisRectWidth, analogAxisRectHeight, _msgToDisplay.r3_x_axis, _msgToDisplay.r3_y_axis);
@@ -65,7 +113,7 @@ void JoystickFrame::paintAnalogRectangle(QString analogAxisName, int x0, int y0,
 {
     QPainter painter(this);
 
-    painter.drawText(x0, y0 - 10, analogAxisName);
+    painter.drawText(x0 + w / 2 - 7, y0 - 10, analogAxisName);
     painter.drawRect(x0, y0, w, h);
 
     int valuesSpan = std::numeric_limits<int8_t>::max() - std::numeric_limits<int8_t>::min();
