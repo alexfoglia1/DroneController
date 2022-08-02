@@ -2,6 +2,7 @@
 #define RADIO_H
 
 #include "modules/radio/proto.h"
+#include "modules/settings/settings.h"
 
 #include <QSerialPort>
 #include <QTimer>
@@ -28,6 +29,7 @@ public slots:
     void transmitData();
     void onJsBtnPressed(int btn);
     void onJsMessageUpdate(CtrlToRadioCommandMessage msgOut);
+    void applySettings(Settings* settings);
 
 signals:
     void radioChangedState(int newState);
@@ -48,6 +50,7 @@ private:
     int _baudRate;
     int _txTimeoutMillis;
     int _rxTimeoutMillis;
+    int _confirmButton;
 
     QByteArray _rxBuffer;
     QByteArray _txBuffer;

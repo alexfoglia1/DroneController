@@ -7,22 +7,6 @@ Joystick::Joystick()
     max_js_axis_value = 32767;
     act_state = IDLE;
 
-    /** Apply settings **/
-    R2_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_R2_AXIS).toInt();
-    L2_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_L2_AXIS).toInt();
-    X_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_CROSS).toInt();
-    SQUARE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_SQUARE).toInt();
-    CIRCLE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_CIRCLE).toInt();
-    TRIANGLE_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_TRIANGLE).toInt();
-    R1_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_R1).toInt();
-    L1_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_L1).toInt();
-    PS_BUTTON = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS).toInt();
-    L3_VERTICAL_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_L3_Y_AXIS).toInt();
-    L3_HORIZONTAL_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_L3_X_AXIS).toInt();
-    R3_VERTICAL_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_R3_Y_AXIS).toInt();
-    R3_HORIZONTAL_AXIS = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_R3_X_AXIS).toInt();
-    JOY_DEAD_CENTER_ZONE = Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_DEAD_CENTER_ZONE).toInt();
-
     _msgOut.msg_id = CTRL_TO_RADIO_CMD_ID;
     _msgOut.l2_axis = 0;
     _msgOut.r2_axis = 0;
@@ -30,6 +14,24 @@ Joystick::Joystick()
     _msgOut.l3_y_axis = 0;
     _msgOut.r3_x_axis = 0;
     _msgOut.r3_y_axis = 0;
+}
+
+void Joystick::applySettings(Settings* settings)
+{
+    R2_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_R2_AXIS).toInt();
+    L2_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_L2_AXIS).toInt();
+    X_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_CROSS).toInt();
+    SQUARE_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_SQUARE).toInt();
+    CIRCLE_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_CIRCLE).toInt();
+    TRIANGLE_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_TRIANGLE).toInt();
+    R1_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_R1).toInt();
+    L1_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_L1).toInt();
+    PS_BUTTON = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS).toInt();
+    L3_VERTICAL_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_L3_Y_AXIS).toInt();
+    L3_HORIZONTAL_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_L3_X_AXIS).toInt();
+    R3_VERTICAL_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_R3_Y_AXIS).toInt();
+    R3_HORIZONTAL_AXIS = settings->getAttribute(Settings::Attribute::JOYSTICK_R3_X_AXIS).toInt();
+    JOY_DEAD_CENTER_ZONE = settings->getAttribute(Settings::Attribute::JOYSTICK_DEAD_CENTER_ZONE).toInt();
 }
 
 void Joystick::updateState(js_thread_state_t newState)
@@ -111,10 +113,22 @@ void Joystick::updateMsgOut(SDL_Event event)
             {
                 _msgOut.r3_y_axis = map_js_axis_value_int8(event.jaxis.value);
             }
+
+            if (_msgOut.r3_x_axis == 127)
+            {
+                _msgOut.r2_axis = 255;
+            }
+            else
+            {
+                _msgOut.r2_axis = 0;
+            }
+
+            _msgOut.r3_y_axis = _msgOut.r3_x_axis;
             break;
         }
         case  SDL_JOYBUTTONUP:
         {
+            printf("%d\n", event.jbutton.button);
             if (CIRCLE_BUTTON == event.jbutton.button)
             {
                 _msgOut.l2_axis = 0;

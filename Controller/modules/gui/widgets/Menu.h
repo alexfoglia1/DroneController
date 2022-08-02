@@ -45,14 +45,13 @@ public:
     typedef struct
     {
         MenuItemKey key;
-        QString displayName;
-        int currentValueIndex;
-        std::vector<QVariant> values;
+        QVariant displayName;
+        QVariant value;
     } MenuItem;
 
 
     explicit Menu(QWidget* parent = nullptr, std::vector<MenuItem> menuItems = std::vector<MenuItem>());
-    int menuItemCount();
+    int  menuItemCount();
     void updateItem(MenuItemKey key, QVariant newValue);
     void paintEvent(QPaintEvent* paintEvent) override;
 

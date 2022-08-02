@@ -5,6 +5,7 @@
 #include "modules/gui/widgets/JoystickFrame.h"
 #include "modules/gui/widgets/DroneFrame.h"
 #include "modules/radio/proto.h"
+#include "modules/settings/settings.h"
 
 #include <QMainWindow>
 #include <QKeyEvent>
@@ -17,7 +18,7 @@ class DroneControllerWindow : public QMainWindow
 public:
     explicit DroneControllerWindow(QWidget *parent = nullptr);
     bool eventFilter(QObject* target, QEvent* event);
-
+    void applySettings(Settings* settings);
 public slots:
     void onRadioFirmwareVersion(QString version);
     void onRadioChangedState(int newState);

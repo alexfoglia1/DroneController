@@ -35,7 +35,6 @@ int main(int argc, char** argv)
     /** Create GUI control **/
     DroneControllerWindow window;
     window.setStyleSheet("background-color: black");
-    window.show();
 
     /** Create joystick control **/
     Joystick js;
@@ -63,6 +62,12 @@ int main(int argc, char** argv)
     QObject::connect(&window, SIGNAL(guiExit()), &js, SLOT(onApplicationQuit()));
     QObject::connect(&js, SIGNAL(jsThreadExit()), &app, SLOT(quit()));
 
+    /** Apply settings **/
+    js.applySettings(settings);
+    radio.applySettings(settings);
+    window.applySettings(settings);
+
     /** Launch app **/
+    window.show();
     return app.exec();
 }

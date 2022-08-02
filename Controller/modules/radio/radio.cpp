@@ -1,5 +1,4 @@
 #include "modules/radio/radio.h"
-#include "modules/settings/settings.h"
 
 #include <QtEndian>
 
@@ -7,22 +6,26 @@ RadioDriver::RadioDriver()
 {
     _state = OFF;
 
-    Settings* s = Settings::instance();
-
-    _serialPortName = s->getAttribute(Settings::Attribute::RADIO_DEVICE).toString();
-    _baudRate = s->getAttribute(Settings::Attribute::RADIO_BAUD).toInt();
-    _txTimeoutMillis = 1000.0 / s->getAttribute(Settings::Attribute::RADIO_TX_FREQ).toInt();
-    _rxTimeoutMillis = 1000.0;
-
     _serialPort = nullptr;
     _txTimer = nullptr;
     _downlinkTimer = nullptr;
     _gotStart = false;
     _gotEnd = false;
 
+    _confirmButton = 0;
+    _baudRate = 0;
+    _txTimeoutMillis = 0;
+    _rxTimeoutMillis = 0;
+
+#ifdef WIN32
+    _serialPortName = "COM1";
+#else
+    _serialPortName = "ttyUSB0";
+#endif
+
     _configMsg.msg_id = CTRL_TO_RADIO_CFG_ID;
-    _configMsg.rx_pipe = s->getAttribute(Settings::Attribute::RADIO_RX_PIPE).toULongLong();
-    _configMsg.tx_pipe = s->getAttribute(Settings::Attribute::RADIO_TX_PIPE).toULongLong();
+    _configMsg.rx_pipe = 0;
+    _configMsg.tx_pipe = 0;
     _configMsg.config_ok = 0;
 
     _commandMsg.msg_id = CTRL_TO_RADIO_CMD_ID;
@@ -32,6 +35,19 @@ RadioDriver::RadioDriver()
     _commandMsg.l3_y_axis = 0x00;
     _commandMsg.r3_x_axis = 0x00;
     _commandMsg.r3_y_axis = 0x00;
+}
+
+void RadioDriver::applySettings(Settings* settings)
+{
+    _serialPortName = settings->getAttribute(Settings::Attribute::RADIO_DEVICE).toString();
+    _baudRate = settings->getAttribute(Settings::Attribute::RADIO_BAUD).toInt();
+    _txTimeoutMillis = 1000.0 / settings->getAttribute(Settings::Attribute::RADIO_TX_FREQ).toInt();
+    _rxTimeoutMillis = 1000.0;
+
+    _configMsg.rx_pipe = settings->getAttribute(Settings::Attribute::RADIO_RX_PIPE).toULongLong();
+    _configMsg.tx_pipe = settings->getAttribute(Settings::Attribute::RADIO_TX_PIPE).toULongLong();
+
+    _confirmButton = settings->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS).toInt();
 }
 
 bool RadioDriver::init()
@@ -196,7 +212,7 @@ void RadioDriver::transmitData()
 
 void RadioDriver::onJsBtnPressed(int btnPressed)
 {
-    if (btnPressed == Settings::instance()->getAttribute(Settings::Attribute::JOYSTICK_BTN_PS))
+    if (btnPressed == _confirmButton)
     {
         init();
     }

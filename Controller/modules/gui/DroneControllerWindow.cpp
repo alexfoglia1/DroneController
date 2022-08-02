@@ -5,27 +5,36 @@
 
 DroneControllerWindow::DroneControllerWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setGeometry(10, 10, Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt(), Settings::instance()->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
+    setGeometry(10, 10, 800, 600);
 
     createFrames();
 
     installEventFilter(this);
 }
 
+void DroneControllerWindow::applySettings(Settings *settings)
+{
+    setGeometry(10, 10, settings->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt(), settings->getAttribute(Settings::Attribute::WINDOW_HEIGHT).toInt());
+
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO_DEVICE, settings->getAttribute(Settings::Attribute::RADIO_DEVICE));
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO_BAUD, settings->getAttribute(Settings::Attribute::RADIO_BAUD));
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO_TX_FREQ, settings->getAttribute(Settings::Attribute::RADIO_TX_FREQ));
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO_TX_PIPE, QString("0x%1").arg(QString::number(settings->getAttribute(Settings::Attribute::RADIO_TX_PIPE).toULongLong(), 16).toUpper()));
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO_RX_PIPE, QString("0x%1").arg(QString::number(settings->getAttribute(Settings::Attribute::RADIO_RX_PIPE).toULongLong(), 16).toUpper()));
+}
+
 void DroneControllerWindow::createFrames()
 {
-    Settings* s = Settings::instance();
-
     _localFrame = new Frame(this, "LOCAL",
                                       {
-                                          {Menu::MenuItemKey::JOYSTICK, "JOYSTICK", 0, {"OFF", "ON"}},
-                                          {Menu::MenuItemKey::RADIO,    "RADIO",    0, {"OFF", "RUNNING", "CONFIG. MISMATCH", "INIT", "UNVALID"}},
-                                          {Menu::MenuItemKey::RADIO_FW_VERSION, "R-FW-VER", 0, {"UNKNOWN"}},
-                                          {Menu::MenuItemKey::RADIO_DEVICE, "R-DEVICE", 0, {s->getAttribute(Settings::Attribute::RADIO_DEVICE)}},
-                                          {Menu::MenuItemKey::RADIO_BAUD, "R-BAUD", 0, {s->getAttribute(Settings::Attribute::RADIO_BAUD)}},
-                                          {Menu::MenuItemKey::RADIO_TX_FREQ, "R-FREQ", 0, {s->getAttribute(Settings::Attribute::RADIO_TX_FREQ)}},
-                                          {Menu::MenuItemKey::RADIO_TX_PIPE, "R-TX PIPE", 0, {s->getAttribute(Settings::Attribute::RADIO_TX_PIPE)}},
-                                          {Menu::MenuItemKey::RADIO_RX_PIPE, "R-RX PIPE", 0, {s->getAttribute(Settings::Attribute::RADIO_RX_PIPE)}},
+                                          {Menu::MenuItemKey::JOYSTICK, "JOYSTICK", "OFF"},
+                                          {Menu::MenuItemKey::RADIO,    "RADIO",    "OFF"},
+                                          {Menu::MenuItemKey::RADIO_FW_VERSION, "R-FW-VER", "UNKNOWN"},
+                                          {Menu::MenuItemKey::RADIO_DEVICE, "R-DEVICE", "UNKNOWN"},
+                                          {Menu::MenuItemKey::RADIO_BAUD, "R-BAUD", "UNKNOWN"},
+                                          {Menu::MenuItemKey::RADIO_TX_FREQ, "R-FREQ", "UNKNOWN"},
+                                          {Menu::MenuItemKey::RADIO_TX_PIPE, "R-TX PIPE", "UNKNOWN"},
+                                          {Menu::MenuItemKey::RADIO_RX_PIPE, "R-RX PIPE", "UNKNOWN"},
                                       });
 
     _localFrame->place(0, 0,
@@ -34,9 +43,9 @@ void DroneControllerWindow::createFrames()
 
     _remoteFrame = new Frame(this, "REMOTE",
                                        {
-                                           {Menu::MenuItemKey::DRONE_STATUS,      "DRONE", 0, {"OFF", "ON"}},
-                                           {Menu::MenuItemKey::DRONE_FW_VERSION,  "FW-VER", 0, {"UNKNOWN"}},
-                                           {Menu::MenuItemKey::DRONE_MOTOR_STATUS, "MOTORS", 0, {"DISARMED", "ARMED"}}
+                                           {Menu::MenuItemKey::DRONE_STATUS,      "DRONE", "OFF"},
+                                           {Menu::MenuItemKey::DRONE_FW_VERSION,  "FW-VER", "UNKNOWN"},
+                                           {Menu::MenuItemKey::DRONE_MOTOR_STATUS, "MOTORS", "UNKNOWN"}
                                        });
 
     _remoteFrame->place(Settings::instance()->getAttribute(Settings::Attribute::WINDOW_WIDTH).toInt() /2, 0,
@@ -59,7 +68,7 @@ void DroneControllerWindow::onRadioChangedState(int newState)
 
 void DroneControllerWindow::onJoystickConnected(bool connected)
 {
-    _localFrame->updateMenuItem(Menu::MenuItemKey::JOYSTICK, connected);
+    _localFrame->updateMenuItem(Menu::MenuItemKey::JOYSTICK, connected ? "ON" : "OFF");
 }
 
 void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
@@ -69,7 +78,12 @@ void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
 
 void DroneControllerWindow::onDroneAlive(bool alive)
 {
-    _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_STATUS, alive);
+    _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_STATUS, alive ? "ON" : "OFF");
+
+    if (!alive)
+    {
+        _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_MOTOR_STATUS, "UNKNOWN");
+    }
 }
 
 void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage msgIn)
@@ -79,7 +93,7 @@ void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage m
                                                                                         .arg(msgIn.fw_minor_v)
                                                                                         .arg(msgIn.fw_stage_v));
 
-    _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_MOTOR_STATUS, msgIn.motors_armed);
+    _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_MOTOR_STATUS, msgIn.motors_armed ? "ARMED" : "DISARMED");
     _droneFrame->updateMessageToDisplay(msgIn);
 }
 

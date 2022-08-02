@@ -47,6 +47,7 @@ public:
     };
 
     Joystick();
+    void applySettings(Settings* settings);
     void updateState(js_thread_state_t newState);
     js_thread_state_t acquireState();
 

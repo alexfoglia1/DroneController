@@ -35,41 +35,9 @@ void Menu::updateItem(MenuItemKey key, QVariant newValue)
     }
 
     MenuItem* item = &_menuItems[index];
-    int oldValueIndex = item->currentValueIndex;
-    QVariant oldValue = item->values[oldValueIndex];
-
-    switch (key)
-    {
-        /** Binary Menu Item to be updated **/
-        case MenuItemKey::DRONE_STATUS:
-        case MenuItemKey::DRONE_MOTOR_STATUS:
-        case MenuItemKey::JOYSTICK:
-        item->currentValueIndex = newValue.toBool() ? 1 : 0;
-        break;
-        /** Radio item key to be updated **/
-        case MenuItemKey::RADIO:
-        item->currentValueIndex = newValue.toInt() == RadioDriver::RadioState::OFF ? 0 :
-                                  newValue.toInt() == RadioDriver::RadioState::RUNNING ? 1 :
-                                  newValue.toInt() == RadioDriver::RadioState::CONFIG_MISMATCH ? 2 :
-                                  newValue.toInt() == RadioDriver::RadioState::INIT ? 3 : 4;
-        break;
-
-        /** CUSTOM STRING Menu Item to be updated **/
-        case MenuItemKey::RADIO_FW_VERSION:
-        case MenuItemKey::DRONE_FW_VERSION:
-        case MenuItemKey::RADIO_BAUD:
-        case MenuItemKey::RADIO_DEVICE:
-        case MenuItemKey::RADIO_RX_PIPE:
-        case MenuItemKey::RADIO_TX_PIPE:
-        case MenuItemKey::RADIO_TX_FREQ:
-        item->values.clear();
-        item->values.push_back(newValue);
-        break;
-    default:
-        break;
-    }
-
-    if (oldValueIndex != item->currentValueIndex || oldValue != item->values[item->currentValueIndex])
+    QVariant oldValue = item->value;
+    item->value = newValue;
+    if (newValue != oldValue)
     {
         repaint();
     }
@@ -83,33 +51,9 @@ void Menu::paintEvent(QPaintEvent* paintEvent)
     int y = 25;
     for(auto& menuItem : _menuItems)
     {
-        painter.drawText(10, y, menuItem.displayName);
-        QVariant itemValue = menuItem.values[menuItem.currentValueIndex];
-
-        switch (menuItem.key)
-        {
-            /** Normal string item to be displayed **/
-            case MenuItemKey::DRONE_MOTOR_STATUS:
-            case MenuItemKey::DRONE_STATUS:
-            case MenuItemKey::JOYSTICK:
-            case MenuItemKey::DRONE_FW_VERSION:
-            case MenuItemKey::RADIO_FW_VERSION:
-            case MenuItemKey::RADIO_DEVICE:
-            case MenuItemKey::RADIO_BAUD:
-            case MenuItemKey::RADIO_TX_FREQ:
-            case MenuItemKey::RADIO:
-                painter.drawText(100, y, itemValue.toString());
-            break;
-
-            /** Hex string item to be displayed **/
-            case MenuItemKey::RADIO_TX_PIPE:
-            case MenuItemKey::RADIO_RX_PIPE:
-                painter.drawText(100, y,
-                                 QString("0x%1").arg(QString::number(itemValue.toULongLong(), 16).toUpper()));
-                break;
-            default:
-                break;
-        }
+        painter.drawText(10, y, menuItem.displayName.toString());
+        QVariant itemValue = menuItem.value;
+        painter.drawText(100, y, itemValue.toString());
 
         y += 25;
     }
