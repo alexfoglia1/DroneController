@@ -1,5 +1,9 @@
 #include "modules/joystick/joystick.h"
 
+#include <QDateTime>
+
+std::vector<double> l3_dts, r3_dts;
+
 Joystick::Joystick()
 {
     js = nullptr;
@@ -100,6 +104,7 @@ void Joystick::updateMsgOut(SDL_Event event)
             else if (L3_HORIZONTAL_AXIS == event.jaxis.axis)
             {
                 _msgOut.l3_x_axis = map_js_axis_value_int8(event.jaxis.value);
+
             }
             else if (L3_VERTICAL_AXIS == event.jaxis.axis)
             {
@@ -114,16 +119,6 @@ void Joystick::updateMsgOut(SDL_Event event)
                 _msgOut.r3_y_axis = map_js_axis_value_int8(event.jaxis.value);
             }
 
-            if (_msgOut.r3_x_axis == 127)
-            {
-                _msgOut.r2_axis = 255;
-            }
-            else
-            {
-                _msgOut.r2_axis = 0;
-            }
-
-            _msgOut.r3_y_axis = _msgOut.r3_x_axis;
             break;
         }
         case  SDL_JOYBUTTONUP:
@@ -163,6 +158,7 @@ void Joystick::updateMsgOut(SDL_Event event)
             break;
 
     }
+
 }
 
 void Joystick::run()
