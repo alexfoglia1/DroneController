@@ -123,7 +123,6 @@ void Joystick::updateMsgOut(SDL_Event event)
         }
         case  SDL_JOYBUTTONUP:
         {
-            printf("%d\n", event.jbutton.button);
             if (CIRCLE_BUTTON == event.jbutton.button)
             {
                 _msgOut.l2_axis = 0;

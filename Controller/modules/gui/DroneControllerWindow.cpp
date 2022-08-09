@@ -1,5 +1,6 @@
 #include "modules/gui/DroneControllerWindow.h"
 #include "modules/settings/settings.h"
+#include "modules/radio/radio.h"
 
 #include <QLabel>
 
@@ -63,7 +64,17 @@ void DroneControllerWindow::onRadioFirmwareVersion(QString version)
 
 void DroneControllerWindow::onRadioChangedState(int newState)
 {
-    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO, newState);
+    QString state("OFF");
+    switch (RadioDriver::RadioState(newState))
+    {
+        case RadioDriver::RadioState::OFF: state = QString("OFF"); break;
+        case RadioDriver::RadioState::INIT: state = QString("INIT"); break;
+        case RadioDriver::RadioState::CONFIG_MISMATCH: state = QString("CONFIG MISMATCH"); break;
+        case RadioDriver::RadioState::RUNNING: state = QString("RUNNING"); break;
+        default: state = QString("OFF"); break;
+    }
+
+    _localFrame->updateMenuItem(Menu::MenuItemKey::RADIO, state);
 }
 
 void DroneControllerWindow::onJoystickConnected(bool connected)
@@ -79,11 +90,6 @@ void DroneControllerWindow::onJoystickMsgOut(CtrlToRadioCommandMessage msgOut)
 void DroneControllerWindow::onDroneAlive(bool alive)
 {
     _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_STATUS, alive ? "ON" : "OFF");
-
-    if (!alive)
-    {
-        _remoteFrame->updateMenuItem(Menu::MenuItemKey::DRONE_MOTOR_STATUS, "UNKNOWN");
-    }
 }
 
 void DroneControllerWindow::onDroneResponseMessage(DroneToRadioResponseMessage msgIn)
