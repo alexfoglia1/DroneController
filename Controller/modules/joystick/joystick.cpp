@@ -88,6 +88,7 @@ void Joystick::updateMsgOut(SDL_Event event)
     {
         case SDL_JOYAXISMOTION:
         {
+            printf("Event.jaxis.axis(%d)\n", event.jaxis.axis);
             if (abs(event.jaxis.value) < JOY_DEAD_CENTER_ZONE)
             {
                 return;
@@ -123,6 +124,7 @@ void Joystick::updateMsgOut(SDL_Event event)
         }
         case  SDL_JOYBUTTONUP:
         {
+            printf("Event.jbutton.button(%d)\n", event.jbutton.button);
             if (CIRCLE_BUTTON == event.jbutton.button)
             {
                 _msgOut.l2_axis = 0;

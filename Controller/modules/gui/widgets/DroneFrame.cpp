@@ -147,12 +147,13 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     painter.fillRect(losx0, losy0 + recheight/2, recwidth, recheight / 2, brown);
 
     double pitch90 = -asin(sin((atan2(sin(act_pitch_deg * 3.14 / 180.0), cos(act_pitch_deg * 3.14 / 180.0)) * 180.0 / 3.14) * 3.14 / 180.0)) * 180.0 / 3.14;
-    double elevPercentage = pitch90 / 90;
+    double elevPercentage = -pitch90 / 90;
     QPoint losElev(losCenter.x(), losCenter.y() + elevPercentage * LOS_RAY);
 
     /** 0 del roll a destra **/
-    QPoint losRollRight(losCenter.x() + LOS_RAY * cos((180.0 /3.14) * (act_roll_deg)), losCenter.y() + LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
-    QPoint losRollLeft(losCenter.x() - LOS_RAY * cos((180.0 / 3.14) * (act_roll_deg)), losCenter.y() - LOS_RAY * sin((180.0 / 3.14) * (act_roll_deg)));
+    double act_roll_radians = -_msgToDisplay.baro_altitude; // Temporaneamente messo qui il rollio in float
+    QPoint losRollRight(losCenter.x() + LOS_RAY * cos(act_roll_radians), losCenter.y() + LOS_RAY * sin(act_roll_radians));
+    QPoint losRollLeft(losCenter.x() - LOS_RAY * cos(act_roll_radians), losCenter.y() - LOS_RAY * sin(act_roll_radians));
     QPoint headingBottom = losCenter;
 
     /** O dell'heading in alto **/
@@ -164,10 +165,10 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
     painter.drawLine(losRollLeft, losRollRight);
     painter.drawLine(losElev.x() - 10, losElev.y(), losElev.x() + 10, losElev.y());
     painter.drawLine(losElev.x(), losElev.y() - 10, losElev.x(), losElev.y() + 10);
-    painter.drawLine(headingBottom, headingTop);
+    //painter.drawLine(headingBottom, headingTop);
 
     /** Scales **/
-    /** Ellipse: for yaw and roll **/
+    /** Ellipse: for roll **/
     pen.setColor(white);
     painter.setPen(pen);
     painter.drawEllipse(losCenter.x() - LOS_RAY, losCenter.y() - LOS_RAY, 2 * LOS_RAY, 2 * LOS_RAY);
@@ -234,7 +235,7 @@ void DroneFrame::paintEvent(QPaintEvent* paintEvent)
 
     pen.setColor(blue);
     painter.setPen(pen);
-    painter.drawText(headingDisplayX0 + 5, headingDisplayY0 + 20, QString::number(act_yaw_deg));
+    //painter.drawText(headingDisplayX0 + 5, headingDisplayY0 + 20, QString::number(act_yaw_deg));
     painter.drawText(rollDisplayX0 + 5, rollDisplayY0 + 20, QString::number(act_roll_deg));
     painter.drawText(pitchDisplayX0 + 5, pitchDisplayY0 + 20, QString::number(act_pitch_deg));
 

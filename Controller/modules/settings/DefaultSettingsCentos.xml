@@ -5,10 +5,10 @@
 
 <joystick
     deadcenterzone="2000"
-    cross="0"
-    square="3"
-    triangle="2"
-    circle="1"
+    cross="1"
+    square="0"
+    triangle="3"
+    circle="2"
     l1="4"
     r1="5"
     l2="6"
@@ -17,13 +17,13 @@
     r3="12"
     share="8"
     options="9"
-    ps="10"
-    l2axis="2"
-    r2axis="5"
+    ps="12"
+    l2axis="3"
+    r2axis="4"
     l3x="0"
     l3y="1"
-    r3x="3"
-    r3y="4"
+    r3x="2"
+    r3y="5"
 />
 
 <radio

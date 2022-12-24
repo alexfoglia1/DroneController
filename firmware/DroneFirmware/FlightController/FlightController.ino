@@ -2,9 +2,9 @@
 #include "RF24.h"
 #include "SPI.h"
 #include "proto.h"
-#include "UltraSonic.h"
+#include "IMU.h"
 
-#include <avr/wdt.h>
+//#include <avr/wdt.h>
 
 #include <Servo.h>
 
@@ -30,12 +30,9 @@ Servo motor3;
 Servo motor4;
 RF24 radio(9,10);
 
-//UltraSonic ultraSonic(2,3);
-
 CtrlToRadioCommandMessage commandMsg;
 DroneToRadioResponseMessage responseMsg;
-BleToUnoMessage serialMsgIn;
-BleToUnoErrorMessage serialMsgInE;
+
 char serialRxBuffer[512];
 int numChars = 512;
 
@@ -46,21 +43,23 @@ boolean armSwitched = false;
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   clearMessages();
+
+  initImu();
     
   motor1.attach(MOTOR_PIN1);
   motor2.attach(MOTOR_PIN2);
   motor3.attach(MOTOR_PIN3);
   motor4.attach(MOTOR_PIN4);
-  
+
   radio.begin();
   radio.openReadingPipe(1, rx_pipe);
   radio.enableAckPayload();
   radio.startListening();
   radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
-  
-  wdt_enable(WDTO_500MS);
+  Serial.println("pitch roll");
+  //wdt_enable(WDTO_500MS);
 }
 
 const int MAX_TIMEOUT = 50;
@@ -68,9 +67,25 @@ int count = 0;
 
 void loop(void)
 {
-  //float gndDistance = ultraSonic.distance();
+  float current_pitch = 0;
+  float current_roll = 0;
+  float current_yaw = 0;
+  float current_temp = 0;
+
+  updateImuFilter();
+  getImuAttitude(&current_roll, &current_pitch, &current_yaw);
   
-  
+  getImuTemperature(&current_temp);
+
+  //Serial.print(current_yaw);
+  //Serial.print(" ");
+  Serial.print(current_pitch * 180.0/M_PI - 3.30);
+  Serial.print(" ");
+  Serial.println(current_roll * 180.0/M_PI - 1.64);
+  //Serial.print("Current attitude: yaw("); Serial.print(current_yaw); Serial.print(") pitch("); Serial.print(current_pitch); Serial.print(") roll("); Serial.print(current_roll); Serial.println(")");
+  //Serial.print("Temperature: ");
+  //Serial.println(current_temp);
+
   int DELAY_M1 = MIN_SIGNAL;
   int DELAY_M2 = MIN_SIGNAL;
   int DELAY_M3 = MIN_SIGNAL;
@@ -84,14 +99,14 @@ void loop(void)
   }
   else
   {
-    wdt_reset();
+    //wdt_reset();
     radioAvailable = true;
     count = 0;
     radio.read((char*)&commandMsg, sizeof(CtrlToRadioCommandMessage));
   }
 
-  Serial.print("Radio available: ");
-  Serial.println(radioAvailable);
+  //Serial.print("Radio available: ");
+  //Serial.println(radioAvailable);
   
   if (count == MAX_TIMEOUT)
   {
@@ -105,8 +120,8 @@ void loop(void)
     if (0xFF == commandMsg.r2_axis && !armSwitched)
     {
       motorsArmed = !motorsArmed;
-      Serial.print("Motor armed switch: ");
-      Serial.println(motorsArmed);
+      //Serial.print("Motor armed switch: ");
+      //Serial.println(motorsArmed);
       armSwitched = true;
     }
     else if (0xFF == commandMsg.r2_axis && armSwitched)
@@ -188,33 +203,16 @@ void loop(void)
     responseMsg.motor3_speed = DELAY_M3;
     responseMsg.motor4_speed = DELAY_M4;
 
-    //boolean dataFromSerial = recvFromSerial();
-    if (false)
-    {
-      uint8_t* msgId = (uint8_t*)(serialRxBuffer);
-      
-      if (BLE_TO_UNO_MSG_ID == *msgId)
-      {
-        BleToUnoMessage* msgIn = (BleToUnoMessage*)(serialRxBuffer);
-        serialMsgIn.msg_id = msgIn->msg_id;
-        serialMsgIn.pitch = msgIn->pitch;
-        serialMsgIn.roll = msgIn->roll;
-        serialMsgIn.yaw = msgIn->yaw;
-        serialMsgIn.baro_altitude = msgIn->baro_altitude;
-      }
-      else
-      {
-        /** Ignore error handling for the moment **/
-      }
-    }
-        
-    responseMsg.heading = floatRadiansToUint16Degrees(serialMsgIn.yaw);
-    responseMsg.roll = floatRadiansToUint16Degrees(serialMsgIn.roll);
-    responseMsg.pitch = floatRadiansToUint16Degrees(serialMsgIn.pitch);
-    responseMsg.baro_altitude = serialMsgIn.baro_altitude;
+    responseMsg.heading = floatRadiansToUint16Degrees(current_yaw);
+    responseMsg.roll = floatRadiansToUint16Degrees(current_roll);
+    responseMsg.pitch = floatRadiansToUint16Degrees(current_pitch);
+    responseMsg.baro_altitude = current_roll;
     //responseMsg.gnd_distance = gndDistance;
-    
     radio.writeAckPayload(1, &responseMsg, sizeof(DroneToRadioResponseMessage));
+
+    //Serial.print(responseMsg.roll);
+    //Serial.print(" ");
+    //Serial.println(responseMsg.pitch);
 
   }
   
@@ -257,68 +255,6 @@ void clearMessages()
   responseMsg.pitch = 0;
   responseMsg.roll = 0;
   responseMsg.baro_altitude = 0;
-
-  serialMsgIn.msg_id = 0;
-  serialMsgIn.pitch = 0.f;
-  serialMsgIn.roll = 0.f;
-  serialMsgIn.yaw = 0.f;
-  serialMsgIn.baro_altitude = 0;
-
-  serialMsgInE.msg_id = 0;
-  serialMsgInE.error_code = 0;
-}
-
-boolean recvFromSerial()
-{
-    static boolean recvInProgress = false;
-    static byte ndx = 0;
-    boolean dataFromSerial = false;
-    char rc;
- 
-    while (Serial.available() > 0)
-    {
-        rc = Serial.read();
-
-        if (recvInProgress == true)
-        {
-            if (rc != endMarker)
-            {
-                serialRxBuffer[ndx] = rc;
-                ndx++;
-                if (ndx >= numChars)
-                {
-                    ndx = numChars - 1;
-                }
-            }
-            else
-            {
-                recvInProgress = false;
-                dataFromSerial = true;
-                ndx = 0;
-            }
-        }
-
-        else if (rc == startMarker)
-        {
-            recvInProgress = true;
-        }
-    }
-
-    return dataFromSerial;
-}
-
-void txToSerial(char* data, int len)
-{
-  char txBuffer[len + 2];
-  txBuffer[0] = startMarker;
-  for (int i = 0; i < len; i++)
-  {
-    txBuffer[i + 1] = data[i];
-  }
-  txBuffer[len + 1] = endMarker;
-
-  Serial.write(txBuffer, len + 2);
-  delay(10);
 }
 
 uint16_t floatRadiansToUint16Degrees(float angleRad)

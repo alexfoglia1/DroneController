@@ -86,6 +86,7 @@ bool RadioDriver::init()
         _serialPort->open(QIODevice::OpenModeFlag::ReadWrite);
         if (!_serialPort->isOpen())
         {
+            perror("Serial port not opened");
             delete _serialPort;
             _serialPort = nullptr;
             _state = OFF;
