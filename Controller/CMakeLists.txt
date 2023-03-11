@@ -9,13 +9,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 if (WIN32)
-    set(SDL2_INCLUDE_DIRS "C:/Users/alex/Downloads/SDL2-devel-2.26.1-VC/SDL2-2.26.1/include")
+    set(SDL2_INCLUDE_DIRS "C:/Users/gieff/SDL2-devel-2.26.4-VC/SDL2-2.26.4/include")
 
     # Support both 32 and 64 bit builds
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-        set(SDL2_LIBRARIES "C:/Users/alex/Downloads/SDL2-devel-2.26.1-VC/SDL2-2.26.1/lib/x64/SDL2.lib;C:/Users/alex/Downloads/SDL2-devel-2.26.1-VC/SDL2-2.26.1/lib/x64/SDL2main.lib")
+        set(SDL2_LIBRARIES "C:/Users/gieff/SDL2-devel-2.26.4-VC/SDL2-2.26.4/lib/x64/SDL2.lib;C:/Users/gieff/SDL2-devel-2.26.4-VC/SDL2-2.26.4/lib/x64/SDL2main.lib")
     else ()
-        set(SDL2_LIBRARIES "C:/Users/alex/Downloads/SDL2-devel-2.26.1-VC/SDL2-2.26.1/lib/x86/SDL2.lib;C:/Users/alex/Downloads/SDL2-devel-2.26.1-VC/SDL2-2.26.1/lib/x86/SDL2main.lib")
+        set(SDL2_LIBRARIES "C:/Users/gieff/SDL2-devel-2.26.4-VC/SDL2-2.26.4/lib/x86/SDL2.lib;C:/Users/gieff/SDL2-devel-2.26.4-VC/SDL2-2.26.4/lib/x86/SDL2main.lib")
     endif ()
 
     string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
@@ -73,6 +73,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     install(TARGETS DroneController DESTINATION bin)
 endif()
 
-add_custom_command(TARGET DroneController POST_BUILD
-    COMMAND cp -n ${CMAKE_SOURCE_DIR}/modules/settings/DefaultSettings.xml ${CMAKE_CURRENT_BINARY_DIR}/Settings.xml
-)
+#add_custom_command(TARGET DroneController POST_BUILD
+#    COMMAND cp -n ${CMAKE_SOURCE_DIR}/modules/settings/DefaultSettings.xml ${CMAKE_CURRENT_BINARY_DIR}/Settings.xml
+#)

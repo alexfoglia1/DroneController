@@ -15,12 +15,18 @@ stateestimation::AttitudeEstimator attEst;
 
 static char SENSOR_ERR_CODE;
 
+static float _gyro_x;
+static float _gyro_y;
+static float _gyro_z;
+
 static float _yaw;
 static float _pitch;
 static float _roll;
-static float _temp;
 
 static long _lastUpdate_ts;
+
+
+const float gyro_bias[3] = {-0.26f, -0.64f, 0.0f};
                           //   x     y    z
 float axis_sign[3]     =     {-1,   -1,  -1};
 const float g = -9.81;
@@ -35,7 +41,41 @@ void imu_to_frame(float* x, float* y, float* z)
   *y = *x * sin(IMU_TO_FRAME_ROTATION) + *y * cos(IMU_TO_FRAME_ROTATION);
 }
 
-const float gyro_bias[3] = {0.10, -0.19, -0.06};
+void read_imu_raw(float* acc_x,  float* acc_y,  float* acc_z,
+                  float* gyro_x, float* gyro_y, float* gyro_z,
+                  float* magn_x, float* magn_y, float* magn_z)
+{
+    sensors_event_t a, m, g, temp;
+
+    lsm.getEvent(&a, &m, &g, &temp); 
+
+    if (acc_x) *acc_x = a.acceleration.x;
+    if (acc_y) *acc_y = a.acceleration.y;
+    if (acc_z) *acc_z = a.acceleration.z;
+
+    if (gyro_x) *gyro_x = g.gyro.x;
+    if (gyro_y) *gyro_y = g.gyro.y;
+    if (gyro_z) *gyro_z = g.gyro.z;
+
+    if (magn_x) *magn_x = m.magnetic.x;
+    if (magn_y) *magn_y = m.magnetic.y;
+    if (magn_z) *magn_z = m.magnetic.z;
+
+    if (acc_x && acc_y && acc_z) imu_to_frame(acc_x,  acc_y,  acc_z);
+    if (gyro_x && gyro_y && gyro_z) imu_to_frame(gyro_x, gyro_y, gyro_z);
+    if (magn_x && magn_y && magn_z) imu_to_frame(magn_x, magn_y, magn_z);
+}
+
+void update_gyro_filter(float gyro_x, float gyro_y, float gyro_z)
+{
+  const float ALPHA = 0.8f;
+  const float BETA = 1.0f - ALPHA;
+
+  _gyro_x = ALPHA * _gyro_x + BETA * gyro_x;
+  _gyro_y = ALPHA * _gyro_y + BETA * gyro_y;
+  _gyro_z = ALPHA * _gyro_z + BETA * gyro_z;
+}
+
 
 void initImu()
 {
@@ -51,22 +91,25 @@ void initImu()
   }
   else
   {
-      // 1.) Set the accelerometer range
-  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G);
+    // 1.) Set the accelerometer range
+    lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G);
+    
+    // 2.) Set the magnetometer sensitivity
+    lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
   
-  // 2.) Set the magnetometer sensitivity
-  lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
-
-  // 3.) Setup the gyroscope
-  lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_2000DPS);
-    
+    // 3.) Setup the gyroscope
+    lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_2000DPS);
+      
     _lastUpdate_ts = -1;
-    
+
+    _gyro_x = 0;
+    _gyro_y = 0;
+    _gyro_z = 0;
     _yaw = 0;
     _pitch = 0;
     _roll = 0;
-    _temp = 0;
   }
+  
 }
 
 char imuErrorState()
@@ -78,49 +121,39 @@ void updateImuFilter()
 {
   if (!(SENSOR_ERR_CODE & IMU_NO_SUCH_DEVICE))
   {
-    sensors_event_t a, m, g, temp;
+    float acc_x,  acc_y,  acc_z;
+    float gyro_x, gyro_y, gyro_z;
+    float magn_x, magn_y, magn_z;
 
-    lsm.getEvent(&a, &m, &g, &temp); 
+    float cur_millis = millis();
+    read_imu_raw(&acc_x,  &acc_y,  &acc_z,
+                 &gyro_x, &gyro_y, &gyro_z,
+                 &magn_x, &magn_y, &magn_z);
 
-    float accx, accy, accz;
-    float gyrox, gyroy, gyroz;
-    float magnx, magny, magnz;
+    update_gyro_filter(gyro_x, gyro_y, gyro_z);
 
-    accx = a.acceleration.x;
-    accy = a.acceleration.y;
-    accz = a.acceleration.z;
+    gyro_x = _gyro_x - gyro_bias[0];
+    gyro_y = _gyro_y - gyro_bias[1];
+    gyro_z = _gyro_z - gyro_bias[2];
 
-    gyrox = g.gyro.x - gyro_bias[0];
-    gyroy = g.gyro.y - gyro_bias[1];
-    gyroz = g.gyro.z - gyro_bias[2];
+    float dt_s = 0.1f;
+    if (-1 == _lastUpdate_ts)
+    {
+      attEst.update(dt_s, gyro_x * M_PI/180.0, gyro_y * M_PI/180.0, gyro_z * M_PI/180.0, acc_x, acc_y, acc_z, magn_x, magn_y, magn_z);
+      _lastUpdate_ts = cur_millis;
 
-    magnx = m.magnetic.x;
-    magny = m.magnetic.y;
-    magnz = m.magnetic.z;
-    
-    imu_to_frame(&accx, &accy, &accz);
-    imu_to_frame(&gyrox, &gyroy, &gyroz);
-    imu_to_frame(&magnx, &magny, &magnz);
-      
-      if (-1 == _lastUpdate_ts)
-      {
-        double dt_s = 0.01;
-        attEst.update(dt_s, gyrox * M_PI/180.0, gyroy * M_PI/180.0, gyroz * M_PI/180.0, accx, accy, accz, magnx, magny, magnz);
-        _lastUpdate_ts = millis();
-      }
-      else
-      {
-        int t = millis();
-        double dt_s = (t - _lastUpdate_ts) / 1000.0;
-        attEst.update(dt_s, gyrox * M_PI/180.0, gyroy * M_PI/180.0, gyroz * M_PI/180.0, accx, accy, accz, magnx, magny, magnz);
-        _lastUpdate_ts = t;
-      }
+    }
+    else
+    {
+      dt_s = (cur_millis - _lastUpdate_ts) / 1000.0f;
+      attEst.update(dt_s, gyro_x * M_PI/180.0, gyro_y * M_PI/180.0, gyro_z * M_PI/180.0, acc_x, acc_y, acc_z, magn_x, magn_y, magn_z);
+      _lastUpdate_ts = cur_millis;
+    }
 
-      _yaw = attEst.fusedYaw();
-      _pitch = attEst.fusedPitch();
-      _roll = attEst.fusedRoll();
+    _yaw = attEst.fusedYaw();
+    _pitch = attEst.fusedPitch();
+    _roll = attEst.fusedRoll();
 
-    _temp = 25;
   }
 }
 
