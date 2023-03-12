@@ -64,11 +64,9 @@ void loop(void)
 
     IMU_CurrentAttitude(&attitude.roll, &attitude.pitch, &attitude.yaw);
 
-    /** LED_BUILTIN HIGH if ||attitude[k - 1] - attitude[k]|| > 1 **/
-    float delta_att_mod = sqrt((attitude_km1.roll  - attitude.roll)  * (attitude_km1.roll  - attitude.roll)  +
-                               (attitude_km1.pitch - attitude.pitch) * (attitude_km1.pitch - attitude.pitch) +
-                               (attitude_km1.yaw   - attitude.yaw)   * (attitude_km1.yaw   - attitude.yaw));
-    digitalWrite(LED_BUILTIN, delta_att_mod > 0.5f ? HIGH : LOW);
+    /** LED_BUILTIN HIGH if |heading[k - 1] - heading[k]|| > 0.25 **/
+    float delta_att_mod = fabs(attitude_km1.yaw - attitude.yaw);
+    digitalWrite(LED_BUILTIN, delta_att_mod > 0.25f ? HIGH : LOW);
 
     Serial.print(attitude.roll);
     Serial.print(" ");
