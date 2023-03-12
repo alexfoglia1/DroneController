@@ -10,8 +10,10 @@ typedef struct
   float z;
 } vector3d_t;
 
+
 bool IMU_Init();
 void IMU_Update();
+void IMU_UpdateBeta(float beta);
 void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw);
 
 

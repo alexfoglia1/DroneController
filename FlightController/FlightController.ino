@@ -31,7 +31,6 @@ drone_attitude_t attitude_km1;
 drone_attitude_t attitude;
 bool lsm9ds1_found;
 
-
 void setup(void)
 {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -60,6 +59,7 @@ void loop(void)
 {
   if (lsm9ds1_found)
   {
+    
     IMU_Update();
 
     IMU_CurrentAttitude(&attitude.roll, &attitude.pitch, &attitude.yaw);
@@ -68,7 +68,14 @@ void loop(void)
     float delta_att_mod = sqrt((attitude_km1.roll  - attitude.roll)  * (attitude_km1.roll  - attitude.roll)  +
                                (attitude_km1.pitch - attitude.pitch) * (attitude_km1.pitch - attitude.pitch) +
                                (attitude_km1.yaw   - attitude.yaw)   * (attitude_km1.yaw   - attitude.yaw));
-    digitalWrite(LED_BUILTIN, delta_att_mod > 0.1f ? HIGH : LOW);
+    digitalWrite(LED_BUILTIN, delta_att_mod > 0.5f ? HIGH : LOW);
+
+    Serial.print(attitude.roll);
+    Serial.print(" ");
+    Serial.print(attitude.pitch);
+    Serial.print(" ");
+    Serial.println(attitude.yaw);
+
 
     attitude_km1.roll  = attitude.roll;
     attitude_km1.pitch = attitude.pitch;

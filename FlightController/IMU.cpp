@@ -78,6 +78,12 @@ void IMU_Update()
 }
 
 
+void IMU_UpdateBeta(float beta)
+{
+  filter.updateBeta(beta);
+}
+
+
 void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw)
 {
   *roll = filter.getRoll();

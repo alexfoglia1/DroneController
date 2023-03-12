@@ -1,0 +1,2 @@
+Fisica: https://sanyambhutani.com/quadcopter-physics-explained/
+Tutorial radiocomando: https://www.danielealberti.it/2016/09/arduino-radiocomandato.html
