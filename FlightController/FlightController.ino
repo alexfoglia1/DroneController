@@ -53,14 +53,11 @@ void setup(void)
   attitude_km1.pitch = 0;
   attitude_km1.roll  = 0;
   attitude_km1.yaw   = 0;
-
-  Serial.println("roll pitch yaw");
 }
 
 
 void loop(void)
 {
-  //digitalWrite(LED_BUILTIN, LOW);
   if (lsm9ds1_found)
   {
     IMU_Update();
