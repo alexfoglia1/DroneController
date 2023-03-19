@@ -34,6 +34,7 @@
 #define MOTOR(N)(N-1)
 #define THROTTLE_CHANNEL   CHANNEL(3)
 #define ROLL_CHANNEL       CHANNEL(1)
+#define PITCH_CHANNEL      CHANNEL(2)
 #define MOTORS_ARM_CHANNEL CHANNEL(5)
 
 #define ROLL_VARIANCE_THRESHOLD  0.04f 
@@ -107,7 +108,6 @@ void setup(void)
 
   analogWrite(YELLOW_LED_PIN, 255);
   analogWrite(GREEN_LED_PIN, 0);
-  Serial.println("ROLL PITCH CONV");
 }
 
 
@@ -131,11 +131,6 @@ void loop(void)
     IMU_CurrentVariance(&variance.data.roll, &variance.data.pitch, &variance.data.yaw);
     MAINT_UpdateKF(attitude.vect);
 
-    Serial.print(attitude.data.roll);
-    Serial.print(" ");
-    Serial.print(attitude.data.pitch);
-    Serial.print(" ");
-
     if (!attitude_converges &&
         variance.data.roll  < ROLL_VARIANCE_THRESHOLD &&
         variance.data.pitch < PITCH_VARIANCE_THRESHOLD)
@@ -152,12 +147,6 @@ void loop(void)
     {
       count_to_variance = 0;
     }
-
-    if (attitude_converges) Serial.println("10"); else Serial.println("0");
-
-    
-    //Serial.print(" ");
-    //Serial.println(attitude.data.yaw);
 
     //Serial.println("**************************** UPDATE IMU *********************************");
     //Serial.print("acc.x(");
@@ -198,22 +187,31 @@ void loop(void)
     channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_SIGNAL, MAX_SIGNAL);
 
     motors_armed = channels[MOTORS_ARM_CHANNEL] > 0.5f;
-    //Serial.println("**************************** UPDATE COMMAND ****************************");
-    //Serial.print("Channel throttle(");
-    //Serial.print(channels[THROTTLE_CHANNEL]);
-    //Serial.print(") Channel roll(");
-    //Serial.print(channels[ROLL_CHANNEL]);
-    //Serial.println(")");
+    Serial.println("**************************** UPDATE COMMAND ****************************");
+    Serial.print("Channel throttle(");
+    Serial.print(channels[THROTTLE_CHANNEL]);
+    Serial.print(") Channel roll(");
+    Serial.print(channels[ROLL_CHANNEL]);
+    Serial.print(") Channel pitch(");
+    Serial.print(channels[PITCH_CHANNEL]);
+    Serial.println(")");
 
                                                  // roll channel is 0.37 when stick is in rest position on FS-I6
     float right_bias = (channels[ROLL_CHANNEL] - 0.37f)/4.0f; // bias: how much drone shall roll toward right or left
     float left_bias  = -right_bias;
 
-    //Serial.print("Bias: L(");
-    //Serial.print(left_bias);
-    //Serial.print(") R(");
-    //Serial.print(right_bias);
-    //Serial.println(")");
+    float down_bias = (channels[PITCH_CHANNEL] - 0.37f)/4.0f;
+    float up_bias = -down_bias;
+
+    Serial.print("Bias: L(");
+    Serial.print(left_bias);
+    Serial.print(") R(");
+    Serial.print(right_bias);
+    Serial.print(") D(");
+    Serial.print(down_bias);
+    Serial.print(") U(");
+    Serial.print(up_bias);
+    Serial.println(")");
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- PID UPDATE --------------------------------------------------------- 
    //if (attitude_converges)
@@ -241,32 +239,28 @@ void loop(void)
 
       // If I want to PITCH DOWN I shall give more thrust to BACK motors  M4,M3
       // If I want to PITCH UP   I shall give more thrust to FRONT motors M1,M2
-      // TODO PITCH
       
-      int   left_thrust  = toRange(channels[THROTTLE_CHANNEL] + right_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
-      int   right_thrust = toRange(channels[THROTTLE_CHANNEL] + left_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
-
-      motors_speed[MOTOR(1)] = left_thrust;
-      motors_speed[MOTOR(4)] = motors_speed[MOTOR(1)];
-
-      motors_speed[MOTOR(2)] = right_thrust;
-      motors_speed[MOTOR(3)] = motors_speed[MOTOR(1)];
-      
-      ////Serial.print(" ");
-      ////Serial.println(PID[ROLL]);
+       motors_speed[MOTOR(1)] = toRange(channels[THROTTLE_CHANNEL] + right_bias + up_bias,   0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
+       motors_speed[MOTOR(2)] = toRange(channels[THROTTLE_CHANNEL] + left_bias  + up_bias,   0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
+       motors_speed[MOTOR(3)] = toRange(channels[THROTTLE_CHANNEL] + left_bias  + down_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
+       motors_speed[MOTOR(4)] = toRange(channels[THROTTLE_CHANNEL] + right_bias + down_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
       
     }
 
 
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MOTORS CONTROL ----------------------------------------------------- 
-  //Serial.print("Motors speed: L(");
-  //Serial.print(motors_speed[MOTOR(1)]);
-  //Serial.print(") R(");
-  //Serial.print(motors_speed[MOTOR(2)]);
-  //Serial.println(")");
-  //Serial.println("*************************************************************************");
-  //Serial.println("");
+  Serial.print("Motors speed: M1(");
+  Serial.print(motors_speed[MOTOR(1)]);
+  Serial.print(") M2(");
+  Serial.print(motors_speed[MOTOR(2)]);
+  Serial.print(") M3(");
+  Serial.print(motors_speed[MOTOR(3)]);
+  Serial.print(") M4(");
+  Serial.print(motors_speed[MOTOR(4)]);
+  Serial.println(")");
+  Serial.println("*************************************************************************");
+  Serial.println("");
   motor1.writeMicroseconds(motors_armed ? motors_speed[MOTOR(1)] : MIN_SIGNAL);
   motor2.writeMicroseconds(motors_armed ? motors_speed[MOTOR(2)] : MIN_SIGNAL);
   motor3.writeMicroseconds(motors_armed ? motors_speed[MOTOR(3)] : MIN_SIGNAL);
