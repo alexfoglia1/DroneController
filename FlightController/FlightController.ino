@@ -1,9 +1,11 @@
+
 #include <Servo.h>
 
 #include "IMU.h"
 #include "PID.h"
+#include "MAINT.h"
+#include "Utils.h"
 
-#define APP_NAME "Arduino Flight Controller"
 #define MAJOR_VERSION '1'
 #define MINOR_VERSION '0'
 #define STAGE_VERSION 'B'
@@ -16,8 +18,28 @@
 #define MOTOR3_PIN 6
 #define MOTOR4_PIN 5
 
-#define MOTOR_ARM_THRESHOLD 200 // motors start spinning at MIN_SIGNAL + 200
-#define PID_START_THRESHOLD 50
+#define CHANNEL_1_PIN 13
+#define CHANNEL_2_PIN 12
+#define CHANNEL_3_PIN 11
+#define CHANNEL_4_PIN 10
+#define CHANNEL_5_PIN  9
+
+#define YELLOW_LED_PIN A0
+#define GREEN_LED_PIN  A1
+
+#define PROBE_PIN 2
+
+#define MOTORS_ARM_THRESHOLD 80 // motors start spinning at MIN_SIGNAL + x
+#define CHANNEL(N)(N-1)
+#define MOTOR(N)(N-1)
+#define THROTTLE_CHANNEL   CHANNEL(3)
+#define ROLL_CHANNEL       CHANNEL(1)
+#define MOTORS_ARM_CHANNEL CHANNEL(5)
+
+#define ROLL_VARIANCE_THRESHOLD  0.04f 
+#define PITCH_VARIANCE_THRESHOLD 0.04f
+#define VARIANCE_CONVERGENCE_THRESHOLD 50
+
 
 typedef union
 {
@@ -31,39 +53,29 @@ typedef union
   float vect[3];
 } drone_attitude_t;
 
+
 Servo motor1;
 Servo motor2;
 Servo motor3;
 Servo motor4;
 
-drone_attitude_t attitude_km1;
+
 drone_attitude_t attitude;
+drone_attitude_t variance;
 bool lsm9ds1_found;
-int count_to_pid;
-
-
-float minMax(float value, float min_value, float max_value)
-{
-    if (value > max_value) {
-        value = max_value;
-    } else if (value < min_value) {
-        value = min_value;
-    }
-
-    return value;
-}
-
-
-float toRange(float value, float rangeIn, float rangeOut)
-{
-  return (value/rangeIn) * rangeOut;
-}
-
+bool attitude_converges;
+int count_to_variance;
 
 void setup(void)
 {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  
+  pinMode(CHANNEL_1_PIN, INPUT);
+  pinMode(CHANNEL_2_PIN, INPUT);
+  pinMode(CHANNEL_3_PIN, INPUT);
+  pinMode(CHANNEL_4_PIN, INPUT);
+  pinMode(CHANNEL_5_PIN, INPUT);
   
   Serial.begin(115200);
   
@@ -73,95 +85,196 @@ void setup(void)
   motor4.attach(MOTOR4_PIN);
 
   lsm9ds1_found = IMU_Init();
+  IMU_UpdateKFBeta(0.05f);
+  attitude_converges = false;
+  
+  MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
   
   attitude.data.pitch = 0;
   attitude.data.roll  = 0;
   attitude.data.yaw   = 0;
 
-  attitude_km1.data.pitch = 0;
-  attitude_km1.data.roll  = 0;
-  attitude_km1.data.yaw   = 0;
+  variance.data.pitch = 0;
+  variance.data.roll = 0;
+  variance.data.yaw = 0;
 
-  count_to_pid = 0;
+  count_to_variance = 0;
 
   motor1.writeMicroseconds(MIN_SIGNAL);
   motor2.writeMicroseconds(MIN_SIGNAL);
   motor3.writeMicroseconds(MIN_SIGNAL);
   motor4.writeMicroseconds(MIN_SIGNAL);
 
-  Serial.println("Press enter");
-  while (!Serial.available());
-  Serial.read();
-  //Serial.println("PID_ROLL, PID_PITCH, PID_YAW");
-  //delay(100);
+  analogWrite(YELLOW_LED_PIN, 255);
+  analogWrite(GREEN_LED_PIN, 0);
+  Serial.println("ROLL PITCH CONV");
 }
 
 
 void loop(void)
-{
-   int MOTOR1_SPEED = MIN_SIGNAL;
-   int MOTOR2_SPEED = MIN_SIGNAL;
-   int MOTOR3_SPEED = MIN_SIGNAL;
-   int MOTOR4_SPEED = MIN_SIGNAL;
-
+{ 
+  uint16_t motors_speed[4] = {MIN_SIGNAL, MIN_SIGNAL, MIN_SIGNAL, MIN_SIGNAL};
+  float channels[5] = {0.f, 0.f, 0.f, 0.f, 0.f};
+  bool motors_armed = false;
+  
   if (lsm9ds1_found)
   {
-    IMU_Update();
-
+// --------------------------------------------- READ CURRENT ATTITUDE --------------------------------------------- 
+    float acc[3]  = {0.f, 0.f, 0.f};
+    float gyro[3] = {0.f, 0.f, 0.f};
+    float magn[3] = {0.f, 0.f, 0.f};
+    float t = 0;
+    float dt = 0;
+    IMU_Update(acc, gyro, magn, &t, &dt);
+    MAINT_UpdateIMU(acc, gyro, magn, t, dt);
     IMU_CurrentAttitude(&attitude.data.roll, &attitude.data.pitch, &attitude.data.yaw);
+    IMU_CurrentVariance(&variance.data.roll, &variance.data.pitch, &variance.data.yaw);
+    MAINT_UpdateKF(attitude.vect);
 
-    /** Attitude stabilized if |heading[k - 1] - heading[k]|| > 0.25 **/
-    float delta_yaw_mod = fabs(attitude_km1.data.yaw - attitude.data.yaw);
-    bool attitude_stabilized = (delta_yaw_mod < 0.25f);
-    digitalWrite(LED_BUILTIN, attitude_stabilized ? LOW : HIGH);
-    
-    attitude_km1.data.roll  = attitude.data.roll;
-    attitude_km1.data.pitch = attitude.data.pitch;
-    attitude_km1.data.yaw   = attitude.data.yaw;
-    
-    /** Wait PID_START_THRESHOLD consecutive attitude_stabilized before PID loop **/
-    if (count_to_pid < PID_START_THRESHOLD)
+    Serial.print(attitude.data.roll);
+    Serial.print(" ");
+    Serial.print(attitude.data.pitch);
+    Serial.print(" ");
+
+    if (!attitude_converges &&
+        variance.data.roll  < ROLL_VARIANCE_THRESHOLD &&
+        variance.data.pitch < PITCH_VARIANCE_THRESHOLD)
     {
-       count_to_pid = attitude_stabilized ? count_to_pid + 1 : 0;
+      count_to_variance += 1;
+      if (count_to_variance == VARIANCE_CONVERGENCE_THRESHOLD)
+      {
+        analogWrite(GREEN_LED_PIN, 255);
+        analogWrite(YELLOW_LED_PIN, 0);
+        attitude_converges = true; 
+      }
     }
     else
     {
-      digitalWrite(LED_BUILTIN, LOW);
-      
-      float fake_command[3] = {0.0f, 0.0f, 0.0f};
-      PID_Update(fake_command, attitude.vect);
-      float pid[3];
-      pid[ROLL]  = toRange(PID[ROLL],  100.0f, 1000.0f);
-      pid[PITCH] = toRange(PID[PITCH], 100.0f, 1000.0f);
-      pid[YAW]   = toRange(PID[YAW],   100.0f, 1000.0); 
-      //Serial.print(PID[ROLL]);
-      //Serial.print(" ");
-      //Serial.print(PID[PITCH]);
-      //Serial.print(" ");
-      //Serial.println(PID[YAW]);
-      
-      MOTOR1_SPEED = minMax(MIN_SIGNAL + MOTOR_ARM_THRESHOLD + pid[ROLL] + pid[PITCH] - pid[YAW], MIN_SIGNAL + MOTOR_ARM_THRESHOLD, 2000);
-      MOTOR4_SPEED = minMax(MIN_SIGNAL + MOTOR_ARM_THRESHOLD - pid[ROLL] + pid[PITCH] + pid[YAW], MIN_SIGNAL + MOTOR_ARM_THRESHOLD, 2000);
-      MOTOR2_SPEED = minMax(MIN_SIGNAL + MOTOR_ARM_THRESHOLD + pid[ROLL] - pid[PITCH] + pid[YAW], MIN_SIGNAL + MOTOR_ARM_THRESHOLD, 2000);
-      MOTOR3_SPEED = minMax(MIN_SIGNAL + MOTOR_ARM_THRESHOLD - pid[ROLL] - pid[PITCH] - pid[YAW], MIN_SIGNAL + MOTOR_ARM_THRESHOLD, 2000);
+      count_to_variance = 0;
     }
-  }
 
-  Serial.print(MOTOR1_SPEED);
-  Serial.print("\t");
-  Serial.print(MOTOR4_SPEED);
-  Serial.print("\t");
-  Serial.print(MOTOR2_SPEED);
-  Serial.print("\t");
-  Serial.println(MOTOR3_SPEED);
+    if (attitude_converges) Serial.println("10"); else Serial.println("0");
 
-  
-  // Front left motor : M1
-  motor1.writeMicroseconds(MOTOR1_SPEED);
-  // Front right motor: M4
-  motor4.writeMicroseconds(MOTOR4_SPEED);
-  // Back left motor: M2
-  motor2.writeMicroseconds(MOTOR2_SPEED);
-  // Back right motor: M3
-  motor3.writeMicroseconds(MOTOR3_SPEED);
+    
+    //Serial.print(" ");
+    //Serial.println(attitude.data.yaw);
+
+    //Serial.println("**************************** UPDATE IMU *********************************");
+    //Serial.print("acc.x(");
+    //Serial.print(acc[X]);
+    //Serial.print(") acc.y(");
+    //Serial.print(acc[Y]);
+    //Serial.print(") acc.z(");
+    //Serial.print(acc[Z]);
+    //Serial.println(")");
+    //Serial.print("gyro.x(");
+    //Serial.print(gyro[X]);
+    //Serial.print(") gyro.y(");
+    //Serial.print(gyro[Y]);
+    //Serial.print(") gyro.z(");
+    //Serial.print(gyro[Z]);
+    //Serial.println(")");
+    //Serial.print("magn.x(");
+    //Serial.print(magn[X]);
+    //Serial.print(") magn.y(");
+    //Serial.print(magn[Y]);
+    //Serial.print(") magn.z(");
+    //Serial.print(magn[Z]);
+    //Serial.println(")");
+    //Serial.print("Roll(");
+    //Serial.print(attitude.data.roll);
+    //Serial.print(") Pitch(");
+    //Serial.print(attitude.data.pitch);
+    //Serial.print(") Yaw(");
+    //Serial.print(attitude.data.yaw);
+    //Serial.println(")");
+    //Serial.println("*************************************************************************");
+// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------------------- READ COMMAND FROM RADIO -------------------------------------------- 
+    channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_SIGNAL, MAX_SIGNAL);
+    channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_SIGNAL, MAX_SIGNAL);
+    channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_SIGNAL, MAX_SIGNAL);
+    channels[CHANNEL(4)] = normalizedPulseIn(CHANNEL_4_PIN, MIN_SIGNAL, MAX_SIGNAL);
+    channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_SIGNAL, MAX_SIGNAL);
+
+    motors_armed = channels[MOTORS_ARM_CHANNEL] > 0.5f;
+    //Serial.println("**************************** UPDATE COMMAND ****************************");
+    //Serial.print("Channel throttle(");
+    //Serial.print(channels[THROTTLE_CHANNEL]);
+    //Serial.print(") Channel roll(");
+    //Serial.print(channels[ROLL_CHANNEL]);
+    //Serial.println(")");
+
+                                                 // roll channel is 0.37 when stick is in rest position on FS-I6
+    float right_bias = (channels[ROLL_CHANNEL] - 0.37f)/4.0f; // bias: how much drone shall roll toward right or left
+    float left_bias  = -right_bias;
+
+    //Serial.print("Bias: L(");
+    //Serial.print(left_bias);
+    //Serial.print(") R(");
+    //Serial.print(right_bias);
+    //Serial.println(")");
+// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------------------- PID UPDATE --------------------------------------------------------- 
+   //if (attitude_converges)
+   //{
+      //float fake_command[3] = {0.0f, 0.0f, 0.0f};
+      //PID_Update(fake_command, attitude.vect);
+   //}
+// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------------------- APPLY SPEED CORRECTION --------------------------------------------- 
+      //[M1]     [M2]    (X)^
+      //    \   /           |
+      //     \ /            | 
+      //      X            (Z)- - ->(Y)
+      //     / \
+      //    /   \
+      //[M4]     [M3]
+      
+      // motors_speed[0] = M1 speed = TOP LEFT
+      // motors_speed[1] = M2 speed = TOP RIGHT
+      // motors_speed[2] = M3 speed = BOTTOM RIGHT
+      // motors_speed[3] = M4 speed = BOTTOM LEFT
+
+      // If I want to roll LEFT  I shall give more thrust to RIGHT motors M2,M3
+      // If I want to roll RIGHT I shall give more thrust to LEFT  motors M1,M4
+
+      // If I want to PITCH DOWN I shall give more thrust to BACK motors  M4,M3
+      // If I want to PITCH UP   I shall give more thrust to FRONT motors M1,M2
+      // TODO PITCH
+      
+      int   left_thrust  = toRange(channels[THROTTLE_CHANNEL] + right_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
+      int   right_thrust = toRange(channels[THROTTLE_CHANNEL] + left_bias, 0.0f, 1.0f, MIN_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_SIGNAL);
+
+      motors_speed[MOTOR(1)] = left_thrust;
+      motors_speed[MOTOR(4)] = motors_speed[MOTOR(1)];
+
+      motors_speed[MOTOR(2)] = right_thrust;
+      motors_speed[MOTOR(3)] = motors_speed[MOTOR(1)];
+      
+      ////Serial.print(" ");
+      ////Serial.println(PID[ROLL]);
+      
+    }
+
+
+// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------------------- MOTORS CONTROL ----------------------------------------------------- 
+  //Serial.print("Motors speed: L(");
+  //Serial.print(motors_speed[MOTOR(1)]);
+  //Serial.print(") R(");
+  //Serial.print(motors_speed[MOTOR(2)]);
+  //Serial.println(")");
+  //Serial.println("*************************************************************************");
+  //Serial.println("");
+  motor1.writeMicroseconds(motors_armed ? motors_speed[MOTOR(1)] : MIN_SIGNAL);
+  motor2.writeMicroseconds(motors_armed ? motors_speed[MOTOR(2)] : MIN_SIGNAL);
+  motor3.writeMicroseconds(motors_armed ? motors_speed[MOTOR(3)] : MIN_SIGNAL);
+  motor4.writeMicroseconds(motors_armed ? motors_speed[MOTOR(4)] : MIN_SIGNAL);
+// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------------------- MAINTENANCE  ------------------------------------------------------- 
+  //MAINT_UpdateMOTORS(channels, motors_armed ? 0x01: 0x00, motors_speed);
+  //uint8_t* p_maint_data = reinterpret_cast<uint8_t*>(MAINT_Get());
+  //Serial.write(p_maint_data, sizeof(maint_data_t));
+// -----------------------------------------------------------------------------------------------------------------
 }

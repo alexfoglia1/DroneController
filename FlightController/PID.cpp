@@ -1,9 +1,9 @@
 #include "PID.h"
 
-                    //roll,  pitch,  yaw
-const float KP[3] = {00.9f,  00.9f,  00.0f};
-const float KI[3] = {00.0f,  00.0f,  00.0f};
-const float KD[3] = {13.0f,  13.0f,  00.0f};
+               //roll,  pitch,  yaw
+float KP[3] = {01.0f,  01.0f,  01.0f};
+float KI[3] = {00.0f,  00.0f,  00.0f};
+float KD[3] = {00.00f, 00.0f,  00.0f};
 
 
 float int_coef[3] = {00.0f,  00.0f,  00.0f};
