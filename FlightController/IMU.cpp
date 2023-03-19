@@ -7,12 +7,12 @@
 
 Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
 Madgwick filter;
-long last_update_t;
+uint64_t last_update_t_micros;
 
 //IMU to BODY x,y axis swapped
-float lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
+uint64_t lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
 {
-  float t = micros();
+  uint64_t t = micros();
   sensors_event_t a, m, g, temp;
   lsm.getEvent(&a, &m, &g, &temp); 
 
@@ -28,13 +28,13 @@ float lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
   magn[Y] = m.magnetic.x;
   magn[Z] = m.magnetic.z;
 
-  return t * 0.000001f;
+  return t;
 }
 
 
 bool IMU_Init()
 {
-  last_update_t = -1;
+  last_update_t_micros = 0;
   if (!lsm.begin())
   {
      return false;
@@ -56,13 +56,13 @@ void IMU_UpdateKFBeta(float beta)
 }
 
 
-void IMU_Update(float acc[3], float gyro[3], float magn[3], float* t, float* dt)
-{
-  *t = lsm9ds1_read(acc, gyro, magn);
-  *dt = (last_update_t < 0) ? 0.1f : (*t - last_update_t);
-  last_update_t = *t;
+void IMU_Update(float acc[3], float gyro[3], float magn[3], uint64_t* dt)
+{ 
+  uint64_t t_micros = lsm9ds1_read(acc, gyro, magn);
+  *dt = (last_update_t_micros == 0) ? 1000 : (t_micros - last_update_t_micros);
+  last_update_t_micros = t_micros;
   
-  filter.update(*dt,
+  filter.update(*dt*1e-6,
                 gyro[X], gyro[Y], gyro[Z],
                 acc[X],  acc[Y],  acc[Z],
                 magn[X], magn[Y], magn[Z]);
