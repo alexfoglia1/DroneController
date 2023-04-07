@@ -15,6 +15,7 @@ typedef struct
   uint8_t  sw_ver[3]; 
   float    gyro[3];
   float    acc[3];
+  float    magn[3];
   uint64_t kf_dt;
   float    attitude[3];
   float    throttle;
@@ -29,7 +30,7 @@ __attribute__((packed))
 maint_data_t;
 
 void MAINT_Init(uint8_t major_v, uint8_t minor_v, uint8_t stage_v);
-void MAINT_UpdateIMU(float acc[3], float gyro[3]);
+void MAINT_UpdateIMU(float acc[3], float gyro[3], float magn[3]);
 void MAINT_UpdateKF(uint64_t dt, float attitude[3]);
 void MAINT_UpdateCMD(float throttle, float cmd[3]);
 void MAINT_UpdatePID(float pid[3]);

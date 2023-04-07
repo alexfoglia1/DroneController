@@ -15,12 +15,14 @@ void MAINT_Init(uint8_t major_v, uint8_t minor_v, uint8_t stage_v)
   MAINT_packet.sw_ver[2] = stage_v;
 }
 
-void MAINT_UpdateIMU(float acc[3], float gyro[3])
+
+void MAINT_UpdateIMU(float acc[3], float gyro[3], float magn[3])
 {
   for (int i = 0; i < 3; i++)
   {
     MAINT_packet.acc[i]  = acc[i];
     MAINT_packet.gyro[i] = gyro[i];
+    MAINT_packet.magn[i] = magn[i];  
   }
 }
 

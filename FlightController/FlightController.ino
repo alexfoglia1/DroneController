@@ -91,7 +91,6 @@ void setup(void)
   Serial.begin(115200);
     
   lsm9ds1_found = IMU_Init();
-  IMU_UpdateKFBeta(0.6f);
   
   MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
   
@@ -117,11 +116,12 @@ void loop(void)
 // --------------------------------------------- READ CURRENT ATTITUDE --------------------------------------------- 
     float acc[3]  = {0.f, 0.f, 0.f};
     float gyro[3] = {0.f, 0.f, 0.f};
+    float magn[3] = {0.f, 0.f, 0.f};
     uint64_t dt = 0;
 
     // Read IMU and update kalman filter
-    IMU_Update(acc, gyro, &dt);
-    MAINT_UpdateIMU(acc, gyro);
+    IMU_Update(acc, gyro, magn, &dt);
+    MAINT_UpdateIMU(acc, gyro, magn);
     // ----------------------------------
     // Get current attitude
     IMU_CurrentAttitude(&attitude.data.roll, &attitude.data.pitch, &attitude.data.yaw);
@@ -129,26 +129,30 @@ void loop(void)
 
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
-    //if (count_to_command == READ_COMMAND_THRESHOLD)
-    { 
+    if (count_to_command == READ_COMMAND_THRESHOLD)
+    {
       channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
-    //if (count_to_command == 1 + READ_COMMAND_THRESHOLD)
+    if (count_to_command == 1 + READ_COMMAND_THRESHOLD)
     {
       channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
-    //if (count_to_command == 2 + READ_COMMAND_THRESHOLD)
+    if (count_to_command == 2 + READ_COMMAND_THRESHOLD)
     {
       channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
-    //if (count_to_command == 3 + READ_COMMAND_THRESHOLD)
+    if (count_to_command == 3 + READ_COMMAND_THRESHOLD)
     {
       channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
 
       count_to_command = 0;
+    }
+    else
+    {
+      count_to_command += 1;
     }
 
     motors_armed = (channels[MOTORS_ARM_CHANNEL] > 0.5f);
@@ -217,6 +221,4 @@ void loop(void)
   uint8_t* p_maint_data = reinterpret_cast<uint8_t*>(MAINT_Get());
   Serial.write(p_maint_data, sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------
-
-  count_to_command += 1;
 }
