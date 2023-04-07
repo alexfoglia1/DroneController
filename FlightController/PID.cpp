@@ -1,9 +1,9 @@
 #include "PID.h"
 
                //roll,  pitch,  yaw
-float KP[3] = {1.0f,   1.0f,   00.0f};
-float KI[3] = {0.0f,   0.0f,   00.0f};
-float KD[3] = {0.0f,   0.0f,   00.0f};
+float KP[3] = {15.00f,  15.00f,  0.00f};
+float KI[3] = {0.00f,   0.00f,  0.00f};
+float KD[3] = {0.00f,   0.00f,  0.00f};
 
 
 float int_coef[3] = {00.0f,  00.0f,  00.0f};
@@ -11,7 +11,7 @@ float prev_err[3] = {00.0f,  00.0f,  00.0f};
 float PID[3]      = {00.0f,  00.0f,  00.0f};
 
 
-void PID_Update(float command[3], float current[3])
+void PID_Update(float command[3], float current[3], float dt)
 {
   // (1) -->         ------>          ------>
   //     ERR      =  COMMAND        - CURRENT
@@ -27,9 +27,9 @@ void PID_Update(float command[3], float current[3])
 
   // (3) ------>         ---->          ------->
   //     D_ERROR      =  ERROR        - PREV_ERROR
-  float  delta_err[3] = {error[ROLL]  - prev_err[ROLL],
-                         error[PITCH] - prev_err[PITCH],
-                         error[YAW]   - prev_err[YAW]};
+  float  delta_err[3] = {(error[ROLL]  - prev_err[ROLL])/dt,
+                         (error[PITCH] - prev_err[PITCH])/dt,
+                         (error[YAW]   - prev_err[YAW])/dt};
   
   // (4) ------->   -->
   //     PREV_ERR = ERR

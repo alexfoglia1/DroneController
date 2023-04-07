@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <stdint.h>
 
 float minMax(float value, float min_value, float max_value)
 {
@@ -31,4 +31,11 @@ float normalizedPulseIn(int pin, float minPulseWidth, float maxPulseWidth)
 {
     int pulseWidth = pulseIn(pin, HIGH);
     return toRange(pulseWidth, minPulseWidth, maxPulseWidth, 0.f, 1.f);
+}
+
+
+float normalizedAnalogRead(int pin)
+{
+  int16_t adc_in = analogRead(pin);
+  return (float)adc_in / 1023.f;
 }

@@ -27,15 +27,15 @@ m2_speed = 26;
 m3_speed = 27;
 m4_speed = 28;
 
-M = csvread("19-03-2023-23-12.csv", 2, 0);
+M = csvread("28-03-2023-02-49.csv", 2, 0);
 
 hold all;
-plot(M(:, pid_roll),  'DisplayName', 'PID ROLL');
-plot(M(:, pid_pitch), 'DisplayName', 'PID PITCH');
-plot(M(:, m1_speed) - 1080,  'DisplayName', 'M1 SPEED');
-plot(M(:, m2_speed) - 1080,  'DisplayName', 'M2 SPEED');
-plot(M(:, m3_speed) - 1080,  'DisplayName', 'M3 SPEED');
-plot(M(:, m4_speed) - 1080,  'DisplayName', 'M4 SPEED');
+plot(M(:, roll),  'DisplayName', 'ROLL');
+plot(M(:, pitch), 'DisplayName', 'PITCH');
+plot(M(:, m1_speed) - 1100,  'DisplayName', 'M1 SPEED');
+%plot(M(:, m2_speed) - 1100,  'DisplayName', 'M2 SPEED');
+%plot(M(:, m3_speed) - 1100,  'DisplayName', 'M3 SPEED');
+%plot(M(:, m4_speed),  'DisplayName', 'M4 SPEED');
 legend(gca, 'show');
 
 grid on;

@@ -22,9 +22,9 @@ void writeCsv(maint_data_t* data)
     fprintf(f, "%.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %lld, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %d, %d, %d, %d, %d\n",
         data->acc[0], data->acc[1], data->acc[2],
         data->gyro[0], data->gyro[1], data->gyro[2],
-        data->magn[0], data->magn[1], data->magn[2],
+        0.0f, 0.0f, 0.0f,
         data->attitude[0], data->attitude[1], data->attitude[2],
-        data->attitude_variance[0], data->attitude_variance[1], data->attitude_variance[2],
+        0.0f, 0.0f, 0.0f,
         data->kf_dt,
         data->throttle,
         data->command[0], data->command[1], data->command[2],
@@ -40,6 +40,7 @@ void updateGui(maint_data_t* data)
 {
     ui.lineSwVer->setText(QString("%1.%2-%3").arg((char)data->sw_ver[0]).arg((char)data->sw_ver[1]).arg((char)data->sw_ver[2]));
 
+
     ui.lineAccX->setText(QString::number(data->acc[0]));
     ui.lineAccY->setText(QString::number(data->acc[1]));
     ui.lineAccZ->setText(QString::number(data->acc[2]));
@@ -48,17 +49,9 @@ void updateGui(maint_data_t* data)
     ui.lineGyroY->setText(QString::number(data->gyro[1]));
     ui.lineGyroZ->setText(QString::number(data->gyro[2]));
 
-    ui.lineMagnX->setText(QString::number(data->magn[0]));
-    ui.lineMagnY->setText(QString::number(data->magn[1]));
-    ui.lineMagnZ->setText(QString::number(data->magn[2]));
-
     ui.lineKfRoll->setText(QString::number(data->attitude[0]));
     ui.lineKfPitch->setText(QString::number(data->attitude[1]));
     ui.lineKfYaw->setText(QString::number(data->attitude[2]));
-
-    ui.lineKfRollVariance->setText(QString::number(data->attitude_variance[0]));
-    ui.lineKfPitchVariance->setText(QString::number(data->attitude_variance[1]));
-    ui.lineKfYawVariance->setText(QString::number(data->attitude_variance[2]));
 
     ui.lineKfDt->setText(QString::number(data->kf_dt));
 

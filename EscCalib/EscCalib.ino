@@ -3,7 +3,7 @@
 
 #define MAX_SIGNAL 2000
 #define MIN_SIGNAL 1000
-#define MOTOR_PIN1 8
+#define MOTOR_PIN1 4
 #define MOTOR_PIN2 7
 #define MOTOR_PIN3 6
 #define MOTOR_PIN4 5
@@ -16,7 +16,7 @@ Servo motor3;
 Servo motor4;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(1500);
   Serial.println("Program begin...");
   delay(1000);
@@ -27,7 +27,7 @@ void setup() {
   motor3.attach(MOTOR_PIN3);
   motor4.attach(MOTOR_PIN4);
 
-#if 0
+
   Serial.print("Now writing maximum output: (");Serial.print(MAX_SIGNAL);Serial.print(" us in this case)");Serial.print("\n");
   Serial.println("Turn on power source, then wait 2 seconds and press Enter");
   motor1.writeMicroseconds(MAX_SIGNAL);
@@ -35,11 +35,14 @@ void setup() {
   motor3.writeMicroseconds(MAX_SIGNAL);
   motor4.writeMicroseconds(MAX_SIGNAL);
 
+  while(!Serial.available());
+  Serial.read();
+  
   // Send min output
   Serial.println("\n");
   Serial.println("\n");
   Serial.print("Sending minimum output: (");Serial.print(MIN_SIGNAL);Serial.print(" us in this case)");Serial.print("\n");
-#endif
+
   motor1.writeMicroseconds(MIN_SIGNAL);
   motor2.writeMicroseconds(MIN_SIGNAL);
   motor3.writeMicroseconds(MIN_SIGNAL);
@@ -59,9 +62,9 @@ void loop() {
     int DELAY = Serial.parseInt();
     if (DELAY > 999)
     {
-      motor1.writeMicroseconds(MIN_SIGNAL);
-      motor2.writeMicroseconds(MIN_SIGNAL);
-      motor3.writeMicroseconds(MIN_SIGNAL);
+      motor1.writeMicroseconds(DELAY);
+      motor2.writeMicroseconds(DELAY);
+      motor3.writeMicroseconds(DELAY);
       motor4.writeMicroseconds(DELAY);
       float SPEED = (DELAY-1000)/10;
       Serial.print("\n");

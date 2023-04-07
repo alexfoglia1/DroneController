@@ -10,6 +10,6 @@ extern float KP[3];
 extern float KI[3];
 extern float KD[3];
 
-void PID_Update(float command[3], float current[3]);
+void PID_Update(float command[3], float current[3], float dt);
 
 #endif
