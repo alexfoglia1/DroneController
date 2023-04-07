@@ -26,11 +26,8 @@
 #define CHANNEL_3_PIN 10
 #define CHANNEL_4_PIN  9
 #define CHANNEL_5_PIN  8
-#define PROBE_PIN 2
 
-#define YELLOW_LED_PIN A0
 #define RED_LED_PIN  13
-#define LIPO_PROBE_PIN A3
 
 
 #define MOTORS_ARM_THRESHOLD 100 // motors start spinning at MIN_SIGNAL + x
@@ -72,7 +69,6 @@ void setup(void)
   // HW Initialisation
   pinMode(RED_LED_PIN,  OUTPUT);
 
-  pinMode(LIPO_PROBE_PIN, INPUT);
   pinMode(CHANNEL_1_PIN, INPUT);
   pinMode(CHANNEL_2_PIN, INPUT);
   pinMode(CHANNEL_3_PIN, INPUT);
@@ -219,7 +215,7 @@ void loop(void)
 // -------------------------------------------- MAINTENANCE  ------------------------------------------------------- 
 
   uint8_t* p_maint_data = reinterpret_cast<uint8_t*>(MAINT_Get());
-  //Serial.write(p_maint_data, sizeof(maint_data_t));
+  Serial.write(p_maint_data, sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------
 
   count_to_command += 1;
