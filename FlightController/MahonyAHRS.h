@@ -13,8 +13,8 @@ public:
     q2 = 0.0f;
     q3 = 0.0f;
     q4 = 0.0f;
-    kp = 6.0f;
-    ki = 0.00025;
+    kp = 12.0f;
+    ki = 0.0005;
 		integralFBx = 0.0f, integralFBy = 0.0f, integralFBz = 0.0f;
 	}
 	void mahonyAHRSupdate(float dt, float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);

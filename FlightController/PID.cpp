@@ -1,7 +1,7 @@
 #include "PID.h"
 
                //roll,  pitch,  yaw
-float KP[3] = {15.00f,  15.00f,  0.00f};
+float KP[3] = {20.00f,  20.00f,  0.00f};
 float KI[3] = {0.00f,   0.00f,  0.00f};
 float KD[3] = {0.00f,   0.00f,  0.00f};
 

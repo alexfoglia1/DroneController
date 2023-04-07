@@ -29,7 +29,6 @@
 
 #define RED_LED_PIN  13
 
-
 #define MOTORS_ARM_THRESHOLD 100 // motors start spinning at MIN_SIGNAL + x
 #define CHANNEL(N)(N-1)
 #define MOTOR(N)(N-1)
@@ -63,6 +62,7 @@ drone_attitude_t attitude;
 bool lsm9ds1_found;
 int count_to_command;
 float channels[5];
+float channels_dead_center_zones[5][2];
 
 void setup(void)
 {
@@ -102,7 +102,15 @@ void setup(void)
   for (int i = CHANNEL(1); i <= CHANNEL(5); i++)
   {
     channels[i] = 0.5f;
+    channels_dead_center_zones[i][0] = 0.0f;
+    channels_dead_center_zones[i][1] = 0.0f;
   }
+
+
+  channels_dead_center_zones[ROLL_CHANNEL][0] = 0.38f;
+  channels_dead_center_zones[ROLL_CHANNEL][1] = 0.43f;
+  channels_dead_center_zones[PITCH_CHANNEL][0] = 0.38f;
+  channels_dead_center_zones[PITCH_CHANNEL][1] = 0.43f;
 }
 
 
@@ -147,7 +155,6 @@ void loop(void)
     if (count_to_command == 3 + READ_COMMAND_THRESHOLD)
     {
       channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
-
       count_to_command = 0;
     }
     else
@@ -157,8 +164,8 @@ void loop(void)
 
     motors_armed = (channels[MOTORS_ARM_CHANNEL] > 0.5f);
                                              
-    float roll = toRange(channels[ROLL_CHANNEL], 0.0f, 0.85f, -2.0f, 2.0f);
-    float pitch = toRange(channels[PITCH_CHANNEL], 0.0f, 0.85f, -2.0, 2.0f);
+    float roll =  (channels[ROLL_CHANNEL]  >= channels_dead_center_zones[ROLL_CHANNEL][0]  && channels[ROLL_CHANNEL]  <= channels_dead_center_zones[ROLL_CHANNEL][1])  ? 0.0f : toRange(channels[ROLL_CHANNEL],  0.0f, 0.85f, -2.0f, 2.0f);
+    float pitch = (channels[PITCH_CHANNEL] >= channels_dead_center_zones[PITCH_CHANNEL][0] && channels[PITCH_CHANNEL] <= channels_dead_center_zones[PITCH_CHANNEL][1]) ? 0.0f : toRange(channels[PITCH_CHANNEL], 0.0f, 0.85f, -2.0f, 2.0f);
     
     float fake_attitude[3] = {0.0f, 0.0f, 0.0f};
     float rx_angle[3] = {roll, pitch, 0.0f};
