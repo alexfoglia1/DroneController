@@ -3,6 +3,7 @@
 #include <qthread.h>
 #include <Windows.h>
 
+#include "PlotWidget.h"
 #include "ui_MaintDRONE.h"
 #include "MAINT.h"
 
@@ -35,6 +36,85 @@ void writeCsv(maint_data_t* data)
     fclose(f);
  }
 
+void plot(QComboBox* combo, PlotWidget* widget, PlotTrack track, maint_data_t* data)
+{
+    if (combo->currentText().toLower().contains("accx"))
+    {
+        widget->addValue(track, data->acc[0]);
+    }
+    else if (combo->currentText().toLower().contains("accy"))
+    {
+        widget->addValue(track, data->acc[1]);
+    }
+    else if (combo->currentText().toLower().contains("accz"))
+    {
+        widget->addValue(track, data->acc[2]);
+    }
+    else if (combo->currentText().toLower().contains("gyrox"))
+    {
+        widget->addValue(track, data->gyro[0]);
+    }
+    else if (combo->currentText().toLower().contains("gyroy"))
+    {
+        widget->addValue(track, data->gyro[1]);
+    }
+    else if (combo->currentText().toLower().contains("gyroz"))
+    {
+        widget->addValue(track, data->gyro[2]);
+    }
+    else if (combo->currentText().toLower().contains("magnx"))
+    {
+        widget->addValue(track, data->magn[0]);
+    }
+    else if (combo->currentText().toLower().contains("magny"))
+    {
+        widget->addValue(track, data->magn[1]);
+    }
+    else if (combo->currentText().toLower().contains("magnz"))
+    {
+        widget->addValue(track, data->magn[2]);
+    }
+    else if (combo->currentText().toLower().contains("pid_roll"))
+    {
+        widget->addValue(track, data->PID[0]);
+    }
+    else if (combo->currentText().toLower().contains("pid_pitch"))
+    {
+        widget->addValue(track, data->PID[1]);
+    }
+    else if (combo->currentText().toLower().contains("pid_yaw"))
+    {
+        widget->addValue(track, data->PID[2]);
+    }
+    else if (combo->currentText().toLower().contains("roll"))
+    {
+        widget->addValue(track, data->attitude[0]);
+    }
+    else if (combo->currentText().toLower().contains("pitch"))
+    {
+        widget->addValue(track, data->attitude[1]);
+    }
+    else if (combo->currentText().toLower().contains("yaw"))
+    {
+        widget->addValue(track, data->attitude[2]);
+    }
+    else if (combo->currentText().toLower().contains("motor1"))
+    {
+        widget->addValue(track, data->motors_speed[0]);
+    }
+    else if (combo->currentText().toLower().contains("motor2"))
+    {
+        widget->addValue(track, data->motors_speed[1]);
+    }
+    else if (combo->currentText().toLower().contains("motor3"))
+    {
+        widget->addValue(track, data->motors_speed[2]);
+    }
+    else if (combo->currentText().toLower().contains("motor4"))
+    {
+        widget->addValue(track, data->motors_speed[3]);
+    }
+}
 
 void updateGui(maint_data_t* data)
 {
@@ -73,6 +153,11 @@ void updateGui(maint_data_t* data)
     ui.lineM3->setText(QString::number(data->motors_speed[2]));
     ui.lineM4->setText(QString::number(data->motors_speed[3]));
 
+    plot(ui.comboPlotTrack1, ui.plot, PlotTrack::PLOT_TRACK_1, data);
+    plot(ui.comboPlotTrack2, ui.plot, PlotTrack::PLOT_TRACK_2, data);
+    plot(ui.comboPlotTrack3, ui.plot, PlotTrack::PLOT_TRACK_3, data);
+    plot(ui.comboPlotTrack4, ui.plot, PlotTrack::PLOT_TRACK_4, data);
+
     app->processEvents();
 }
 
@@ -82,6 +167,32 @@ void initGui()
     mainWindow = new QMainWindow();
 
     ui.setupUi(mainWindow);
+    int r, g, b;
+    ui.plot->trackColors[0].getRgb(&r, &g, &b);
+    ui.comboPlotTrack1->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
+    ui.plot->trackColors[1].getRgb(&r, &g, &b);
+    ui.comboPlotTrack2->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
+    ui.plot->trackColors[2].getRgb(&r, &g, &b);
+    ui.comboPlotTrack3->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
+    ui.plot->trackColors[3].getRgb(&r, &g, &b);
+    ui.comboPlotTrack4->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
+
+    QObject::connect(ui.horizontalSlider1, &QSlider::valueChanged, mainWindow, [](int value)
+        {
+            ui.plot->setRange(PlotTrack::PLOT_TRACK_1, value);
+        });
+    QObject::connect(ui.horizontalSlider2, &QSlider::valueChanged, mainWindow, [](int value)
+        {
+            ui.plot->setRange(PlotTrack::PLOT_TRACK_2, value);
+        });
+    QObject::connect(ui.horizontalSlider3, &QSlider::valueChanged, mainWindow, [](int value)
+        {
+            ui.plot->setRange(PlotTrack::PLOT_TRACK_3, value);
+        });
+    QObject::connect(ui.horizontalSlider4, &QSlider::valueChanged, mainWindow, [](int value)
+        {
+            ui.plot->setRange(PlotTrack::PLOT_TRACK_4, value);
+        });
     mainWindow->setVisible(true);
 }
 

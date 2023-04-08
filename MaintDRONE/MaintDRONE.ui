@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1137</width>
+    <width>1641</width>
     <height>891</height>
    </rect>
   </property>
@@ -570,19 +570,535 @@
      </item>
     </layout>
    </widget>
+   <widget class="QComboBox" name="comboPlotTrack4">
+    <property name="geometry">
+     <rect>
+      <x>1493</x>
+      <y>10</y>
+      <width>124</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>accx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyrox</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magny</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor4</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboPlotTrack1">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>10</y>
+      <width>124</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>accx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyrox</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magny</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor4</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboPlotTrack3">
+    <property name="geometry">
+     <rect>
+      <x>1362</x>
+      <y>10</y>
+      <width>124</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>accx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyrox</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magny</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor4</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboPlotTrack2">
+    <property name="geometry">
+     <rect>
+      <x>1231</x>
+      <y>10</y>
+      <width>124</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>accx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>accz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyrox</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>gyroz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnx</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magny</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>magnz</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_roll</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_pitch</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>pid_yaw</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor3</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>motor4</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="PlotWidget" name="plot">
+    <property name="geometry">
+     <rect>
+      <x>1110</x>
+      <y>80</y>
+      <width>501</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider1">
+    <property name="geometry">
+     <rect>
+      <x>1110</x>
+      <y>40</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider2">
+    <property name="geometry">
+     <rect>
+      <x>1230</x>
+      <y>40</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider3">
+    <property name="geometry">
+     <rect>
+      <x>1370</x>
+      <y>40</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="horizontalSlider4">
+    <property name="geometry">
+     <rect>
+      <x>1490</x>
+      <y>40</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>180</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1137</width>
+     <width>1641</width>
      <height>34</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QLabel</extends>
+   <header>PlotWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

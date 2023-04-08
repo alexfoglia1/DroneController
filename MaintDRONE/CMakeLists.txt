@@ -13,6 +13,8 @@ ${CMAKE_SOURCE_DIR}/../FlightController/MAINT.h
 ${CMAKE_SOURCE_DIR}/../FlightController/MAINT.cpp
 
 ${CMAKE_SOURCE_DIR}/MaintDRONE.ui
+${CMAKE_SOURCE_DIR}/PlotWidget.h
+${CMAKE_SOURCE_DIR}/PlotWidget.cpp
 ${CMAKE_SOURCE_DIR}/main.cpp)
 
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
