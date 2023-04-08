@@ -63,6 +63,9 @@ bool lsm9ds1_found;
 int count_to_command;
 float channels[5];
 float channels_dead_center_zones[5][2];
+bool motors_armed;
+bool motors_armed_rise;
+bool motors_armed_fall;
 
 void setup(void)
 {
@@ -89,7 +92,6 @@ void setup(void)
 
   // SW Initialisation
   Serial.begin(115200);
-    
   lsm9ds1_found = IMU_Init();
   
   MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
@@ -98,14 +100,18 @@ void setup(void)
   attitude.data.roll  = 0;
   attitude.data.yaw   = 0;
 
+  motors_armed = false;
+  motors_armed_rise = false;
+  motors_armed_fall = false;
+
   count_to_command = 0;
+  
   for (int i = CHANNEL(1); i <= CHANNEL(5); i++)
   {
     channels[i] = 0.5f;
     channels_dead_center_zones[i][0] = 0.0f;
     channels_dead_center_zones[i][1] = 0.0f;
   }
-
 
   channels_dead_center_zones[ROLL_CHANNEL][0] = 0.38f;
   channels_dead_center_zones[ROLL_CHANNEL][1] = 0.43f;
@@ -117,7 +123,6 @@ void setup(void)
 void loop(void)
 { 
   uint16_t motors_speed[4] = {MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL};
-  bool motors_armed = false;
 
   if (lsm9ds1_found)
   {
@@ -128,6 +133,18 @@ void loop(void)
     uint64_t dt = 0;
 
     // Read IMU and update kalman filter
+    if (motors_armed_rise)
+    {
+      IMU_EnableFilters();
+      MAINT_UpdateButterworthFilterState(1);
+    }
+    
+    if (motors_armed_fall)
+    {
+      IMU_DisableFilters();
+      MAINT_UpdateButterworthFilterState(0);
+    }
+    
     IMU_Update(acc, gyro, magn, &dt);
     MAINT_UpdateIMU(acc, gyro, magn);
     // ----------------------------------
@@ -162,7 +179,27 @@ void loop(void)
       count_to_command += 1;
     }
 
-    motors_armed = (channels[MOTORS_ARM_CHANNEL] > 0.5f);
+
+    bool motors_armed_condition = (channels[MOTORS_ARM_CHANNEL] > 0.5f);
+    if (motors_armed == false && motors_armed_condition == true)
+    {
+      motors_armed_rise = true;
+    }
+    else
+    {
+      motors_armed_rise = false;
+    }
+
+    if (motors_armed == true && motors_armed_condition == false)
+    {
+      motors_armed_fall = true;
+    }
+    else
+    {
+      motors_armed_fall = false;
+    }
+
+    motors_armed = motors_armed_condition;
                                              
     float roll =  (channels[ROLL_CHANNEL]  >= channels_dead_center_zones[ROLL_CHANNEL][0]  && channels[ROLL_CHANNEL]  <= channels_dead_center_zones[ROLL_CHANNEL][1])  ? 0.0f : toRange(channels[ROLL_CHANNEL],  0.0f, 0.85f, -2.0f, 2.0f);
     float pitch = (channels[PITCH_CHANNEL] >= channels_dead_center_zones[PITCH_CHANNEL][0] && channels[PITCH_CHANNEL] <= channels_dead_center_zones[PITCH_CHANNEL][1]) ? 0.0f : toRange(channels[PITCH_CHANNEL], 0.0f, 0.85f, -2.0f, 2.0f);

@@ -13,6 +13,8 @@ void MAINT_Init(uint8_t major_v, uint8_t minor_v, uint8_t stage_v)
   MAINT_packet.sw_ver[0] = major_v;
   MAINT_packet.sw_ver[1] = minor_v;
   MAINT_packet.sw_ver[2] = stage_v;
+
+  MAINT_packet.bw_filter_state = 0;
 }
 
 
@@ -24,6 +26,12 @@ void MAINT_UpdateIMU(float acc[3], float gyro[3], float magn[3])
     MAINT_packet.gyro[i] = gyro[i];
     MAINT_packet.magn[i] = magn[i];  
   }
+}
+
+
+void MAINT_UpdateButterworthFilterState(uint8_t bw_filter_state)
+{
+  MAINT_packet.bw_filter_state = bw_filter_state;
 }
 
 

@@ -132,6 +132,8 @@ void updateGui(maint_data_t* data)
     ui.lineMagnY->setText(QString::number(data->magn[1]));
     ui.lineMagnZ->setText(QString::number(data->magn[2]));
 
+    ui.checkBWFilterEnabled->setChecked(data->bw_filter_state > 0);
+
     ui.lineKfRoll->setText(QString::number(data->attitude[0]));
     ui.lineKfPitch->setText(QString::number(data->attitude[1]));
     ui.lineKfYaw->setText(QString::number(data->attitude[2]));

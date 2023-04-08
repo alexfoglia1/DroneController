@@ -27,15 +27,38 @@ m2_speed = 26;
 m3_speed = 27;
 m4_speed = 28;
 
-M = csvread("28-03-2023-02-49.csv", 2, 0);
+M = csvread("08-04-2023-03-31.csv", 2, 0);
+
+pkg load signal;
+dt = 0.020;
+fs = 1/dt;
+fc = 10;
+fn =  fc/(fs/2)
+[b,a] = butter(6,fn);
+
+ax = M(:,accx);
+ay = M(:,accy);
+az = M(:,accz);
+N_samples = length(ax);
+
+accx_filtered = zeros(1, N_samples);
+accy_filtered = zeros(1, N_samples);
+accz_filtered = zeros(1, N_samples);
+for i=1:N_samples
+  accx_filtered(i) = filter(b,a,ax(i));
+  accy_filtered(i) = filter(b,a,ay(i));
+  accz_filtered(i) = filter(b,a,az(i));
+endfor
+
 
 hold all;
-plot(M(:, roll),  'DisplayName', 'ROLL');
-plot(M(:, pitch), 'DisplayName', 'PITCH');
-plot(M(:, m1_speed) - 1100,  'DisplayName', 'M1 SPEED');
-%plot(M(:, m2_speed) - 1100,  'DisplayName', 'M2 SPEED');
-%plot(M(:, m3_speed) - 1100,  'DisplayName', 'M3 SPEED');
-%plot(M(:, m4_speed),  'DisplayName', 'M4 SPEED');
+plot(accx_filtered, 'DisplayName', 'ACCX_Filtered');
+plot(accy_filtered, 'DisplayName', 'ACCY_Filtered');
+plot(accz_filtered, 'DisplayName', 'ACCZ_Filtered');
+plot(M(:, accx),  'DisplayName', 'ACCX');
+plot(M(:, accy),  'DisplayName', 'ACCY');
+plot(M(:, accz),  'DisplayName', 'ACCZ');
+
 legend(gca, 'show');
 
 grid on;

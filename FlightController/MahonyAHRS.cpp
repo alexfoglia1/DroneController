@@ -15,7 +15,7 @@
 
 void MahonyAHRS::mahonyAHRSupdate(float dt, float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz)
 {
-  float norm;
+  float _norm;
   float hx, hy, bx, bz;
   float vx, vy, vz, wx, wy, wz;
   float ex, ey, ez;
@@ -34,20 +34,20 @@ void MahonyAHRS::mahonyAHRSupdate(float dt, float gx, float gy, float gz, float 
   float q4q4 = q4 * q4;   
 
   // Normalise accelerometer measurement
-  norm = (float)sqrt(ax * ax + ay * ay + az * az);
-  if (norm == 0.f) return; // handle NaN
-  norm = 1 / norm;        // use reciprocal for division
-  ax *= norm;
-  ay *= norm;
-  az *= norm;
+  _norm = (float)sqrt(ax * ax + ay * ay + az * az);
+  if (_norm == 0.f) return; // handle NaN
+  _norm = 1 / _norm;        // use reciprocal for division
+  ax *= _norm;
+  ay *= _norm;
+  az *= _norm;
 
   // Normalise magnetometer measurement
-  norm = (float)sqrt(mx * mx + my * my + mz * mz);
-  if (norm == 0.f) return; // handle NaN
-  norm = 1 / norm;        // use reciprocal for division
-  mx *= norm;
-  my *= norm;
-  mz *= norm;
+  _norm = (float)sqrt(mx * mx + my * my + mz * mz);
+  if (_norm == 0.f) return; // handle NaN
+  _norm = 1 / _norm;        // use reciprocal for division
+  mx *= _norm;
+  my *= _norm;
+  mz *= _norm;
 
   // Reference direction of Earth's magnetic field
   hx = 2.f * mx * (0.5f - q3q3 - q4q4) + 2.f * my * (q2q3 - q1q4) + 2.f * mz * (q2q4 + q1q3);
@@ -95,12 +95,12 @@ void MahonyAHRS::mahonyAHRSupdate(float dt, float gx, float gy, float gz, float 
   q4 = pc + (q1 * gz + pa * gy - pb * gx) * (0.5f * dt);
 
   // Normalise quaternion
-  norm = invSqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4);
+  _norm = invSqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4);
 
-  q1 = q1 * norm;
-  q2 = q2 * norm;
-  q3 = q3 * norm;
-  q4 = q4 * norm;
+  q1 = q1 * _norm;
+  q2 = q2 * _norm;
+  q3 = q3 * _norm;
+  q4 = q4 * _norm;
 }
 
 float invSqrt(float x) {
