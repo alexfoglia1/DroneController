@@ -108,7 +108,7 @@ void IMU_Update(float acc[3], float gyro[3], float magn[3], uint64_t* dt)
   *dt = uint64_t(SAMPLING_PERIOD * 1e6);
   
   ahrs.mahonyAHRSupdate(SAMPLING_PERIOD,
-                gyro[X], gyro[Y], gyro[Z],
+                gyro[X] / 57.295780f, gyro[Y] / 57.295780f, gyro[Z] / 57.295780f,
                 acc[X],  acc[Y],  acc[Z],
                 magn[X], magn[Y], magn[Z]);
 }
