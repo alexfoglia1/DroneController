@@ -27,8 +27,8 @@ void PlotWidget::setGeometry(const QRect& r)
 void PlotWidget::setRange(PlotTrack track, float range)
 {
 	if (range < 1) range = 1;
-	
-	float* ranges[4] = {&track1_range, &track2_range, &track3_range, &track4_range};
+
+	float* ranges[4] = { &track1_range, &track2_range, &track3_range, &track4_range };
 	*ranges[static_cast<int>(track)] = range;
 	repaint();
 }
@@ -39,24 +39,28 @@ void PlotWidget::addValue(PlotTrack track, float val)
 
 	switch (track)
 	{
-		case PlotTrack::PLOT_TRACK_1:
+	case PlotTrack::PLOT_TRACK_1:
+	{
+		if (track1.size() < t_range)
 		{
-			if (track1.size() < t_range)
+			track1.push_back(val);
+		}
+		else
+		{
+			for (int i = 1; i < track1.size(); i++)
 			{
-				track1.push_back(val);
-			}
-			else
-			{
-				for (int i = 1; i < track1.size(); i++)
-				{
-					track1[i - 1] = track1[i];
-				}
-
-				track1.pop_back();
-				track1.push_back(val);
+				track1[i - 1] = track1[i];
 			}
 
-			break;
+			track1.pop_back();
+			track1.push_back(val);
+		}
+
+		if (fabs(val) > track1_range / 2)
+		{
+			track1_range *= 2;
+		}
+		break;
 		}
 		case PlotTrack::PLOT_TRACK_2:
 		{
@@ -74,7 +78,10 @@ void PlotWidget::addValue(PlotTrack track, float val)
 				track2.pop_back();
 				track2.push_back(val);
 			}
-
+			if (fabs(val) > track2_range / 2)
+			{
+				track2_range *= 2;
+			}
 			break;
 		}
 		case PlotTrack::PLOT_TRACK_3:
@@ -93,7 +100,10 @@ void PlotWidget::addValue(PlotTrack track, float val)
 				track3.pop_back();
 				track3.push_back(val);
 			}
-
+			if (fabs(val) > track3_range / 2)
+			{
+				track3_range *= 2;
+			}
 			break;
 		}
 		case PlotTrack::PLOT_TRACK_4:
@@ -111,6 +121,10 @@ void PlotWidget::addValue(PlotTrack track, float val)
 
 				track4.pop_back();
 				track4.push_back(val);
+			}
+			if (fabs(val) > track4_range / 2)
+			{
+				track4_range *= 2;
 			}
 		}
 
