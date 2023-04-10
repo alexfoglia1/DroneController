@@ -10,7 +10,8 @@
 // Date      Author      Notes
 // 29/09/2011 SOH Madgwick    Initial release
 // 02/10/2011 SOH Madgwick  Optimised for reduced CPU load
-// 10/10/2016   JP  Alves       Optimized for reduced CPU load and asynchronous communication (Arduino) 
+// 10/10/2016   JP  Alves       Optimized for reduced CPU load and asynchronous communication (Arduino)
+// 10/04/2023 Alex Foglia       sampling period as mahonyAHRSupdate parameter
 //=====================================================================================================
 
 void MahonyAHRS::mahonyAHRSupdate(float dt, float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz)
@@ -103,13 +104,20 @@ void MahonyAHRS::mahonyAHRSupdate(float dt, float gx, float gy, float gz, float 
   q4 = q4 * _norm;
 }
 
-float invSqrt(float x) {
+
+float MahonyAHRS::invSqrt(float x)
+{
   volatile float halfx = 0.5f * x;
   volatile float y = x;
   volatile long i = *(long*)&y;
+  
   i = 0x5f3759df - (i>>1);
   y = *(float*)&i;
-  for(int i=0;i < 3;i++)  
+  
+  for (int i = 0; i < 3; i++)
+  {
     y = y * (1.5f - (halfx * y * y));
+  }
+  
   return y;
 }

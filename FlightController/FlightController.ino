@@ -37,6 +37,8 @@
 #define PITCH_CHANNEL      CHANNEL(2)
 #define MOTORS_ARM_CHANNEL CHANNEL(5)
 
+#define SAMPLING_PERIOD_S 0.02f
+
 #define READ_COMMAND_THRESHOLD 0
 
 
@@ -92,7 +94,7 @@ void setup(void)
 
   // SW Initialisation
   Serial.begin(115200);
-  lsm9ds1_found = IMU_Init();
+  lsm9ds1_found = IMU_Init(SAMPLING_PERIOD_S);
   
   MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
   
@@ -122,36 +124,35 @@ void setup(void)
 
 void loop(void)
 { 
+  uint64_t t0_micros = micros();
+  
   uint16_t motors_speed[4] = {MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL};
-
   if (lsm9ds1_found)
   {
 // --------------------------------------------- READ CURRENT ATTITUDE --------------------------------------------- 
     float acc[3]  = {0.f, 0.f, 0.f};
     float gyro[3] = {0.f, 0.f, 0.f};
     float magn[3] = {0.f, 0.f, 0.f};
-    uint64_t dt = 0;
 
     // Read IMU and update kalman filter
     if (motors_armed_rise)
     {
-      IMU_EnableFilters();
-      MAINT_UpdateButterworthFilterState(1);
+      IMU_EnableMovingAVGFilter();
+      MAINT_UpdateMovingAVGFilterState(1);
     }
     
     if (motors_armed_fall)
     {
-      IMU_DisableFilters();
-      MAINT_UpdateButterworthFilterState(0);
+      IMU_DisableMovingAVGFilter();
+      MAINT_UpdateMovingAVGFilterState(0);
     }
     
-    IMU_Update(acc, gyro, magn, &dt);
+    IMU_Update(acc, gyro, magn);
     MAINT_UpdateIMU(acc, gyro, magn);
     // ----------------------------------
     // Get current attitude
     IMU_CurrentAttitude(&attitude.data.roll, &attitude.data.pitch, &attitude.data.yaw);
-    MAINT_UpdateKF(dt, attitude.vect);
-
+    MAINT_UpdateAHRS(attitude.vect);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
     if (count_to_command == READ_COMMAND_THRESHOLD)
@@ -207,12 +208,11 @@ void loop(void)
     float fake_attitude[3] = {0.0f, 0.0f, 0.0f};
     float rx_angle[3] = {roll, pitch, 0.0f};
     MAINT_UpdateCMD(channels[THROTTLE_CHANNEL], rx_angle);
-
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- PID UPDATE --------------------------------------------------------- 
-    PID_Update(rx_angle, fake_attitude, dt*1e-6);
+    PID_Update(rx_angle, fake_attitude, SAMPLING_PERIOD_S);
+    float* PID = PID_Get();
     MAINT_UpdatePID(PID);
-
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- APPLY SPEED CORRECTION --------------------------------------------- 
       //[M1]     [M2]    (X)^
@@ -252,7 +252,6 @@ void loop(void)
        
        MAINT_UpdateMOTORS(motors_armed, motors_speed);
     }
-
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MOTORS CONTROL ----------------------------------------------------- 
   motor1.writeMicroseconds(motors_armed ? motors_speed[MOTOR(1)] : MIN_MOTOR_SIGNAL);
@@ -260,7 +259,10 @@ void loop(void)
   motor3.writeMicroseconds(motors_armed ? motors_speed[MOTOR(3)] : MIN_MOTOR_SIGNAL);
   motor4.writeMicroseconds(motors_armed ? motors_speed[MOTOR(4)] : MIN_MOTOR_SIGNAL);
 // -----------------------------------------------------------------------------------------------------------------
-// -------------------------------------------- MAINTENANCE  ------------------------------------------------------- 
+// -------------------------------------------- MAINTENANCE  -------------------------------------------------------
+  uint64_t tf_micros = micros();
+  uint64_t dt_micros = tf_micros - t0_micros;
+  MAINT_UpdateLoopTime(dt_micros);
   uint8_t* p_maint_data = reinterpret_cast<uint8_t*>(MAINT_Get());
   Serial.write(p_maint_data, sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------

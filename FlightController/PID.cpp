@@ -43,3 +43,27 @@ void PID_Update(float command[3], float current[3], float dt)
   PID[PITCH] =  (error[PITCH] * KP[PITCH])  + (int_coef[PITCH] * KI[PITCH]) + (delta_err[PITCH] * KD[PITCH]);
   PID[YAW]   =  (error[YAW]   * KP[YAW])    + (int_coef[YAW]   * KI[YAW])   + (delta_err[YAW]   * KD[YAW]);
 }
+
+
+float* PID_Get()
+{
+  return PID;
+}
+
+
+float* PID_Kp()
+{
+  return KP;
+}
+
+
+float* PID_Ki()
+{
+  return KI;
+}
+
+
+float* PID_Kd()
+{
+  return KD;
+}

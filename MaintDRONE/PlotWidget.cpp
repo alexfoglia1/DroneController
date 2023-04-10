@@ -7,7 +7,6 @@ PlotWidget::PlotWidget(QWidget* parent) : QLabel(parent)
 	track1_range = 20;
 	track2_range = 20;
 	track3_range = 20;
-	track4_range = 20;
 
 	t_range = 200;
 }
@@ -28,7 +27,7 @@ void PlotWidget::setRange(PlotTrack track, float range)
 {
 	if (range < 1) range = 1;
 
-	float* ranges[4] = { &track1_range, &track2_range, &track3_range, &track4_range };
+	float* ranges[4] = { &track1_range, &track2_range, &track3_range };
 	*ranges[static_cast<int>(track)] = range;
 	repaint();
 }
@@ -106,29 +105,6 @@ void PlotWidget::addValue(PlotTrack track, float val)
 			}
 			break;
 		}
-		case PlotTrack::PLOT_TRACK_4:
-		{
-			if (track4.size() < t_range)
-			{
-				track4.push_back(val);
-			}
-			else
-			{
-				for (int i = 1; i < track4.size(); i++)
-				{
-					track4[i - 1] = track4[i];
-				}
-
-				track4.pop_back();
-				track4.push_back(val);
-			}
-			if (fabs(val) > track4_range / 2)
-			{
-				track4_range *= 2;
-			}
-		}
-
-		break;
 	}
 
 
@@ -146,14 +122,14 @@ void PlotWidget::paintEvent(QPaintEvent* event)
 	plotPainter.setPen(QColor(0xff, 0xff, 0xff));
 	plotPainter.drawLine(OFFSET_X_PX, 0, OFFSET_X_PX, r.height());
 	plotPainter.drawLine(0, r.height() / 2, r.width(), r.height() / 2);
-	std::vector<float>* tracks[4] = { &track1, &track2, &track3, &track4 };
-	float* ranges[4] = { &track1_range, &track2_range, &track3_range, &track4_range };
+	std::vector<float>* tracks[3] = { &track1, &track2, &track3 };
+	float* ranges[3] = { &track1_range, &track2_range, &track3_range };
 
-	for (int y = 0; y < r.height(); y += 5 * OFFSET_X_PX)
+	for (int y = 5 * OFFSET_X_PX; y < r.height(); y += 5 * OFFSET_X_PX)
 	{
 		plotPainter.setPen(QColor(0xff, 0xff, 0xff));
 		plotPainter.drawLine(OFFSET_X_PX, y, r.width(), y);
-		for (int track = 0; track < 4; track++)
+		for (int track = 0; track < 3; track++)
 		{
 			std::vector<float> currentTrack = *tracks[static_cast<int>(track)];
 			float currentRange = *ranges[static_cast<int>(track)];
@@ -163,14 +139,14 @@ void PlotWidget::paintEvent(QPaintEvent* event)
 
 			float f = (r.height() / 2 - y) / scaleY;
 
-			plotPainter.drawText(QPointF(OFFSET_X_PX + 5, y + (track - 2) * 12), QString::number(f));
+			plotPainter.drawText(QPointF(OFFSET_X_PX + 5, y + (track - 3) * 12), QString::number(f));
 		}
 	}
 
 	float scaleX = (r.width() - OFFSET_X_PX) / t_range;
 	
 	
-	for (int track = 0; track < 4; track++)
+	for (int track = 0; track < 3; track++)
 	{
 		std::vector<float> currentTrack = *tracks[static_cast<int>(track)];
 		float currentRange = *ranges[static_cast<int>(track)];

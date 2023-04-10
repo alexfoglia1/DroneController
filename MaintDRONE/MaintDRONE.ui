@@ -24,15 +24,38 @@
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="9" column="2">
-      <widget class="QLineEdit" name="lineKfPitch">
-       <property name="enabled">
-        <bool>false</bool>
+     <item row="6" column="1">
+      <widget class="QLabel" name="label_9">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Magnetometer</string>
        </property>
       </widget>
      </item>
-     <item row="21" column="1">
-      <widget class="QLabel" name="label_26">
+     <item row="27" column="1">
+      <widget class="QLabel" name="label_30">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>M4</string>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="1">
+      <widget class="QLabel" name="label_17">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Roll</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLabel" name="label_12">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
@@ -41,27 +64,23 @@
        </property>
       </widget>
      </item>
-     <item row="21" column="2">
-      <widget class="QLineEdit" name="linePidPitch">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="22" column="1">
-      <widget class="QLabel" name="label_27">
+     <item row="14" column="1">
+      <widget class="QLabel" name="label_23">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>Yaw</string>
+        <string>Throttle</string>
        </property>
       </widget>
      </item>
-     <item row="16" column="2">
-      <widget class="QLineEdit" name="lineCmdPitch">
-       <property name="enabled">
-        <bool>false</bool>
+     <item row="13" column="1">
+      <widget class="QLabel" name="label_16">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -75,23 +94,44 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="22" column="2">
+      <widget class="QLineEdit" name="linePidYaw">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="2">
+      <widget class="QLineEdit" name="lineKfYaw">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="2">
+      <widget class="QLineEdit" name="lineCmdRoll">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="1">
+      <widget class="QLabel" name="label_21">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Pitch</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
       <widget class="QLabel" name="label_8">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
         <string>Accelerometer</string>
-       </property>
-      </widget>
-     </item>
-     <item row="26" column="3">
-      <widget class="QLabel" name="label_31">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>M2</string>
        </property>
       </widget>
      </item>
@@ -108,30 +148,6 @@
        </property>
       </widget>
      </item>
-     <item row="15" column="1">
-      <widget class="QLabel" name="label_17">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Roll</string>
-       </property>
-      </widget>
-     </item>
-     <item row="26" column="2">
-      <widget class="QLineEdit" name="lineM1">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="22" column="2">
-      <widget class="QLineEdit" name="linePidYaw">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
      <item row="13" column="0">
       <widget class="QLabel" name="label_4">
        <property name="styleSheet">
@@ -142,121 +158,15 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="0">
-        <widget class="QLineEdit" name="lineGyroX">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="lineGyroZ">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineGyroY">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_33">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_34">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>Y</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_35">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>Z</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="11" column="1">
-      <widget class="QLabel" name="label_15">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>dt</string>
-       </property>
-      </widget>
-     </item>
-     <item row="24" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>MOTORS</string>
-       </property>
-      </widget>
-     </item>
-     <item row="27" column="4">
-      <widget class="QLineEdit" name="lineM3">
+     <item row="27" column="2">
+      <widget class="QLineEdit" name="lineM4">
        <property name="enabled">
         <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="10" column="2">
-      <widget class="QLineEdit" name="lineKfYaw">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="1">
-      <widget class="QLabel" name="label_13">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Yaw</string>
-       </property>
-      </widget>
-     </item>
-     <item row="26" column="4">
-      <widget class="QLineEdit" name="lineM2">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineSwVer">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QLabel" name="label_12">
+     <item row="21" column="1">
+      <widget class="QLabel" name="label_26">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
@@ -265,120 +175,17 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="2">
-      <widget class="QLineEdit" name="lineKfDt">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="27" column="2">
-      <widget class="QLineEdit" name="lineM4">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="2">
-      <widget class="QLineEdit" name="lineKfRoll">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="1">
-      <widget class="QLabel" name="label_16">
+     <item row="9" column="1">
+      <widget class="QLabel" name="label_11">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string/>
+        <string>Roll</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QLabel" name="label_9">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Magnetometer</string>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="2">
-      <widget class="QLineEdit" name="lineCmdThrottle">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="1">
-      <widget class="QLabel" name="label_23">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Throttle</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QLineEdit" name="lineAccX">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="lineAccZ">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="lineAccY">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_24">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>Y</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_28">
-         <property name="styleSheet">
-          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-         </property>
-         <property name="text">
-          <string>Z</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="5" column="2">
+     <item row="6" column="2">
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="1" column="2">
         <layout class="QGridLayout" name="gridLayout_5">
@@ -437,23 +244,77 @@
        </item>
       </layout>
      </item>
-     <item row="17" column="1">
-      <widget class="QLabel" name="label_22">
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="checkBWFilterEnabled">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>Yaw</string>
+        <string>AVG Filter</string>
        </property>
       </widget>
      </item>
-     <item row="26" column="1">
-      <widget class="QLabel" name="label_29">
+     <item row="19" column="2">
+      <widget class="QLineEdit" name="linePidRoll">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>M1</string>
+        <string>IMU</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>AHRS</string>
+       </property>
+      </widget>
+     </item>
+     <item row="26" column="2">
+      <widget class="QLineEdit" name="lineM1">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="26" column="3">
+      <widget class="QLabel" name="label_31">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>M2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLabel" name="label_14">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Gyroscope</string>
+       </property>
+      </widget>
+     </item>
+     <item row="21" column="2">
+      <widget class="QLineEdit" name="linePidPitch">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -467,45 +328,83 @@
        </property>
       </widget>
      </item>
-     <item row="16" column="1">
-      <widget class="QLabel" name="label_21">
+     <item row="4" column="2">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineAccX">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="lineAccZ">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineAccY">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_24">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_28">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>Z</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="11" column="1">
+      <widget class="QLabel" name="label_13">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>Pitch</string>
+        <string>Yaw</string>
        </property>
       </widget>
      </item>
-     <item row="27" column="1">
-      <widget class="QLabel" name="label_30">
+     <item row="22" column="1">
+      <widget class="QLabel" name="label_27">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>M4</string>
+        <string>Yaw</string>
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
-      <widget class="QLabel" name="label_11">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Roll</string>
-       </property>
-      </widget>
-     </item>
-     <item row="15" column="2">
-      <widget class="QLineEdit" name="lineCmdRoll">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="19" column="2">
-      <widget class="QLineEdit" name="linePidRoll">
+     <item row="14" column="2">
+      <widget class="QLineEdit" name="lineCmdThrottle">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -521,42 +420,87 @@
        </property>
       </widget>
      </item>
-     <item row="17" column="2">
-      <widget class="QLineEdit" name="lineCmdYaw">
+     <item row="26" column="4">
+      <widget class="QLineEdit" name="lineM2">
        <property name="enabled">
         <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_2">
+     <item row="26" column="1">
+      <widget class="QLabel" name="label_29">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>AHRS</string>
+        <string>M1</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="24" column="0">
+      <widget class="QLabel" name="label_6">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>IMU</string>
+        <string>MOTORS</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <widget class="QLabel" name="label_14">
-       <property name="styleSheet">
-        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
-       </property>
-       <property name="text">
-        <string>Gyroscope</string>
-       </property>
-      </widget>
+     <item row="5" column="2">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineGyroX">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="lineGyroZ">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineGyroY">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_33">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_34">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_35">
+         <property name="styleSheet">
+          <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+         </property>
+         <property name="text">
+          <string>Z</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="18" column="0">
       <widget class="QLabel" name="label_5">
@@ -568,132 +512,83 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QCheckBox" name="checkBWFilterEnabled">
+     <item row="10" column="2">
+      <widget class="QLineEdit" name="lineKfPitch">
        <property name="enabled">
         <bool>false</bool>
        </property>
+      </widget>
+     </item>
+     <item row="17" column="1">
+      <widget class="QLabel" name="label_22">
        <property name="styleSheet">
         <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
        </property>
        <property name="text">
-        <string>BW Filter</string>
+        <string>Yaw</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="2">
+      <widget class="QLineEdit" name="lineCmdYaw">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="2">
+      <widget class="QLineEdit" name="lineCmdPitch">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineSwVer">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="27" column="4">
+      <widget class="QLineEdit" name="lineM3">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="2">
+      <widget class="QLineEdit" name="lineKfRoll">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Courier&quot;;</string>
+       </property>
+       <property name="text">
+        <string>LOOP TIME</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="lineLoopTime">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QComboBox" name="comboPlotTrack4">
-    <property name="geometry">
-     <rect>
-      <x>1450</x>
-      <y>10</y>
-      <width>161</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <item>
-     <property name="text">
-      <string>accx</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>accy</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>accz</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>gyrox</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>gyroy</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>gyroz</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>magnx</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>magny</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>magnz</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>roll</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>pitch</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>yaw</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>pid_roll</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>pid_pitch</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>pid_yaw</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>motor1</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>motor2</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>motor3</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>motor4</string>
-     </property>
-    </item>
    </widget>
    <widget class="QComboBox" name="comboPlotTrack1">
     <property name="geometry">
      <rect>
       <x>890</x>
       <y>10</y>
-      <width>151</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -796,9 +691,9 @@
    <widget class="QComboBox" name="comboPlotTrack3">
     <property name="geometry">
      <rect>
-      <x>1260</x>
+      <x>1150</x>
       <y>10</y>
-      <width>151</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -901,9 +796,9 @@
    <widget class="QComboBox" name="comboPlotTrack2">
     <property name="geometry">
      <rect>
-      <x>1070</x>
+      <x>1420</x>
       <y>10</y>
-      <width>151</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -1009,7 +904,7 @@
       <x>890</x>
       <y>80</y>
       <width>720</width>
-      <height>400</height>
+      <height>500</height>
      </rect>
     </property>
     <property name="text">
@@ -1021,7 +916,7 @@
      <rect>
       <x>890</x>
       <y>40</y>
-      <width>141</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -1038,9 +933,9 @@
    <widget class="QSlider" name="horizontalSlider2">
     <property name="geometry">
      <rect>
-      <x>1070</x>
+      <x>1150</x>
       <y>40</y>
-      <width>151</width>
+      <width>201</width>
       <height>22</height>
      </rect>
     </property>
@@ -1057,28 +952,9 @@
    <widget class="QSlider" name="horizontalSlider3">
     <property name="geometry">
      <rect>
-      <x>1260</x>
+      <x>1420</x>
       <y>40</y>
-      <width>151</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>180</number>
-    </property>
-    <property name="value">
-     <number>20</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QSlider" name="horizontalSlider4">
-    <property name="geometry">
-     <rect>
-      <x>1450</x>
-      <y>40</y>
-      <width>161</width>
+      <width>191</width>
       <height>22</height>
      </rect>
     </property>

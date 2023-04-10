@@ -5,21 +5,23 @@
 #include "MahonyAHRS.h"
 #include "IMU.h"
 
-
 #define MOVING_AVG_SIZE 20
-#define SAMPLING_PERIOD 0.02f
+
+
+Adafruit_LSM9DS1 lsm;
+MahonyAHRS ahrs;
 
 float ax_hist[MOVING_AVG_SIZE];
 float ay_hist[MOVING_AVG_SIZE];
 float az_hist[MOVING_AVG_SIZE];
-int ll_ax_hist = 0;
-int ll_ay_hist = 0;
-int ll_az_hist = 0;
+int ll_ax_hist;
+int ll_ay_hist;
+int ll_az_hist;
+bool is_avg_filter_enabled;
 
-Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
-MahonyAHRS ahrs;
+float sampling_period_sec;
 
-bool bw_filter_state = false;
+
 float a_filter(float f, int* ll, float* hist)
 {
   if (*ll < MOVING_AVG_SIZE)
@@ -36,7 +38,6 @@ float a_filter(float f, int* ll, float* hist)
     hist[*ll - 1] = f;
   }
 
-
   float sum = 0.0f;
   for (int i = 0; i < *ll; i++)
   {
@@ -44,18 +45,17 @@ float a_filter(float f, int* ll, float* hist)
   }
   
   return sum / *ll;
-  
 }
 
-uint64_t lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
+
+void lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
 {
-  uint64_t t = micros();
   sensors_event_t a, m, g, temp;
   lsm.getEvent(&a, &m, &g, &temp); 
   
-  acc[X] = bw_filter_state ? a_filter(a.acceleration.x, &ll_ax_hist, &ax_hist[0]) : a.acceleration.x;
-  acc[Y] = bw_filter_state ? a_filter(a.acceleration.y, &ll_ay_hist, &ay_hist[0]) : a.acceleration.y;
-  acc[Z] = bw_filter_state ? a_filter(a.acceleration.z, &ll_az_hist, &az_hist[0]) : a.acceleration.z;
+  acc[X] = is_avg_filter_enabled ? a_filter(a.acceleration.x, &ll_ax_hist, &ax_hist[0]) : a.acceleration.x;
+  acc[Y] = is_avg_filter_enabled ? a_filter(a.acceleration.y, &ll_ay_hist, &ay_hist[0]) : a.acceleration.y;
+  acc[Z] = is_avg_filter_enabled ? a_filter(a.acceleration.z, &ll_az_hist, &az_hist[0]) : a.acceleration.z;
   
   gyro[X] = g.gyro.x;
   gyro[Y] = g.gyro.y;
@@ -64,9 +64,8 @@ uint64_t lsm9ds1_read(float acc[3], float gyro[3], float magn[3])
   magn[X] = m.magnetic.x;
   magn[Y] = m.magnetic.y;
   magn[Z] = m.magnetic.z;
-
-  return t;
 }
+
 
 void history_reset()
 {
@@ -83,10 +82,12 @@ void history_reset()
 }
 
 
-bool IMU_Init()
+bool IMU_Init(float sampling_period_s)
 {
-
+  is_avg_filter_enabled = false;
   history_reset();
+  sampling_period_sec = sampling_period_s;
+
   if (!lsm.begin())
   {
      return false;
@@ -102,12 +103,11 @@ bool IMU_Init()
 }
 
 
-void IMU_Update(float acc[3], float gyro[3], float magn[3], uint64_t* dt)
-{ 
-  uint64_t t_micros = lsm9ds1_read(acc, gyro, magn);
-  *dt = uint64_t(SAMPLING_PERIOD * 1e6);
+void IMU_Update(float acc[3], float gyro[3], float magn[3])
+{
+  lsm9ds1_read(acc, gyro, magn);
   
-  ahrs.mahonyAHRSupdate(SAMPLING_PERIOD,
+  ahrs.mahonyAHRSupdate(sampling_period_sec,
                 gyro[X] / 57.295780f, gyro[Y] / 57.295780f, gyro[Z] / 57.295780f,
                 acc[X],  acc[Y],  acc[Z],
                 magn[X], magn[Y], magn[Z]);
@@ -127,13 +127,14 @@ void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw)
 }
 
 
-void IMU_EnableFilters()
+void IMU_EnableMovingAVGFilter()
 {
   history_reset();
-  bw_filter_state = true;
+  is_avg_filter_enabled = true;
 }
 
-void IMU_DisableFilters()
+
+void IMU_DisableMovingAVGFilter()
 {
-  bw_filter_state = false;
+  is_avg_filter_enabled = false;
 }

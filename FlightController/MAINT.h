@@ -16,14 +16,14 @@ typedef struct
   float    gyro[3];
   float    acc[3];
   float    magn[3];
-  uint8_t  bw_filter_state; 
-  uint64_t kf_dt;
+  uint8_t  avg_filter; 
   float    attitude[3];
   float    throttle;
   float    command[3];
   float    PID[3];
   uint8_t  motors_armed;
   uint16_t motors_speed[4];
+  uint64_t loop_time;
 }
 #ifndef WIN32
 __attribute__((packed))
@@ -32,11 +32,12 @@ maint_data_t;
 
 void MAINT_Init(uint8_t major_v, uint8_t minor_v, uint8_t stage_v);
 void MAINT_UpdateIMU(float acc[3], float gyro[3], float magn[3]);
-void MAINT_UpdateButterworthFilterState(uint8_t bw_filter_state);
-void MAINT_UpdateKF(uint64_t dt, float attitude[3]);
+void MAINT_UpdateMovingAVGFilterState(uint8_t is_avg_filter_enabled);
+void MAINT_UpdateAHRS(float attitude[3]);
 void MAINT_UpdateCMD(float throttle, float cmd[3]);
 void MAINT_UpdatePID(float pid[3]);
 void MAINT_UpdateMOTORS(uint8_t motors_armed, uint16_t motors_speed[4]);
+void MAINT_UpdateLoopTime(uint64_t loop_time_us);
 
 maint_data_t* MAINT_Get();
 

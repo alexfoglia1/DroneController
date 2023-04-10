@@ -1,19 +1,10 @@
 #include <math.h>
-#include <Filters.h>
-
-#define GRAU2RAD 0.01745329251 
-
-float invSqrt(float x);
 
 class MahonyAHRS {
-	float q1, q2, q3, q4;
-  float gx, gy, gz;
-  float ax, ay, az;
-  float mx, my, mz;
-	float kp, ki;
-	float integralFBx, integralFBy, integralFBz;
+
 public:
-	MahonyAHRS() {
+  MahonyAHRS()
+  {
     q1 = 1.0f;
     q2 = 0.0f;
     q3 = 0.0f;
@@ -33,22 +24,37 @@ public:
 	}
 	void mahonyAHRSupdate(float dt, float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
 
-	inline float& getQ1() {
+	inline float& getQ1()
+	{
 		return q1;
 	}
-	inline float& getQ2() {
+	inline float& getQ2()
+	{
 		return q2;
 	}
-	inline float& getQ3() {
+	inline float& getQ3()
+	{
 		return q3;
 	}
-	inline float& getQ4() {
+	inline float& getQ4()
+	{
 		return q4;
 	}
-	inline float& Kp() {
+	inline float& Kp()
+	{
 		return kp;
 	}
-	inline float& Ki() {
+	inline float& Ki()
+	{
 		return ki;
 	}
+ 
+  private:
+    float q1, q2, q3, q4;
+    float gx, gy, gz;
+    float ax, ay, az;
+    float mx, my, mz;
+    float kp, ki;
+    float integralFBx, integralFBy, integralFBz;
+    float invSqrt(float x);
 };

@@ -14,7 +14,7 @@ void MAINT_Init(uint8_t major_v, uint8_t minor_v, uint8_t stage_v)
   MAINT_packet.sw_ver[1] = minor_v;
   MAINT_packet.sw_ver[2] = stage_v;
 
-  MAINT_packet.bw_filter_state = 0;
+  MAINT_packet.avg_filter = 0;
 }
 
 
@@ -29,20 +29,18 @@ void MAINT_UpdateIMU(float acc[3], float gyro[3], float magn[3])
 }
 
 
-void MAINT_UpdateButterworthFilterState(uint8_t bw_filter_state)
+void MAINT_UpdateMovingAVGFilterState(uint8_t is_avg_filter_enabled)
 {
-  MAINT_packet.bw_filter_state = bw_filter_state;
+  MAINT_packet.avg_filter = is_avg_filter_enabled;
 }
 
 
-void MAINT_UpdateKF(uint64_t dt, float attitude[3])
+void MAINT_UpdateAHRS(float attitude[3])
 {
   for (int i = 0; i < 3; i++)
   {
     MAINT_packet.attitude[i] = attitude[i];
   }
-
-  MAINT_packet.kf_dt = dt;
 }
 
 
@@ -73,6 +71,12 @@ void MAINT_UpdateMOTORS(uint8_t motors_armed, uint16_t motors_speed[4])
   }
 
   MAINT_packet.motors_armed = motors_armed;
+}
+
+
+void MAINT_UpdateLoopTime(uint64_t loop_time_us)
+{
+  MAINT_packet.loop_time = loop_time_us;
 }
 
 

@@ -5,10 +5,10 @@
 #define Y 1
 #define Z 2
 
-bool IMU_Init();
-void IMU_EnableFilters();
-void IMU_DisableFilters();
-void IMU_Update(float acc[3], float gyro[3], float magn[3], uint64_t* dt);
+bool IMU_Init(float sampling_period_s);
+void IMU_EnableMovingAVGFilter();
+void IMU_DisableMovingAVGFilter();
+void IMU_Update(float acc[3], float gyro[3], float magn[3]);
 void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw);
 
 

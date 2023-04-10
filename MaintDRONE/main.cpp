@@ -26,7 +26,7 @@ void writeCsv(maint_data_t* data)
         data->magn[0], data->magn[1], data->magn[2],
         data->attitude[0], data->attitude[1], data->attitude[2],
         0.0f, 0.0f, 0.0f,
-        data->kf_dt,
+        data->loop_time,
         data->throttle,
         data->command[0], data->command[1], data->command[2],
         data->PID[0], data->PID[1], data->PID[2],
@@ -132,13 +132,13 @@ void updateGui(maint_data_t* data)
     ui.lineMagnY->setText(QString::number(data->magn[1]));
     ui.lineMagnZ->setText(QString::number(data->magn[2]));
 
-    ui.checkBWFilterEnabled->setChecked(data->bw_filter_state > 0);
+    ui.checkBWFilterEnabled->setChecked(data->avg_filter > 0);
 
     ui.lineKfRoll->setText(QString::number(data->attitude[0]));
     ui.lineKfPitch->setText(QString::number(data->attitude[1]));
     ui.lineKfYaw->setText(QString::number(data->attitude[2]));
 
-    ui.lineKfDt->setText(QString::number(data->kf_dt));
+    ui.lineLoopTime->setText(QString::number(data->loop_time));
 
     ui.lineCmdRoll->setText(QString::number(data->command[0]));
     ui.lineCmdPitch->setText(QString::number(data->command[1]));
@@ -158,7 +158,6 @@ void updateGui(maint_data_t* data)
     plot(ui.comboPlotTrack1, ui.plot, PlotTrack::PLOT_TRACK_1, data);
     plot(ui.comboPlotTrack2, ui.plot, PlotTrack::PLOT_TRACK_2, data);
     plot(ui.comboPlotTrack3, ui.plot, PlotTrack::PLOT_TRACK_3, data);
-    plot(ui.comboPlotTrack4, ui.plot, PlotTrack::PLOT_TRACK_4, data);
 
     app->processEvents();
 }
@@ -176,8 +175,6 @@ void initGui()
     ui.comboPlotTrack2->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
     ui.plot->trackColors[2].getRgb(&r, &g, &b);
     ui.comboPlotTrack3->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
-    ui.plot->trackColors[3].getRgb(&r, &g, &b);
-    ui.comboPlotTrack4->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
 
     QObject::connect(ui.horizontalSlider1, &QSlider::valueChanged, mainWindow, [](int value)
         {
@@ -190,10 +187,6 @@ void initGui()
     QObject::connect(ui.horizontalSlider3, &QSlider::valueChanged, mainWindow, [](int value)
         {
             ui.plot->setRange(PlotTrack::PLOT_TRACK_3, value);
-        });
-    QObject::connect(ui.horizontalSlider4, &QSlider::valueChanged, mainWindow, [](int value)
-        {
-            ui.plot->setRange(PlotTrack::PLOT_TRACK_4, value);
         });
     mainWindow->setVisible(true);
 }
