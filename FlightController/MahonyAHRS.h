@@ -18,7 +18,7 @@ public:
     mx = 0.0f;
     my = 0.0f;
     mz = 0.0f;
-    kp = 1.0f;
+    kp = 25.0f;
     ki = 0.0000;
 		integralFBx = 0.0f, integralFBy = 0.0f, integralFBz = 0.0f;
 	}

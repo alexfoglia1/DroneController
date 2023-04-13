@@ -250,22 +250,22 @@ void loop(void)
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
     if (count_to_command == READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
+      channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
     if (count_to_command == 1 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
+      channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
     if (count_to_command == 2 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
+      channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
     }
 
     if (count_to_command == 3 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
+      channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
       count_to_command = 0;
     }
     else
