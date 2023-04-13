@@ -1,5 +1,8 @@
 
 #include <Servo.h>
+#include <Wire.h>
+#include <hd44780.h>
+#include <hd44780ioClass/hd44780_I2Cexp.h>
 
 #include "IMU.h"
 #include "PID.h"
@@ -10,14 +13,17 @@
 #define MINOR_VERSION '0'
 #define STAGE_VERSION 'B'
 
+#define LCD_COLS 16
+#define LCD_ROWS 2
+
 #define MAX_MOTOR_SIGNAL 1500
 #define MIN_MOTOR_SIGNAL 1000
 
 #define MAX_RADIO_SIGNAL 2000
 #define MIN_RADIO_SIGNAL 1000
 
-#define MOTOR1_PIN 4
-#define MOTOR2_PIN 7
+#define MOTOR1_PIN 7
+#define MOTOR2_PIN 4
 #define MOTOR3_PIN 6
 #define MOTOR4_PIN 5
 
@@ -37,9 +43,10 @@
 #define PITCH_CHANNEL      CHANNEL(2)
 #define MOTORS_ARM_CHANNEL CHANNEL(5)
 
-#define SAMPLING_PERIOD_S 0.02f
+#define SAMPLING_PERIOD_S 0.05f
 
 #define READ_COMMAND_THRESHOLD 0
+#define DISPLAY_THRESHOLD 50
 
 
 typedef union
@@ -59,10 +66,12 @@ Servo motor1;
 Servo motor2;
 Servo motor3;
 Servo motor4;
+hd44780_I2Cexp lcd;
 
 drone_attitude_t attitude;
 bool lsm9ds1_found;
 int count_to_command;
+int count_to_disp;
 float channels[5];
 float channels_dead_center_zones[5][2];
 bool motors_armed;
@@ -92,6 +101,10 @@ void setup(void)
 
   digitalWrite(RED_LED_PIN, LOW);
 
+  lcd.begin(LCD_COLS, LCD_ROWS);
+  lcd.setCursor(0,0);
+  lcd.print("ROLL PITCH YAW");
+
   // SW Initialisation
   Serial.begin(115200);
   lsm9ds1_found = IMU_Init(SAMPLING_PERIOD_S);
@@ -106,11 +119,12 @@ void setup(void)
   motors_armed_rise = false;
   motors_armed_fall = false;
 
+  count_to_disp = 0;
   count_to_command = 0;
   
   for (int i = CHANNEL(1); i <= CHANNEL(5); i++)
   {
-    channels[i] = 0.5f;
+    channels[i] = 0.0f;
     channels_dead_center_zones[i][0] = 0.0f;
     channels_dead_center_zones[i][1] = 0.0f;
   }
@@ -119,8 +133,12 @@ void setup(void)
   channels_dead_center_zones[ROLL_CHANNEL][1] = 0.43f;
   channels_dead_center_zones[PITCH_CHANNEL][0] = 0.38f;
   channels_dead_center_zones[PITCH_CHANNEL][1] = 0.43f;
-}
 
+  channels[MOTORS_ARM_CHANNEL] = 0.0f;
+  channels[THROTTLE_CHANNEL] = 0.0f;
+  channels[PITCH_CHANNEL] = 0.4f;
+  channels[ROLL_CHANNEL] = 0.0f;
+}
 
 void loop(void)
 { 
@@ -152,6 +170,41 @@ void loop(void)
     // ----------------------------------
     // Get current attitude
     IMU_CurrentAttitude(&attitude.data.roll, &attitude.data.pitch, &attitude.data.yaw);
+
+    // Display current attitude
+    if (count_to_disp == DISPLAY_THRESHOLD)
+    {
+      char ascii[5];
+      int_to_ascii((int)attitude.data.roll, ascii, 5);
+      
+      lcd.setCursor(0, 1);
+      lcd.print(ascii);
+    }
+
+    if (count_to_disp == 1 + DISPLAY_THRESHOLD)
+    {
+      char ascii[5];
+      int_to_ascii((int)attitude.data.pitch, ascii, 5);
+
+      lcd.setCursor(5, 1);
+      lcd.print(ascii);
+    }
+
+    if (count_to_disp == 2 + DISPLAY_THRESHOLD)
+    {
+      char ascii[5];
+      int_to_ascii((int)attitude.data.yaw, ascii, 5);
+
+      lcd.setCursor(10, 1);
+      lcd.print(ascii);
+
+      count_to_disp = 0;
+    }
+    else
+    {
+      count_to_disp += 1;
+    }
+    
     MAINT_UpdateAHRS(attitude.vect);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
@@ -179,8 +232,7 @@ void loop(void)
     {
       count_to_command += 1;
     }
-
-
+    
     bool motors_armed_condition = (channels[MOTORS_ARM_CHANNEL] > 0.5f);
     if (motors_armed == false && motors_armed_condition == true)
     {
@@ -252,6 +304,14 @@ void loop(void)
        
        MAINT_UpdateMOTORS(motors_armed, motors_speed);
     }
+    else
+    {
+      digitalWrite(RED_LED_PIN, HIGH);
+      lcd.setCursor(0, 0);
+      lcd.print("IMU :          ");
+      lcd.setCursor(0, 1);
+      lcd.print("NO SUCH DEVICE");
+    }
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MOTORS CONTROL ----------------------------------------------------- 
   motor1.writeMicroseconds(motors_armed ? motors_speed[MOTOR(1)] : MIN_MOTOR_SIGNAL);
@@ -263,7 +323,6 @@ void loop(void)
   uint64_t tf_micros = micros();
   uint64_t dt_micros = tf_micros - t0_micros;
   MAINT_UpdateLoopTime(dt_micros);
-  uint8_t* p_maint_data = reinterpret_cast<uint8_t*>(MAINT_Get());
-  Serial.write(p_maint_data, sizeof(maint_data_t));
+  Serial.write((uint8_t*)MAINT_Get(), sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------
 }

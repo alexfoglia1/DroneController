@@ -8,7 +8,7 @@ PlotWidget::PlotWidget(QWidget* parent) : QLabel(parent)
 	track2_range = 20;
 	track3_range = 20;
 
-	t_range = 200;
+	t_range = 100;
 }
 
 void PlotWidget::setGeometry(const QRect& r)
@@ -27,7 +27,7 @@ void PlotWidget::setRange(PlotTrack track, float range)
 {
 	if (range < 1) range = 1;
 
-	float* ranges[4] = { &track1_range, &track2_range, &track3_range };
+	float* ranges[3] = { &track1_range, &track2_range, &track3_range };
 	*ranges[static_cast<int>(track)] = range;
 	repaint();
 }
@@ -106,9 +106,6 @@ void PlotWidget::addValue(PlotTrack track, float val)
 			break;
 		}
 	}
-
-
-	repaint();
 }
 
 void PlotWidget::paintEvent(QPaintEvent* event)

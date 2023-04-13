@@ -687,8 +687,13 @@
       <string>motor4</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>loop_time</string>
+     </property>
+    </item>
    </widget>
-   <widget class="QComboBox" name="comboPlotTrack3">
+   <widget class="QComboBox" name="comboPlotTrack2">
     <property name="geometry">
      <rect>
       <x>1150</x>
@@ -792,8 +797,13 @@
       <string>motor4</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>loop_time</string>
+     </property>
+    </item>
    </widget>
-   <widget class="QComboBox" name="comboPlotTrack2">
+   <widget class="QComboBox" name="comboPlotTrack3">
     <property name="geometry">
      <rect>
       <x>1420</x>
@@ -895,6 +905,11 @@
     <item>
      <property name="text">
       <string>motor4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>loop_time</string>
      </property>
     </item>
    </widget>

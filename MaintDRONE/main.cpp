@@ -114,6 +114,10 @@ void plot(QComboBox* combo, PlotWidget* widget, PlotTrack track, maint_data_t* d
     {
         widget->addValue(track, data->motors_speed[3]);
     }
+    else if (combo->currentText().toLower().contains("loop_time"))
+    {
+        widget->addValue(track, data->loop_time);
+    }
 }
 
 void updateGui(maint_data_t* data)
@@ -158,7 +162,7 @@ void updateGui(maint_data_t* data)
     plot(ui.comboPlotTrack1, ui.plot, PlotTrack::PLOT_TRACK_1, data);
     plot(ui.comboPlotTrack2, ui.plot, PlotTrack::PLOT_TRACK_2, data);
     plot(ui.comboPlotTrack3, ui.plot, PlotTrack::PLOT_TRACK_3, data);
-
+    ui.plot->repaint();
     app->processEvents();
 }
 
@@ -169,11 +173,11 @@ void initGui()
 
     ui.setupUi(mainWindow);
     int r, g, b;
-    ui.plot->trackColors[0].getRgb(&r, &g, &b);
+    ui.plot->trackColors[0].getRgb(&r, &g, &b); //cyan
     ui.comboPlotTrack1->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
-    ui.plot->trackColors[1].getRgb(&r, &g, &b);
+    ui.plot->trackColors[1].getRgb(&r, &g, &b); //magenta
     ui.comboPlotTrack2->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
-    ui.plot->trackColors[2].getRgb(&r, &g, &b);
+    ui.plot->trackColors[2].getRgb(&r, &g, &b); //green
     ui.comboPlotTrack3->setStyleSheet(QString("background-color:rgb(%1, %2, %3); ").arg(r).arg(g).arg(b));
 
     QObject::connect(ui.horizontalSlider1, &QSlider::valueChanged, mainWindow, [](int value)
@@ -276,10 +280,11 @@ void rxThread(const char* port)
             res = ReadFile(hComm, &packet->sw_ver, sizeof(maint_data_t) - 4, &size, 0);
             if (res)
             {
-                updateGui(packet);
                 writeCsv(packet);
+                updateGui(packet);
             }
         }
+
     }
 }
 
