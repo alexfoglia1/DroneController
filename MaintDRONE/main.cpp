@@ -159,6 +159,8 @@ void updateGui(maint_data_t* data)
     ui.lineM3->setText(QString::number(data->motors_speed[2]));
     ui.lineM4->setText(QString::number(data->motors_speed[3]));
 
+    ui.horizonWidget->setRollPitch(data->attitude[0] / 57.295780f, data->attitude[1] / 57.295780f);
+
     plot(ui.comboPlotTrack1, ui.plot, PlotTrack::PLOT_TRACK_1, data);
     plot(ui.comboPlotTrack2, ui.plot, PlotTrack::PLOT_TRACK_2, data);
     plot(ui.comboPlotTrack3, ui.plot, PlotTrack::PLOT_TRACK_3, data);

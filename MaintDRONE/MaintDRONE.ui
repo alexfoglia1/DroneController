@@ -917,7 +917,7 @@
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>80</y>
+      <y>70</y>
       <width>720</width>
       <height>500</height>
      </rect>
@@ -983,6 +983,19 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
+   <widget class="HorizonWidget" name="horizonWidget">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>589</y>
+      <width>241</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1001,6 +1014,11 @@
    <class>PlotWidget</class>
    <extends>QLabel</extends>
    <header>PlotWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HorizonWidget</class>
+   <extends>QLabel</extends>
+   <header>HorizonWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
