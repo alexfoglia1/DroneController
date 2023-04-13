@@ -27,9 +27,9 @@ float toRange(float value, float inMin, float inMax, float outMin, float outMax)
 }
 
 
-float normalizedPulseIn(int pin, float minPulseWidth, float maxPulseWidth)
+float normalizedPulseIn(int pin, float minPulseWidth, float maxPulseWidth, uint64_t timeout)
 {
-    int pulseWidth = pulseIn(pin, HIGH);
+    int pulseWidth = pulseIn(pin, HIGH, timeout);
     return toRange(pulseWidth, minPulseWidth, maxPulseWidth, 0.f, 1.f);
 }
 

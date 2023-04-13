@@ -33,6 +33,9 @@
 #define CHANNEL_4_PIN  9
 #define CHANNEL_5_PIN  8
 
+#define OSCILLOSCOPE_CH_1_PIN 2
+#define OSCILLOSCOPE_CH_2_PIN 3
+
 #define RED_LED_PIN  13
 
 #define MOTORS_ARM_THRESHOLD 100 // motors start spinning at MIN_SIGNAL + x
@@ -43,7 +46,9 @@
 #define PITCH_CHANNEL      CHANNEL(2)
 #define MOTORS_ARM_CHANNEL CHANNEL(5)
 
-#define SAMPLING_PERIOD_S 0.05f
+#define SAMPLING_PERIOD_S 0.025f
+#define SAMPLING_PERIOD_US 25000UL
+#define SECONDS_TO_MICROSECONDS 1000000UL
 
 #define READ_COMMAND_THRESHOLD 0
 #define DISPLAY_THRESHOLD 50
@@ -72,16 +77,23 @@ drone_attitude_t attitude;
 bool lsm9ds1_found;
 int count_to_command;
 int count_to_disp;
+uint64_t last_exec_micros;
+uint64_t loop_time;
 float channels[5];
 float channels_dead_center_zones[5][2];
 bool motors_armed;
 bool motors_armed_rise;
 bool motors_armed_fall;
 
+
+bool pin1_state = false;
 void setup(void)
 {
   // HW Initialisation
   pinMode(RED_LED_PIN,  OUTPUT);
+
+  pinMode(OSCILLOSCOPE_CH_1_PIN, OUTPUT);
+  pinMode(OSCILLOSCOPE_CH_2_PIN, OUTPUT);
 
   pinMode(CHANNEL_1_PIN, INPUT);
   pinMode(CHANNEL_2_PIN, INPUT);
@@ -99,14 +111,17 @@ void setup(void)
   motor3.writeMicroseconds(MIN_MOTOR_SIGNAL);
   motor4.writeMicroseconds(MIN_MOTOR_SIGNAL);
 
+  digitalWrite(OSCILLOSCOPE_CH_1_PIN, LOW);
+  digitalWrite(OSCILLOSCOPE_CH_2_PIN, LOW);
   digitalWrite(RED_LED_PIN, LOW);
-
+  
   lcd.begin(LCD_COLS, LCD_ROWS);
   lcd.setCursor(0,0);
   lcd.print("ROLL PITCH YAW");
-
-  // SW Initialisation
+   
   Serial.begin(115200);
+  
+  // SW Initialisation
   lsm9ds1_found = IMU_Init(SAMPLING_PERIOD_S);
   
   MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
@@ -138,12 +153,37 @@ void setup(void)
   channels[THROTTLE_CHANNEL] = 0.0f;
   channels[PITCH_CHANNEL] = 0.4f;
   channels[ROLL_CHANNEL] = 0.0f;
+
+  last_exec_micros = 0;
+  loop_time = 0;
 }
 
 void loop(void)
 { 
+  pin1_state = !pin1_state;
+// --------------------------------------------- TIMING CONSTRAINTS -------------------------------------------------
   uint64_t t0_micros = micros();
+  if (last_exec_micros == 0UL)
+  {
+    last_exec_micros = t0_micros;
+  }
+  else
+  {
+    uint64_t delta_micros = t0_micros - last_exec_micros;
+    if (delta_micros < SAMPLING_PERIOD_US)
+    {
+      uint64_t remaining_micros = (SAMPLING_PERIOD_US - delta_micros);
+      digitalWrite(OSCILLOSCOPE_CH_2_PIN, HIGH);
+      delayMicroseconds(remaining_micros);
+      digitalWrite(OSCILLOSCOPE_CH_2_PIN, LOW);
+    }
+  }
   
+  digitalWrite(OSCILLOSCOPE_CH_1_PIN, pin1_state ? HIGH : LOW);
+  uint64_t cur_micros = micros();
+  loop_time = cur_micros - last_exec_micros;
+  last_exec_micros = cur_micros;
+// ----------------------------------------------------------------------------------------------------------------- 
   uint16_t motors_speed[4] = {MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL, MIN_MOTOR_SIGNAL};
   if (lsm9ds1_found)
   {
@@ -210,22 +250,22 @@ void loop(void)
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
     if (count_to_command == READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
+      channels[CHANNEL(1)] = normalizedPulseIn(CHANNEL_1_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
     }
 
     if (count_to_command == 1 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
+      channels[CHANNEL(2)] = normalizedPulseIn(CHANNEL_2_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
     }
 
     if (count_to_command == 2 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
+      channels[CHANNEL(3)] = normalizedPulseIn(CHANNEL_3_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
     }
 
     if (count_to_command == 3 + READ_COMMAND_THRESHOLD)
     {
-      channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL);
+      channels[CHANNEL(5)] = normalizedPulseIn(CHANNEL_5_PIN, MIN_RADIO_SIGNAL, MAX_RADIO_SIGNAL, 16000);
       count_to_command = 0;
     }
     else
@@ -320,9 +360,7 @@ void loop(void)
   motor4.writeMicroseconds(motors_armed ? motors_speed[MOTOR(4)] : MIN_MOTOR_SIGNAL);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MAINTENANCE  -------------------------------------------------------
-  uint64_t tf_micros = micros();
-  uint64_t dt_micros = tf_micros - t0_micros;
-  MAINT_UpdateLoopTime(dt_micros);
+  MAINT_UpdateLoopTime(loop_time);
   Serial.write((uint8_t*)MAINT_Get(), sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------
 }

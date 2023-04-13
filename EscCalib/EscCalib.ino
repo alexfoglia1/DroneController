@@ -3,8 +3,8 @@
 
 #define MAX_SIGNAL 2000
 #define MIN_SIGNAL 1000
-#define MOTOR_PIN1 4
-#define MOTOR_PIN2 7
+#define MOTOR_PIN1 7
+#define MOTOR_PIN2 4
 #define MOTOR_PIN3 6
 #define MOTOR_PIN4 5
 
