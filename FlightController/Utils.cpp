@@ -41,6 +41,15 @@ float normalizedAnalogRead(int pin)
 }
 
 
+float roundDecimal(float f, int nDigits)
+{
+  float __10exp = pow(10, nDigits);
+  int __if = (int)round(f * __10exp);
+
+  return ((float)__if)/__10exp; 
+}
+
+
 void int_to_ascii(int value, char* ascii, int len)
 {
   for (int i = 0; i < len - 1; i++)

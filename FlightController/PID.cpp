@@ -1,7 +1,7 @@
 #include "PID.h"
 
                //roll,  pitch,  yaw
-float KP[3] = {20.00f,  20.00f,  0.00f};
+float KP[3] = {9.00f,   9.00f,  0.00f};
 float KI[3] = {0.00f,   0.00f,  0.00f};
 float KD[3] = {0.00f,   0.00f,  0.00f};
 
@@ -11,13 +11,13 @@ float prev_err[3] = {00.0f,  00.0f,  00.0f};
 float PID[3]      = {00.0f,  00.0f,  00.0f};
 
 
-void PID_Update(float command[3], float current[3], float dt)
+void PID_Update(float setpoint[3], float feedback[3], float dt)
 {
-  // (1) -->         ------>          ------>
-  //     ERR      =  COMMAND        - CURRENT
-  float  error[3] = {command[ROLL]  - current[ROLL],
-                     command[PITCH] - current[PITCH],
-                     command[YAW]   - current[YAW]};
+  // (1) -->         ------>           ------>
+  //     ERR      =  SETPOINT        - FEEDBACK
+  float  error[3] = {setpoint[ROLL]  - feedback[ROLL],
+                     setpoint[PITCH] - feedback[PITCH],
+                     setpoint[YAW]   - feedback[YAW]};
                      
   // (2) ------->    
   //     INT_COEF =  <Ʃ ERROR_ROLL, Ʃ ERROR_PITCH, Ʃ ERROR_YAW> 

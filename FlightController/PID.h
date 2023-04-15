@@ -5,7 +5,7 @@
 #define PITCH 1
 #define YAW   2
 
-void PID_Update(float command[3], float current[3], float dt);
+void PID_Update(float setpoint[3], float feedback[3], float dt);
 float* PID_Get();
 float* PID_Kp();
 float* PID_Ki();

@@ -116,9 +116,6 @@ void setup(void)
   digitalWrite(RED_LED_PIN, LOW);
   
   lcd.begin(LCD_COLS, LCD_ROWS);
-  lcd.setCursor(0,0);
-  lcd.print("ROLL PITCH YAW");
-   
   Serial.begin(115200);
   
   // SW Initialisation
@@ -156,6 +153,12 @@ void setup(void)
 
   last_exec_micros = 0;
   loop_time = 0;
+
+  lcd.setCursor(0, 0);
+  lcd.print("UNBIAS GYROSCOPE");
+  IMU_EstimateBias(500);
+  lcd.setCursor(0, 0);
+  lcd.print("ROLL PITCH YAW  ");
 }
 
 void loop(void)
@@ -293,16 +296,15 @@ void loop(void)
     }
 
     motors_armed = motors_armed_condition;
-                                             
-    float roll =  (channels[ROLL_CHANNEL]  >= channels_dead_center_zones[ROLL_CHANNEL][0]  && channels[ROLL_CHANNEL]  <= channels_dead_center_zones[ROLL_CHANNEL][1])  ? 0.0f : toRange(channels[ROLL_CHANNEL],  0.0f, 0.85f, -2.0f, 2.0f);
-    float pitch = (channels[PITCH_CHANNEL] >= channels_dead_center_zones[PITCH_CHANNEL][0] && channels[PITCH_CHANNEL] <= channels_dead_center_zones[PITCH_CHANNEL][1]) ? 0.0f : toRange(channels[PITCH_CHANNEL], 0.0f, 0.85f, -2.0f, 2.0f);
-    
-    float fake_attitude[3] = {0.0f, 0.0f, 0.0f};
-    float rx_angle[3] = {roll, pitch, 0.0f};
-    MAINT_UpdateCMD(channels[THROTTLE_CHANNEL], rx_angle);
+
+    float roll_sp  = (channels[ROLL_CHANNEL]  >= channels_dead_center_zones[ROLL_CHANNEL][0]  && channels[ROLL_CHANNEL]  <= channels_dead_center_zones[ROLL_CHANNEL][1])  ? 0.0f : toRange(channels[ROLL_CHANNEL],  0.0f, 0.85f, -2.0f, 2.0f);
+    float pitch_sp = (channels[PITCH_CHANNEL] >= channels_dead_center_zones[PITCH_CHANNEL][0] && channels[PITCH_CHANNEL] <= channels_dead_center_zones[PITCH_CHANNEL][1]) ? 0.0f : toRange(0.85f - channels[PITCH_CHANNEL], 0.0f, 0.85f, -2.0f, 2.0f);
+
+    float attitude_sp[3] = {roll_sp, pitch_sp, 0.0f};
+    MAINT_UpdateCMD(channels[THROTTLE_CHANNEL], attitude_sp);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- PID UPDATE --------------------------------------------------------- 
-    PID_Update(rx_angle, fake_attitude, SAMPLING_PERIOD_S);
+    PID_Update(attitude_sp, attitude.vect, SAMPLING_PERIOD_S);
     float* PID = PID_Get();
     MAINT_UpdatePID(PID);
 // -----------------------------------------------------------------------------------------------------------------
@@ -326,19 +328,19 @@ void loop(void)
       // If I want to PITCH DOWN I shall give more thrust to BACK motors  M4,M3
       // If I want to PITCH UP   I shall give more thrust to FRONT motors M1,M2
        motors_speed[MOTOR(1)] = minMax(
-                                       toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) + PID[ROLL] - PID[PITCH],
+                                       toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) + PID[ROLL] + PID[PITCH],
                                        MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD,
                                        MAX_MOTOR_SIGNAL);
        motors_speed[MOTOR(2)] = minMax(
-                                       toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) - PID[ROLL] - PID[PITCH],
+                                       toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) - PID[ROLL] + PID[PITCH],
                                        MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD,
                                        MAX_MOTOR_SIGNAL);
        motors_speed[MOTOR(3)] = minMax(
-                                      toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) - PID[ROLL] + PID[PITCH],
+                                      toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) - PID[ROLL] - PID[PITCH],
                                       MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD,
                                       MAX_MOTOR_SIGNAL);
        motors_speed[MOTOR(4)] = minMax(
-                                      toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) + PID[ROLL] + PID[PITCH],
+                                      toRange(channels[THROTTLE_CHANNEL], 0.0f, 1.0f, MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD, MAX_MOTOR_SIGNAL) + PID[ROLL] - PID[PITCH],
                                       MIN_MOTOR_SIGNAL + MOTORS_ARM_THRESHOLD,
                                       MAX_MOTOR_SIGNAL);
        

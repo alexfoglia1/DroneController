@@ -996,6 +996,19 @@
      <string/>
     </property>
    </widget>
+   <widget class="CompassWidget" name="compassWidget">
+    <property name="geometry">
+     <rect>
+      <x>1370</x>
+      <y>589</y>
+      <width>241</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1019,6 +1032,11 @@
    <class>HorizonWidget</class>
    <extends>QLabel</extends>
    <header>HorizonWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CompassWidget</class>
+   <extends>QLabel</extends>
+   <header>CompassWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
