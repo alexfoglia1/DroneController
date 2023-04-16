@@ -32,6 +32,7 @@
 
 #define SW_UART_RX 2
 #define SW_UART_TX 3
+#define NANO_MOTORS_ARMED_PIN A0
 
 #define RED_LED_PIN  13
 
@@ -58,19 +59,21 @@ Servo motor1;
 Servo motor2;
 Servo motor3;
 Servo motor4;
-NeoSWSerial uart_nano(SW_UART_RX, SW_UART_TX);
 
-UNO2NANO_Message message_out;
+NeoSWSerial uart_nano(SW_UART_RX, SW_UART_TX);
 NANO2UNO_Message message_in;
+nano_proto_state_t rx_status;
+
 uint8_t rx_buffer[256];
 int n_bytes_in;
 
-nano_proto_state_t rx_status;
 int count_to_command;
 int count_to_disp;
+
 float channels[5];
 float channels_dead_center_zones[5][2];
 bool motors_armed;
+
 
 void update_fsm(uint8_t byte_in)
 {
@@ -125,14 +128,13 @@ void update_fsm(uint8_t byte_in)
       break;
     }
   }
-
-
 }
 
 void setup(void)
 {
   // HW Initialisation
   pinMode(RED_LED_PIN,  OUTPUT);
+  pinMode(NANO_MOTORS_ARMED_PIN, OUTPUT);
 
   pinMode(CHANNEL_1_PIN, INPUT);
   pinMode(CHANNEL_2_PIN, INPUT);
@@ -151,11 +153,11 @@ void setup(void)
   motor4.writeMicroseconds(MIN_MOTOR_SIGNAL);
 
   digitalWrite(RED_LED_PIN, LOW);
+  digitalWrite(NANO_MOTORS_ARMED_PIN, LOW);
   Serial.begin(115200);
+  
   // SW Initialisation
   uart_nano.begin(38400);
-  message_out.sync = 0xFF;
-  message_out.motors_armed = 0x00;
 
   message_in.sync = 0x00;
   message_in.lsm9ds1_found = 0;
@@ -163,16 +165,15 @@ void setup(void)
   message_in.pitch = 0;
   message_in.yaw = 0;
   message_in.loop_time = 0;
+  message_in.avg_filter_enabled = 0;
+  
   for (int i = 0; i < 256; i++)
   {
     rx_buffer[i] = 0;
   }
+  
   n_bytes_in = 0;
   rx_status = WAIT_SYNC;
-  
-  motors_armed = false;
-  
-  MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
 
   count_to_disp = 0;
   count_to_command = 0;
@@ -193,6 +194,10 @@ void setup(void)
   channels[THROTTLE_CHANNEL] = 0.0f;
   channels[PITCH_CHANNEL] = 0.4f;
   channels[ROLL_CHANNEL] = 0.4f;
+
+  motors_armed = false;
+  
+  MAINT_Init(MAJOR_VERSION, MINOR_VERSION, STAGE_VERSION);
 }
 
 void loop(void)
@@ -205,7 +210,6 @@ void loop(void)
   }
 
 // -----------------------------------------------------------------------------------------------------------------
-
   if (message_in.sync != 0xFF)
   {
     digitalWrite(RED_LED_PIN, HIGH);
@@ -216,6 +220,8 @@ void loop(void)
 // -------------------------------------------- READ ATTITUDE FROM NANO --------------------------------------------
    float attitude[3] = {message_in.roll, message_in.pitch, message_in.yaw};
    MAINT_UpdateAHRS(attitude);
+   MAINT_UpdateLoopTime(message_in.loop_time);
+   MAINT_UpdateMovingAVGFilterState(message_in.avg_filter_enabled);
 // -----------------------------------------------------------------------------------------------------------------
 
 // -------------------------------------------- READ COMMAND FROM RADIO --------------------------------------------
@@ -300,12 +306,9 @@ void loop(void)
   {
     digitalWrite(RED_LED_PIN, HIGH);
   }
-
 // -----------------------------------------------------------------------------------------------------------------
-// -------------------------------------------- UPDATE MESSAGE OUT ------------------------------------------------- 
-  //message_out.motors_armed = motors_armed ? 0x01 : 0x00;
-  //uart_nano.write((uint8_t*)&message_out, sizeof(UNO2NANO_Message));
-// -----------------------------------------------------------------------------------------------------------------
+// -------------------------------- UPDATE MOTORS ARMED SIGNAL TO NANO --------------------------------------------- 
+  digitalWrite(NANO_MOTORS_ARMED_PIN, motors_armed ? HIGH : LOW);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MOTORS CONTROL ----------------------------------------------------- 
   motor1.writeMicroseconds(motors_armed ? motors_speed[MOTOR(1)] : MIN_MOTOR_SIGNAL);
@@ -314,7 +317,6 @@ void loop(void)
   motor4.writeMicroseconds(motors_armed ? motors_speed[MOTOR(4)] : MIN_MOTOR_SIGNAL);
 // -----------------------------------------------------------------------------------------------------------------
 // -------------------------------------------- MAINTENANCE  -------------------------------------------------------
-  MAINT_UpdateLoopTime(message_in.loop_time);
   Serial.write((uint8_t*)MAINT_Get(), sizeof(maint_data_t));
 // -----------------------------------------------------------------------------------------------------------------
 }

@@ -9,15 +9,9 @@ typedef struct
     float    pitch;
     float    yaw;
     uint32_t loop_time;
+    uint8_t  avg_filter_enabled;
     uint8_t  checksum;
 }__attribute__((packed)) NANO2UNO_Message;
-
-
-typedef struct
-{
-    uint8_t sync;
-    uint8_t motors_armed;
-}__attribute__((packed)) UNO2NANO_Message;
 
 
 inline uint8_t NANO2UNO_Cks(uint8_t* buf)

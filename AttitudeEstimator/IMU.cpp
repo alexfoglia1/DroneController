@@ -161,12 +161,12 @@ void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw)
 
 void IMU_EnableMovingAVGFilter()
 {
-  history_reset();
   is_avg_filter_enabled = true;
 }
 
 
 void IMU_DisableMovingAVGFilter()
 {
+  history_reset();
   is_avg_filter_enabled = false;
 }
