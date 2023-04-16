@@ -21,9 +21,7 @@ void writeCsv(maint_data_t* data)
 {
     FILE* f = fopen(__CSVFILE__, "a");
     fprintf(f, "%.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %lld, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %.6f, %d, %d, %d, %d, %d\n",
-        data->acc[0], data->acc[1], data->acc[2],
-        data->gyro[0], data->gyro[1], data->gyro[2],
-        data->magn[0], data->magn[1], data->magn[2],
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         data->attitude[0], data->attitude[1], data->attitude[2],
         0.0f, 0.0f, 0.0f,
         data->loop_time,
@@ -38,43 +36,7 @@ void writeCsv(maint_data_t* data)
 
 void plot(QComboBox* combo, PlotWidget* widget, PlotTrack track, maint_data_t* data)
 {
-    if (combo->currentText().toLower().contains("accx"))
-    {
-        widget->addValue(track, data->acc[0]);
-    }
-    else if (combo->currentText().toLower().contains("accy"))
-    {
-        widget->addValue(track, data->acc[1]);
-    }
-    else if (combo->currentText().toLower().contains("accz"))
-    {
-        widget->addValue(track, data->acc[2]);
-    }
-    else if (combo->currentText().toLower().contains("gyrox"))
-    {
-        widget->addValue(track, data->gyro[0]);
-    }
-    else if (combo->currentText().toLower().contains("gyroy"))
-    {
-        widget->addValue(track, data->gyro[1]);
-    }
-    else if (combo->currentText().toLower().contains("gyroz"))
-    {
-        widget->addValue(track, data->gyro[2]);
-    }
-    else if (combo->currentText().toLower().contains("magnx"))
-    {
-        widget->addValue(track, data->magn[0]);
-    }
-    else if (combo->currentText().toLower().contains("magny"))
-    {
-        widget->addValue(track, data->magn[1]);
-    }
-    else if (combo->currentText().toLower().contains("magnz"))
-    {
-        widget->addValue(track, data->magn[2]);
-    }
-    else if (combo->currentText().toLower().contains("pid_roll"))
+    if (combo->currentText().toLower().contains("pid_roll"))
     {
         widget->addValue(track, data->PID[0]);
     }
@@ -123,18 +85,6 @@ void plot(QComboBox* combo, PlotWidget* widget, PlotTrack track, maint_data_t* d
 void updateGui(maint_data_t* data)
 {
     ui.lineSwVer->setText(QString("%1.%2-%3").arg((char)data->sw_ver[0]).arg((char)data->sw_ver[1]).arg((char)data->sw_ver[2]));
-
-    ui.lineAccX->setText(QString::number(data->acc[0]));
-    ui.lineAccY->setText(QString::number(data->acc[1]));
-    ui.lineAccZ->setText(QString::number(data->acc[2]));
-
-    ui.lineGyroX->setText(QString::number(data->gyro[0]));
-    ui.lineGyroY->setText(QString::number(data->gyro[1]));
-    ui.lineGyroZ->setText(QString::number(data->gyro[2]));
-
-    ui.lineMagnX->setText(QString::number(data->magn[0]));
-    ui.lineMagnY->setText(QString::number(data->magn[1]));
-    ui.lineMagnZ->setText(QString::number(data->magn[2]));
 
     ui.checkBWFilterEnabled->setChecked(data->avg_filter > 0);
 

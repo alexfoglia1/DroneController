@@ -13,9 +13,6 @@ typedef struct
 {
   uint32_t sync;
   uint8_t  sw_ver[3];
-  float    gyro[3];
-  float    acc[3];
-  float    magn[3];
   uint8_t  avg_filter; 
   float    attitude[3];
   float    throttle;

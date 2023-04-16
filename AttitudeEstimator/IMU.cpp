@@ -4,7 +4,6 @@
 
 #include "IMU.h"
 #include "MahonyAHRS.h"
-#include "Utils.h"
 
 #define MOVING_AVG_SIZE 20
 
@@ -141,9 +140,9 @@ void IMU_Update(float acc[3], float gyro[3], float magn[3])
   lsm9ds1_read(acc, gyro, magn);
   
   ahrs.mahonyAHRSupdate(sampling_period_sec,
-                roundDecimal(gyro[X], 2) / 57.295780f, roundDecimal(gyro[Y], 2) / 57.295780f, roundDecimal(gyro[Z], 2) / 57.295780f,
-                roundDecimal(acc[X], 2),  roundDecimal(acc[Y], 2),  roundDecimal(acc[Z], 2),
-                roundDecimal(magn[X], 2), roundDecimal(magn[Y], 2), roundDecimal(magn[Z], 2));
+                gyro[X] / 57.295780f, gyro[Y] / 57.295780f, gyro[Z] / 57.295780f,
+                acc[X],  acc[Y],  acc[Z],
+                magn[X], magn[Y], magn[Z]);
 }
 
 
@@ -154,9 +153,9 @@ void IMU_CurrentAttitude(float* roll, float* pitch, float* yaw)
   float q2 = ahrs.getQ3();
   float q3 = ahrs.getQ4();
   
-  *roll = roundDecimal(atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2) * 57.295780f, 2);
-  *pitch = roundDecimal(asinf(-2.0f * (q1*q3 - q0*q2)) * 57.295780f, 2);
-  *yaw = roundDecimal(atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3) * 57.295780f, 2);
+  *roll = atan2f(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2) * 57.295780f;
+  *pitch = asinf(-2.0f * (q1*q3 - q0*q2)) * 57.295780f;
+  *yaw = atan2f(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3) * 57.295780f;
 }
 
 
